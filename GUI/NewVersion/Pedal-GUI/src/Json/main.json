@@ -1,0 +1,547 @@
+{
+    "plugins" : [
+        {
+            "name" : "Chorus",
+            "uri" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin/ChorusJUCE",
+            "bypass" : 0,
+            "channels" : "stereo",
+            "inputs" : [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs" : [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters" : [
+                {
+                    "type" : "plug",
+                    "name" : "Gain",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin/ChorusJUCE:gain",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Rate",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin/ChorusJUCE:rate",
+                    "mode" : "dial",
+                    "default" : 2,
+                    "min" : 0,
+                    "max" : 10
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Depth",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin/ChorusJUCE:depth",
+                    "mode" : "dial",
+                    "default" : 0.2,
+                    "min" : 0,
+                    "max" : 1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Delay",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin/ChorusJUCE:delay",
+                    "mode" : "dial",
+                    "default" : 7,
+                    "min" : 1,
+                    "max" : 100
+                },
+                {
+                    "type" : "plug",
+                    "name" : "FeedBack",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin/ChorusJUCE:feedback",
+                    "mode" : "dial",
+                    "default" : 0.2,
+                    "min" : 0,
+                    "max" : 1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Mix",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin/ChorusJUCE:mix",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 1
+                }
+            ]
+        },
+        {
+            "name" : "Distortion Normal",
+            "uri" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/DistortionPlugin",
+            "bypass" : 0,
+            "channels" : "stereo",
+            "inputs" : [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs" : [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters" : [
+                {
+                    "type" : "plug",
+                    "name" : "Gain",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/DistortionPlugin:gain",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 3
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Mode",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/DistortionPlugin:mode",
+                    "mode" : "selector",
+                    "default" : 0,
+                    "min" : 0,
+                    "max" : 5
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Soft Clip 1",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/DistortionPlugin:sc1",
+                    "mode" : "dial",
+                    "default" : 1,
+                    "min" : 1,
+                    "max" : 10
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Soft Clip 2",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/DistortionPlugin:sc2",
+                    "mode" : "dial",
+                    "default" : 0.33,
+                    "min" : 0,
+                    "max" : 0.333333
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Soft Clip 3",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/DistortionPlugin:sc3",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 3
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Soft Clip 4",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/DistortionPlugin:sc4",
+                    "mode" : "dial",
+                    "default" : 3,
+                    "min" : 1,
+                    "max" : 5
+                }
+            ]
+        },
+        {
+            "name" : "Chorus 2",
+            "uri" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin",
+            "bypass" : 0,
+            "channels" : "stereo",
+            "inputs" : [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs" : [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters" : [
+                {
+                    "type" : "plug",
+                    "name" : "Gain",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin:gain",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Rate",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin:rate",
+                    "mode" : "dial",
+                    "default" : 5,
+                    "min" : 0,
+                    "max" : 10
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Depth",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin:depth",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Delay",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin:delay",
+                    "mode" : "dial",
+                    "default" : 0.03,
+                    "min" : 0.01,
+                    "max" : 0.1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "FeedBack",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin:feedback",
+                    "mode" : "dial",
+                    "default" : 0.2,
+                    "min" : 0,
+                    "max" : 1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Mix",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin:mix",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 1
+                }
+            ]
+        },
+        {
+            "name" : "Compressor",
+            "uri" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin",
+            "bypass" : 0,
+            "channels" : "stereo",
+            "inputs" : [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs" : [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters" : [
+                {
+                    "type" : "plug",
+                    "name" : "Attack",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin:attack",
+                    "mode" : "dial",
+                    "default" : 5,
+                    "min" : 0,
+                    "max" : 30
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Release",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin:release",
+                    "mode" : "dial",
+                    "default" : 100,
+                    "min" : 50,
+                    "max" : 300
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Threshold",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin:threshold",
+                    "mode" : "dial",
+                    "default" : -20,
+                    "min" : -50,
+                    "max" : 5
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Ratio",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin:ratio",
+                    "mode" : "dial",
+                    "default" : 3,
+                    "min" : 1,
+                    "max" : 20
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Release",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin:release",
+                    "mode" : "dial",
+                    "default" : 100,
+                    "min" : 50,
+                    "max" : 300
+                },
+                {
+                    "type" : "plug",
+                    "name" : "ThresMod",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin:thresMod",
+                    "mode" : "button",
+                    "default" : 0,
+                    "min" : 0,
+                    "max" : 1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "ThresModFreq",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin:thresModFreq",
+                    "mode" : "dial",
+                    "default" : 2,
+                    "min" : 1,
+                    "max" : 20
+                }
+            ]
+        },
+        {
+            "name" : "FunDistortion",
+            "uri" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin",
+            "bypass" : 0,
+            "channels" : "stereo",
+            "inputs" : [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs" : [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters" : [
+                {
+                    "type" : "plug",
+                    "name" : "Gain",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin:gain",
+                    "mode" : "dial",
+                    "default" : 1,
+                    "min" : 0,
+                    "max" : 3
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Mode",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin:mode",
+                    "mode" : "selector",
+                    "default" : 0,
+                    "min" : 0,
+                    "max" : 5
+                },
+                {
+                    "type" : "plug",
+                    "name" : "LowThres",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin:lowthres2",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0.5,
+                    "max" : 9
+                },
+                {
+                    "type" : "plug",
+                    "name" : "HighThres",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin:highthres2",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0.5,
+                    "max" : 9
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Bits",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin:nbit5",
+                    "mode" : "selector",
+                    "default" : 4,
+                    "min" : 1,
+                    "max" : 128
+                },
+                {
+                    "type" : "plug",
+                    "name" : "PercentDrop",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin:percentDrop4",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 10
+                }
+                
+            ]
+        },
+        {
+            "name" : "Tremolo",
+            "uri" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/TremoloPlugin",
+            "bypass" : 0,
+            "channels" : "stereo",
+            "inputs" : [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs" : [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters" : [
+                {
+                    "type" : "plug",
+                    "name" : "Gain",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/TremoloPlugin:gain",
+                    "mode" : "dial",
+                    "default" : 1,
+                    "min" : 0,
+                    "max" : 2
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Rate",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/TremoloPlugin:rate",
+                    "mode" : "dial",
+                    "default" : 2,
+                    "min" : 0,
+                    "max" : 20
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Depth",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/TremoloPlugin:depth",
+                    "mode" : "dial",
+                    "default" : 0.2,
+                    "min" : 0,
+                    "max" : 1
+                }
+            ]
+        },
+        {
+            "name" : "Chorus",
+            "uri" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin",
+            "bypass" : 0,
+            "channels" : "stereo",
+            "inputs" : [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs" : [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters" : [
+                {
+                    "type" : "plug",
+                    "name" : "Gain",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin:gain",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Rate",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin:rate",
+                    "mode" : "dial",
+                    "default" : 5,
+                    "min" : 0,
+                    "max" : 10
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Depth",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin:depth",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Delay",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin:delay",
+                    "mode" : "dial",
+                    "default" : 0.03,
+                    "min" : 0.01,
+                    "max" : 0.1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Feedback",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin:feedback",
+                    "mode" : "dial",
+                    "default" : 0.2,
+                    "min" : 0,
+                    "max" : 1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Mix",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/ChorusPlugin:mix",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 1
+                }
+            ]
+        },
+        {
+            "name" : "Flanger",
+            "uri" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FlangerPlugin",
+            "bypass" : 0,
+            "channels" : "stereo",
+            "inputs" : [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs" : [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters" : [
+                {
+                    "type" : "plug",
+                    "name" : "Gain",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FlangerPlugin:gain",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Rate",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FlangerPlugin:rate",
+                    "mode" : "dial",
+                    "default" : 5,
+                    "min" : 0,
+                    "max" : 10
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Depth",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FlangerPlugin:depth",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Delay",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FlangerPlugin:delay",
+                    "mode" : "dial",
+                    "default" : 0.001,
+                    "min" : 0.001,
+                    "max" : 0.01
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Feedback",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FlangerPlugin:feedback",
+                    "mode" : "dial",
+                    "default" : 0.2,
+                    "min" : 0,
+                    "max" : 1
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Mix",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FlangerPlugin:mix",
+                    "mode" : "dial",
+                    "default" : 0.5,
+                    "min" : 0,
+                    "max" : 1
+                }
+            ]
+        }
+    ]
+}
