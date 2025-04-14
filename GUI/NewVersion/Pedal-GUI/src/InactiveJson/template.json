@@ -1,0 +1,97 @@
+{
+    "plugins" : [
+        {
+            "name" : "required",
+            "uri" : "required",
+            "bypass" : "optional",
+            "channels" : "optional Defaults = mono",
+            "inputs" : [
+                "optional Defaults = in"
+            ],
+            "outputs" : [
+                "optional Defaults = out"
+            ],
+            "parameters" : [
+                {
+                    "type" : "optional Defaults = lv2",
+                    "name" : "optional Defaults = parameter",
+                    "symbol" : "required",
+                    "mode" : "optional Defaults = dial",
+                    "min" : "required",
+                    "max" : "required",
+                    "default" : "optional Defaults 1.0"
+                },
+                {
+                    "__comment__" : "parameters is optional Defaults = None"
+                }
+            ]
+        },
+        {
+            "name" : "tempName - Should be under 8 characters to display properly",
+            "uri" : "found in manifest.tll in lv2 folder",
+            "bypass" : "***0 - plugin is on, 1 - plugin is bypassed*** default = 0",
+            "channels" : "mono or stereo",
+            "inputs" : [
+                "ex. in or audio_in_1",
+                "can be found in .ttl file describing inputs and outputs",
+                "mod-host green ports show the inputs and outputs",
+                "default = [in] which works with all gx_ plugins"
+            ],
+            "outputs" : [
+                "ex. out or audio_out_1",
+                "can be found in .ttl file describing inputs and outputs",
+                "mod-host green ports show the inputs and outputs",
+                "default = [out] which works with all gx_ plugins"
+            ],
+            "parameters" : [
+                {
+                    "type" : "types = plug or lv2 can be found in .tll file ex plug:gain",
+                    "name" : "displayed name for gui",
+                    "symbol" : "lv2 symbol or plug = uri:symbol",
+                    "mode" : "dial for smooth transitions, button is 0 or 1, and selector for mode selects",
+                    "default" : "defaults the value see example below for syntax",
+                    "min" : "minimum value the parameter can reach",
+                    "max" : "maximum value the parameter can reach"
+                },
+                {
+                    "type" : "plug",
+                    "name" : "Gain",
+                    "symbol" : "https://somelv2uri.com/plugin:gain",
+                    "mode" : "dial",
+                    "default" : 0,
+                    "min" : 0,
+                    "max" : 1.0
+                }
+            ]
+
+
+        },
+        {
+            "name" : "Drive",
+            "uri" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FuzzPlugin",
+            "bypass" : 0,
+            "channels" : "stereo",
+            "inputs" : [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs" : [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters" : [
+                {
+                    "type" : "plug",
+                    "name" : "Gain",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FuzzPlugin:gain",
+                    "mode" : "dial",
+                    "default" : 0,
+                    "min" : 0,
+                    "max" : 1
+
+                }
+            ]
+            
+        }
+    ]
+}
