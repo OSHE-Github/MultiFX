@@ -1,0 +1,123 @@
+{
+    "plugins" : [
+        {
+            "name" : "Fuzz",
+            "uri" : "http://guitarix.sourceofrge.net/plugins/gx_fuzz_#fuzz_",
+            "bypass" : 0,
+            "channels" : "mono",
+            "parameters" : [
+                {   
+                    "type" : "lv2",
+                    "name" : "Drive",
+                    "symbol" : "DRIVE",
+                    "mode" : "dial",
+                    "default" : 1.0,
+                    "min" : -3.0,
+                    "max" : 100.0
+                },
+                {
+                    "type" : "lv2",
+                    "name" : "Tone",
+                    "symbol" : "TONE",
+                    "mode" : "dial",
+                    "default" : 1.0,
+                    "min" : 0.0,
+                    "max" : 1.0
+                }
+            ]
+        },
+        {
+            "name" : "Reverb",
+            "uri" : "",
+            "bypass" : 0,
+            "channels" : "mono",
+            "inputs" : [
+                "in"
+            ],
+            "outputs": [
+                "out"
+            ],
+            "parameters" : [
+                {   
+                    "type" : "lv2",
+                    "name" : "Dry/Wet",
+                    "symbol" : "dry_wet",
+                    "mode" : "dial",
+                    "default" : 50.0,
+                    "min" : 0.0,
+                    "max" : 100.0
+                },
+                {
+                     
+                    "type" : "lv2",
+                    "name" : "LFO",
+                    "symbol" : "lfo",
+                    "mode" : "dial",
+                    "default" : 0.2,
+                    "min" : 0.0,
+                    "max" : 5.0
+                },
+                {
+                     
+                    "type" : "lv2",
+                    "name" : "Room Size",
+                    "symbol" : "roomsize",
+                    "mode" : "button",
+                    "default" : 0.5,
+                    "min" : 0.0,
+                    "max" : 1.0
+                },
+                {
+                     
+                    "type" : "lv2",
+                    "name" : "Damp",
+                    "symbol" : "damp",
+                    "mode" : "dial",
+                    "default" : 0.2,
+                    "min" : 0.0,
+                    "max" : 1
+                },
+                {
+                     
+                    "type" : "lv2",
+                    "name" : "Mode",
+                    "symbol" : "mode",
+                    "mode" : "selector",
+                    "default" : 0,
+                    "min" : 0,
+                    "max" : 1
+                }
+
+            ]
+
+        },
+        {
+            "name" : "Drive",
+            "uri" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FuzzPlugin",
+            "bypass" : 0,
+            "channels" : "stereo",
+            "inputs" : [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs" : [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters" : [
+                {
+                    "type" : "plug",
+                    "name" : "Gain",
+                    "symbol" : "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FuzzPlugin:gain",
+                    "mode" : "dial",
+                    "default" : 0,
+                    "min" : 0,
+                    "max" : 1
+
+                }
+            ]
+            
+        }
+    ]
+}
+        
