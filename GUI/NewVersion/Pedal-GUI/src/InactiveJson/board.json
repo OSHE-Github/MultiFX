@@ -1,0 +1,30 @@
+{
+    "plugins" : [
+        {
+            "name" : "Fuzz",
+            "uri" : "http://guitarix.sourceofrge.net/plugins/gx_fuzz_#fuzz_",
+            "bypass" : 0,
+            "channels" : "mono",
+            "parameters" : [
+                {   
+                    "type" : "lv2",
+                    "name" : "Drive",
+                    "symbol" : "DRIVE",
+                    "mode" : "dial",
+                    "default" : 1.0,
+                    "min" : -3.0,
+                    "max" : 100.0
+                },
+                {
+                    "type" : "lv2",
+                    "name" : "Tone",
+                    "symbol" : "TONE",
+                    "mode" : "dial",
+                    "default" : 1.0,
+                    "min" : 0.0,
+                    "max" : 1.0
+                }
+            ]
+        }
+    ]
+}
