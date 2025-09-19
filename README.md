@@ -35,6 +35,19 @@ Below is a detailed guide on how to run the GUI locally for development.
 - Python
 - PyQt5
 
+Commands to install dependencies may vary on system. Try pip first.
+
+```
+pip install PyQt5
+```
+
+If you get an error about an "externally managed environment", try using your
+system's package manager:
+
+```
+sudo pacman -S python-pyqt5
+```
+
 ### Running the GUI
 
 **Show the commands needed to run the GUI here**
