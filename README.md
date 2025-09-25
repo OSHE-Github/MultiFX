@@ -5,11 +5,11 @@ of the MultiFX Pedal project.
 ## Repo Outline (Proposed)
 
 ```
+docs/       # Documentation for specific features
 footswitch/ # Arduino code for the footswitch attachment
-├ Footswitch_Code.ino # Arduino sketch. Move out of folder it's currently in.
-| # We need to figure out what's going on with the .zip files.
+├ Footswitch_Code.ino # Arduino sketch. 
+└ *.zip     # I think this is EE type stuff, someone else describe this. -Jay
 gui/
-| # We can probably ditch the old ASCII GUI stuff
 ├ assets/         # Images and such
 ├ config/         # This can be backed up to USB or be located elsewhere later.
 | ├ profile.json  # High level config
@@ -22,7 +22,7 @@ gui/
   ├ main.py       # Run this file
   ├ gui/          # GUI arrangement and components
   └ audio/        # plugin host, JACK, socket stuff. We can rename this.
-README.md
+README.md         # General overview
 # We should also include the hardware schematics unless that's all done elsewhere.
 ```
 
@@ -50,7 +50,24 @@ sudo pacman -S python-pyqt5
 
 ### Running the GUI
 
-**Show the commands needed to run the GUI here**
+Running the GUI is very simple.
+
+Navigate to the src directory.
+
+```bash
+cd gui/src
+```
+
+Run `main.py`
+
+```bash
+python main.py
+```
+
+Running locally may yield some bugs depending on the audio configuration of
+your system. Errors will be printed when the system appears to be
+misconfigured, but the GUI should still work for testing navigation and
+visuals.
 
 ## Run on a Raspberry Pi
 
