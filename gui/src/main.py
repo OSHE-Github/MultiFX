@@ -15,60 +15,6 @@ from modhostmanager import (
 )
 
 
-class ParameterPanel(QWidget):
-
-    def __init__(self, background_color : str = "white", positon : int = 0, page : int = 0, plugin : Plugin = None):
-        super().__init__()
-        self.setFixedSize(480, 800)
-        self.background_color = QColor(background_color)
-        self.plugin = plugin
-        self.position = positon
-        self.page = page
-        self.parameters = []
-        self.initUI()
-
-    def initUI(self):
-         #Change to be done dynamically
-        for index in range(0 , 3):
-            try:
-                parameter : Parameter = self.plugin.parameters[index + (self.page*3)]
-                match parameter.mode:
-                    case "dial":
-                        dial = ParameterReadingRange(parameter)
-                        dial.setParent(self)
-                        dial.move(self.width()//2, (801//3) * index)
-                        self.parameters.append(dial)
-
-                    case "button":
-                        button = ParameterReadingButton(parameter)
-                        button.setParent(self)
-                        button.move(self.width()//2, (801//3) * index)
-                        self.parameters.append(button)
-                    case "selector":
-                        selector = ParameterReadingSlider(parameter)
-                        selector.setParent(self)
-                        selector.move(self.width()//2, (801//3) * index)
-                        self.parameters.append(selector)
-                    
-
-            except:
-                pass
-    
-    def updateParameter(self,position : int = 0):
-        try:
-            self.parameters[position].updateValue(self.plugin.parameters[position + (self.page * 3)])
-        except:
-            pass
-        
-    def paintEvent(self, event):
-        painter = QPainter(self)
-
-        pen = QPen(QColor(self.background_color), 10)
-        painter.setPen(pen)
-
-        rect = QRect((self.width()//2)-7, (self.height()//3)*self.position + 5, 15, self.height()//3-9)
-        painter.fillRect(rect, self.background_color)
-
 class BoardWindow(QWidget):
     def __init__(self, manager : PluginManager, mod_host_manager, restart_callback):
         super().__init__()
