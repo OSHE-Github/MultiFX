@@ -1,5 +1,6 @@
-from typing import List
 import json
+
+
 class Parameter():
     def __init__(self, type: str, name: str, symbol: str, mode: str, value: float, min: float, max: float):
         self.type = type
