@@ -15,8 +15,8 @@ from modhostmanager import (
 )
 
 
-class BoxofJsons(QWidget):
-    def __init__(self,page : int, boards : list):
+class BoxOfJsons(QWidget):
+    def __init__(self, page: int, boards: list):
         super().__init__()
         self.setFixedSize(480, 800)
         self.boxes = []
