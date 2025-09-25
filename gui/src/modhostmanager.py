@@ -224,15 +224,16 @@ def connectSystemPlaybackMono(sock, source):
         print(f"Error connectingEffects {e}")
         return -5
 
-def updateParameter(sock, instanceNum , parameter: plugin_manager.Parameter):
-    if(parameter.type == "lv2"):
+
+def updateParameter(sock, instanceNum, parameter: plugin_manager.Parameter):
+    if (parameter.type == "lv2"):
         command = f"param_set {instanceNum} {parameter.symbol} {parameter.value}"
         try:
             return sendCommand(sock, command).split()[1]
         except Exception as e:
             print(f"Error updatingParameter {e}")
             return -5
-    if(parameter.type == "plug"):
+    if (parameter.type == "plug"):
         command = f"patch_set {instanceNum} {parameter.symbol} {parameter.value}"
         try:
             return sendCommand(sock, command).split()[1]
@@ -311,15 +312,16 @@ def setUpPatch(sock, manager: plugin_manager.PluginManager):
                     return -5
         previous = plugin
 
-def varifyParameters(sock, manager: plugin_manager.PluginManager):
+
+def verifyParameters(sock, manager: plugin_manager.PluginManager):
     badParameters = []
     for instanceNum, plugin in enumerate(manager.plugins):
         for instanceNumP, parameter in enumerate(plugin.parameters):
             val = updateParameter(sock, instanceNum, parameter)
-            if(val != 0):
-                badParameters.append((plugin.name,parameter.name))
+            if (val != 0):
+                badParameters.append((plugin.name, parameter.name))
             time.sleep(.1)
-    
+
     return badParameters
 
 

@@ -11,7 +11,7 @@ from plugin_manager import PluginManager, Plugin, Parameter
 import os
 from modhostmanager import (
     startModHost, connectToModHost, updateParameter, updateBypass,
-    quitModHost, setUpPatch, setUpPlugins, varifyParameters, startJackdServer
+    quitModHost, setUpPatch, setUpPlugins, verifyParameters, startJackdServer
 )
 
 
@@ -606,7 +606,7 @@ class MainWindow(QWidget):
             return
         setUpPlugins(modhost, board)
         setUpPatch(modhost, board)
-        varifyParameters(modhost, board)
+        verifyParameters(modhost, board)
 
         # Remove old board window if it exists
         if self.board_window is not None:
