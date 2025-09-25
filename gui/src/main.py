@@ -4,77 +4,16 @@ from PyQt5.QtWidgets import (
     QApplication, QLabel, QWidget, QStackedWidget
 )
 from PyQt5.QtGui import (
-    QPixmap, QPainter, QPen, QColor, QPolygon, QTransform
+    QPixmap, QPainter, QPen, QColor, QTransform
 )
-from PyQt5.QtCore import Qt, QRect, QPoint
+from PyQt5.QtCore import Qt, QRect
 from plugin_manager import PluginManager, Plugin, Parameter
 import os
-from modhostmanager import startModHost, connectToModHost, updateParameter, updateBypass, quitModHost, setUpPatch, setUpPlugins, varifyParameters, startJackdServer
+from modhostmanager import (
+    startModHost, connectToModHost, updateParameter, updateBypass,
+    quitModHost, setUpPatch, setUpPlugins, varifyParameters, startJackdServer
+)
 
-
-class BoxofPlugins(QWidget):
-    def __init__(self,page : int, plugins : PluginManager):
-        super().__init__()
-        self.setFixedSize(480, 800)
-        self.boxes = []
-        for index in range(0, 3):
-            try:
-                plugin : Plugin = plugins.plugins[index + (3*(page))]
-                box = BoxWidget(index + 3*page, plugin.name, plugin.bypass)
-                box.setParent(self)
-                box.move(0, (self.height()//3)*index)
-                self.boxes.append(box)
-            except Exception as e:
-                box = BoxWidget(index + 3*page)
-                box.setParent(self)
-                box.move(0, (self.height()//3)*index)
-                self.boxes.append(box)
-        
-    def updateBypass(self,page, position : int, bypass):
-        try:
-            self.boxes[position - (3*page)].updateBypass(bypass)
-        except:
-            pass
-
-class Cursor(QWidget):
-    def __init__(self, position : int = 0):
-        super().__init__()
-        self.position = position % 3
-    
-    def paintEvent(self, event):
-        arrow_color = QColor("black")
-        self.setFixedSize(480, 800) 
-
-        painter = QPainter(self)
-        x = 270
-        y = 266
-        width = 160
-        arrowWidth = 30
-        headOffset = 30
-        adjusted_y = (y//2) + (y*self.position)
-        
-
-        #Line of arrow
-        start = QPoint(x, adjusted_y)
-        end = QPoint(x+width, adjusted_y)
-
-        #Arrow head
-        arrow_p1 = QPoint(x+headOffset+arrowWidth, adjusted_y + arrowWidth //2 )
-        arrow_p2 = QPoint(x+headOffset+arrowWidth, adjusted_y - arrowWidth //2 )
-
-        pen = QPen(arrow_color, 5)
-        painter.setPen(pen)
-        painter.drawLine(start, end)
-
-        arrow_head = QPolygon([start, arrow_p1, arrow_p2])
-        painter.setBrush(arrow_color)
-        painter.drawPolygon(arrow_head)
-
-
-
-    def changePointer(self,positon : int):
-        self.position = positon
-        self.update()
 
 class ParameterReadingRange(QWidget):
     def __init__(self, parameter : Parameter):
