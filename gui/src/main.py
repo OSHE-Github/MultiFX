@@ -682,7 +682,8 @@ class PedalBoardSelectWindow(QWidget):
     def __init__(self, callback):
         super().__init__()
         self.json_dir = os.path.dirname(os.path.abspath(__file__))
-        self.json_files = self.get_json_files(f"{self.json_dir}/Json")
+        # TODO: No relative linepaths
+        self.json_files = self.get_json_files(f"../config/") 
         self.board = BoxofJsons(0, self.json_files)
         self.board.setParent(self)
 

@@ -5,9 +5,6 @@ import time
 import sys
 import plugin_manager
 
-
-
-
 def startModHost():
     try:
         mod_host_cmd = ["mod-host","-n","-p","5555"] #Starting mod-host -n(no ui) -p 5555(w/ port 5555)
