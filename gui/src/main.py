@@ -2,7 +2,7 @@ import sys
 import time
 from PyQt5.QtWidgets import QApplication
 from modhostmanager import startJackdServer
-from qwidgets import MainWindow
+from qwidgets.core import MainWindow
 
 
 def main():
