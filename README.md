@@ -70,6 +70,17 @@ your system. Errors will be printed when the system appears to be
 misconfigured, but the GUI should still work for testing navigation and
 visuals.
 
+For my system (Jay), this is how I set up the dummy audio servers so I can
+test the GUI.
+
+```
+jackd d dummy
+```
+
+```
+mod-host
+```
+
 ## Run on a Raspberry Pi
 
 Below is a detailed guide on how to run the software on a Raspberry Pi
