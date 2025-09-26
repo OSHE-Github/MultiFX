@@ -20,8 +20,7 @@ gui/
 |       └ <preset>.json
 └ src/            # Python code
   ├ main.py       # Run this file
-  ├ gui/          # GUI arrangement and components
-  └ audio/        # plugin host, JACK, socket stuff. We can rename this.
+  └ qwidgets/     # GUI components
 README.md         # General overview
 # We should also include the hardware schematics unless that's all done elsewhere.
 ```
