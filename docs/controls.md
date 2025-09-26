@@ -2,7 +2,7 @@
 
 Documentation for controlling the GUI through the knobs and footswitches.
 
-![Diagram of rotary encoder controls](controls_diagram.png)
+![Diagram of rotary encoder controls](control_diagram.png)
 
 <sub>This diagram will likely become less accurate as the GUI is changed</sub>
 
