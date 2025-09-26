@@ -34,6 +34,7 @@ Below is a detailed guide on how to run the GUI locally for development.
 - Python
 - PyQt5
 - [KodeMono](https://kodemono.com/) font
+- [mod-host](https://github.com/mod-audio/mod-host)
 
 Commands to install dependencies may vary on system. Try pip first.
 

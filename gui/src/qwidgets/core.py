@@ -75,7 +75,7 @@ class Cursor(QWidget):
         self.position = position % 3
 
     def paintEvent(self, event):
-        arrow_color = QColor("black")
+        arrow_color = color_foreground
         self.setFixedSize(480, 800)
 
         painter = QPainter(self)
