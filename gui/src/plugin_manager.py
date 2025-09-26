@@ -52,15 +52,16 @@ class PluginManager:
             names = []
             for parameter in self.plugins[x].parameters:
                 names.append(parameter.name)
-            
+
             return names
-        except:
+        except Exception as e:
+            print(e)
             return []
 
     def size(self):
         return len(self.plugins)
-    
-    def paramSize(self, x : int):
+
+    def paramSize(self, x: int):
         return len(self.plugins[x].parameters)
 
     def getPlugin(self, x: int):
@@ -69,33 +70,32 @@ class PluginManager:
         except IndexError:
             print("Index does not exist")
             return []
-    
+
     def addPlugin(self, plugin: Plugin):
         self.plugins.append(plugin)
-    
+
     def changeParameter(self, pluginIndex: int, parameterIndex: int, value: float):
         try:
             plugin = self.plugins[pluginIndex]
             try:
                 parameter = plugin.parameters[parameterIndex]
                 parameter.setValue(value)
-            
+
             except IndexError:
                 print("Parameter index does not exist")
                 return None
-                
-        
+
         except IndexError:
             print("Plugin index does not exist")
             return None
-    
+
     def initFromJSON(self, jsonFile: str):
         try:
             with open(jsonFile, "r") as file:
                 data = json.load(file)
                 if "plugins" not in data:
                     raise ValueError("Missing 'plugins' field")
-                
+
                 for plugin_data in data["plugins"]:
                     name = plugin_data.get("name", "plugin")
                     if "uri" not in plugin_data:
@@ -111,10 +111,10 @@ class PluginManager:
                     for param_data in plugin_data.get("parameters", []):
                         try:
                             parameter = Parameter(
-                                type = param_data.get("type","lv2"),
-                                name=param_data.get("name","parameter"),
+                                type=param_data.get("type", "lv2"),
+                                name=param_data.get("name", "parameter"),
                                 symbol=param_data["symbol"],
-                                mode=param_data.get("mode","dial"),
+                                mode=param_data.get("mode", "dial"),
                                 min=param_data["min"],
                                 max=param_data["max"],
                                 value=param_data.get("default", 1.0)
@@ -122,16 +122,16 @@ class PluginManager:
                             parameters.append(parameter)
                         except KeyError as e:
                             print(f"Skipping parameter {name} due to missing key: {e}")
-                    self.addPlugin( Plugin(
-                            name=name, 
-                            uri=uri, 
+                    self.addPlugin(Plugin(
+                            name=name,
+                            uri=uri,
                             bypass=bypass,
                             channels=channels,
                             inputs=inputs,
                             outputs=outputs,
                             paramters=parameters
                         ))
-                    
+
         except json.JSONDecodeError:
             print("Invalid JSON format!")
             return -1
@@ -140,4 +140,3 @@ class PluginManager:
             return -1
         except ValueError as e:
             print(f"JSON Error: {e}")
-    
