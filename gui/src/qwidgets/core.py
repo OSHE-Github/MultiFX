@@ -10,6 +10,7 @@ from modhostmanager import (
     startModHost, connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
     updateBypass, quitModHost, updateParameter
 )
+from styles import styles_indicator, styles_label
 from qwidgets.parameter_widgets import ParameterPanel
 
 
@@ -433,10 +434,7 @@ class BoxWidget(QWidget):
         # Creating plugin name field
         self.label = QLabel(self.plugin_name, self)
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet(
-            "font : bold 30px;"
-            "font-family : Comic Sans MS;"
-        )
+        self.label.setStyleSheet(styles_label)
         # Adjust size after setting text
         self.label.adjustSize()
         self.label.move((
@@ -445,10 +443,7 @@ class BoxWidget(QWidget):
 
         # Indicator Label
         self.indicator = QLabel(str(self.indicator), self)
-        self.indicator.setStyleSheet(
-            "font: bold 30px;"
-            "font-family : Comic Sans MS;"
-            )
+        self.indicator.setStyleSheet(styles_label)
 
         # Move to bottom-left corner
         self.indicator.adjustSize()
@@ -480,10 +475,7 @@ class BoxWidget(QWidget):
             indicatorText = "Off"
 
         self.indicator_text = QLabel(indicatorText, self)
-        self.indicator_text.setStyleSheet(
-            "font: bold 13px;"
-            "font-family : Comic Sans MS;"
-            )
+        self.indicator_text.setStyleSheet(styles_indicator)
         self.indicator_text.adjustSize()
         self.indicator_text.move(
             (self.width() - self.indicator.width()) - 16,
