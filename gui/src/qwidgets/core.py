@@ -10,7 +10,10 @@ from modhostmanager import (
     startModHost, connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
     updateBypass, quitModHost, updateParameter
 )
-from styles import styles_indicator, styles_label
+from styles import (
+    styles_indicator, styles_label, styles_window, color_foreground
+)
+from utils import config_dir
 from qwidgets.parameter_widgets import ParameterPanel
 
 
@@ -22,6 +25,7 @@ class MainWindow(QWidget):
         self.stack = QStackedWidget(self)
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.stack)
+        self.setStyleSheet(styles_window)
 
         # Create selection screen
         self.start_screen = PedalBoardSelectWindow(self.launch_board)
@@ -485,7 +489,7 @@ class BoxWidget(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
 
-        pen = QPen(Qt.black, 10)
+        pen = QPen(color_foreground, 10)
         painter.setPen(pen)
 
         rect = QRect(0, 0, self.width()-1, self.height())
@@ -548,9 +552,8 @@ class BoxOfPlugins(QWidget):
 class PedalBoardSelectWindow(QWidget):
     def __init__(self, callback):
         super().__init__()
-        self.json_dir = os.path.dirname(os.path.abspath(__file__))
-        # TODO: No relative linepaths
-        self.json_files = self.get_json_files("../config/")
+        self.json_dir = os.path.dirname(config_dir)
+        self.json_files = self.get_json_files(config_dir)
         self.board = BoxOfJsons(0, self.json_files)
         self.board.setParent(self)
 

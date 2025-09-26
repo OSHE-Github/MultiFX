@@ -6,7 +6,6 @@ from qwidgets.core import MainWindow
 
 
 def main():
-    print(root_dir)
     app = QApplication(sys.argv)
     startJackdServer()
     time.sleep(.1)

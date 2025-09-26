@@ -8,14 +8,25 @@ https://doc.qt.io/qtforpython-6/overviews/qtwidgets-stylesheet.html
 
 """
 
+from PyQt5.QtGui import QColor
+
 font_family = "Kode Mono"
+
+color_background = QColor.fromRgb(0, 0, 0)
+color_foreground = QColor.fromRgb(255, 255, 255)
+
+styles_window = f"""
+    background: {color_background.name()};
+"""
 
 styles_indicator = f"""
     font: bold 13px;
     font-family: {font_family};
+    color: {color_foreground.name()};
 """
 
 styles_label = f"""
     font : bold 30px;
     font-family : {font_family};
+    color: {color_foreground.name()};
 """
