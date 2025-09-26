@@ -10,7 +10,7 @@ corresponds to the bottom.
 ## Keyboard Controls
 
 | Turn Left | Click In | Turn Right |
--------------------------------------
+|:---------:|:--------:|:----------:|
 |q|w|e|
 |a|s|d|
 |z|x|c|
