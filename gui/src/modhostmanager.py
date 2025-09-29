@@ -75,10 +75,10 @@ def connectToModHost():
             print("Connected via socket")
             return sock
         except ConnectionRefusedError:
-            print("Socket couldnt connect...")
+            print("Socket couldn't connect...")
             time.sleep(1)
 
-    print("Socket couldnt make a connection")
+    print("Socket couldn't make a connection")
     return None
 
 

@@ -10,6 +10,11 @@ from modhostmanager import (
     startModHost, connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
     updateBypass, quitModHost, updateParameter
 )
+from styles import (
+    styles_indicator, styles_label, styles_window, color_foreground,
+    styles_error
+)
+from utils import config_dir
 from qwidgets.parameter_widgets import ParameterPanel
 
 
@@ -21,6 +26,7 @@ class MainWindow(QWidget):
         self.stack = QStackedWidget(self)
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.stack)
+        self.setStyleSheet(styles_window)
 
         # Create selection screen
         self.start_screen = PedalBoardSelectWindow(self.launch_board)
@@ -70,7 +76,7 @@ class Cursor(QWidget):
         self.position = position % 3
 
     def paintEvent(self, event):
-        arrow_color = QColor("black")
+        arrow_color = color_foreground
         self.setFixedSize(480, 800)
 
         painter = QPainter(self)
@@ -400,24 +406,27 @@ class BoardWindow(QWidget):
             self.update()
 
 
-# TODO: Rename this when its clearer what it does. Or at least document
-class BoxOfJsons(QWidget):
+class BoxOfProfiles(QWidget):
+    pluginsPerPage: int = 3
+
     def __init__(self, page: int, boards: list):
         super().__init__()
         self.setFixedSize(480, 800)
         self.boxes = []
-        for index in range(0, 3):
-            try:
-                box = BoxWidget(index + 3*page, boards[index + 3*page])
-                box.setParent(self)
-                box.move(0, (self.height()//3)*index)
-                self.boxes.append(box)
-            except Exception as e:
-                box = BoxWidget(index + 3*page)
-                box.setParent(self)
-                box.move(0, (self.height()//3)*index)
-                print(e)
-                self.boxes.append(box)
+        numBoxes: int = min(
+                BoxOfPlugins.pluginsPerPage,
+                len(boards) - BoxOfProfiles.pluginsPerPage * page)
+        if numBoxes == 0:
+            box = BoxWidget(-1, "Unable to load profiles!", 0)
+            box.label.setStyleSheet(styles_error)
+            box.setParent(self)
+            self.boxes.append(box)
+            return
+        for index in range(0, numBoxes):
+            box = BoxWidget(index + 3*page, boards[index + 3*page])
+            box.setParent(self)
+            box.move(0, (self.height()//3)*index)
+            self.boxes.append(box)
 
 
 class BoxWidget(QWidget):
@@ -433,10 +442,7 @@ class BoxWidget(QWidget):
         # Creating plugin name field
         self.label = QLabel(self.plugin_name, self)
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet(
-            "font : bold 30px;"
-            "font-family : Comic Sans MS;"
-        )
+        self.label.setStyleSheet(styles_label)
         # Adjust size after setting text
         self.label.adjustSize()
         self.label.move((
@@ -445,10 +451,7 @@ class BoxWidget(QWidget):
 
         # Indicator Label
         self.indicator = QLabel(str(self.indicator), self)
-        self.indicator.setStyleSheet(
-            "font: bold 30px;"
-            "font-family : Comic Sans MS;"
-            )
+        self.indicator.setStyleSheet(styles_label)
 
         # Move to bottom-left corner
         self.indicator.adjustSize()
@@ -480,10 +483,7 @@ class BoxWidget(QWidget):
             indicatorText = "Off"
 
         self.indicator_text = QLabel(indicatorText, self)
-        self.indicator_text.setStyleSheet(
-            "font: bold 13px;"
-            "font-family : Comic Sans MS;"
-            )
+        self.indicator_text.setStyleSheet(styles_indicator)
         self.indicator_text.adjustSize()
         self.indicator_text.move(
             (self.width() - self.indicator.width()) - 16,
@@ -493,7 +493,7 @@ class BoxWidget(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
 
-        pen = QPen(Qt.black, 10)
+        pen = QPen(color_foreground, 10)
         painter.setPen(pen)
 
         rect = QRect(0, 0, self.width()-1, self.height())
@@ -525,23 +525,28 @@ class BoxWidget(QWidget):
 
 
 class BoxOfPlugins(QWidget):
+    pluginsPerPage: int = 3
+
     def __init__(self, page: int, plugins: PluginManager):
         super().__init__()
         self.setFixedSize(480, 800)
         self.boxes = []
-        for index in range(0, 3):
-            try:
-                plugin: Plugin = plugins.plugins[index + (3*(page))]
-                box = BoxWidget(index + 3*page, plugin.name, plugin.bypass)
-                box.setParent(self)
-                box.move(0, (self.height()//3)*index)
-                self.boxes.append(box)
-            except Exception as e:
-                box = BoxWidget(index + 3*page)
-                box.setParent(self)
-                box.move(0, (self.height()//3)*index)
-                print(e)
-                self.boxes.append(box)
+        numBoxes: int = min(
+                BoxOfPlugins.pluginsPerPage,
+                len(plugins.plugins) - BoxOfPlugins.pluginsPerPage * page)
+        if numBoxes == 0:
+            box = BoxWidget(-1, "Unable to load plugins!", 0)
+            box.label.setStyleSheet(styles_error)
+            box.setParent(self)
+            self.boxes.append(box)
+            return
+        for index in range(0, numBoxes):
+            plugin: Plugin = plugins.plugins[index + (3*(page))]
+            box = BoxWidget(index + BoxOfPlugins.pluginsPerPage*page,
+                            plugin.name, plugin.bypass)
+            box.setParent(self)
+            box.move(0, (self.height()//3)*index)
+            self.boxes.append(box)
 
     def updateBypass(self, page, position: int, bypass):
         # NOTE: this used to be a bare try-except with nothing in the except
@@ -556,10 +561,9 @@ class BoxOfPlugins(QWidget):
 class PedalBoardSelectWindow(QWidget):
     def __init__(self, callback):
         super().__init__()
-        self.json_dir = os.path.dirname(os.path.abspath(__file__))
-        # TODO: No relative linepaths
-        self.json_files = self.get_json_files("../config/")
-        self.board = BoxOfJsons(0, self.json_files)
+        self.json_dir = os.path.dirname(config_dir)
+        self.json_files = self.get_json_files(config_dir)
+        self.board = BoxOfProfiles(0, self.json_files)
         self.board.setParent(self)
 
         self.callback = callback

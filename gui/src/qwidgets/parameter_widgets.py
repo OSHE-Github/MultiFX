@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QWidget, QLabel
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QTransform
 from PyQt5.QtCore import Qt, QRect
 from plugin_manager import Plugin, Parameter
+from styles import styles_label
 
 
 class ParameterPanel(QWidget):
@@ -83,11 +84,7 @@ class ParameterReadingButton(QWidget):
         # Creating plugin name field
         self.label = QLabel(parameter.name, self)
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet(
-            "font : bold 30px;"
-            "font-family : Comic Sans MS;"
-            "background : transparent;"
-        )
+        self.label.setStyleSheet(styles_label)
 
         self.label.adjustSize()
         self.label.move(
@@ -97,10 +94,7 @@ class ParameterReadingButton(QWidget):
 
         # Indicator Label
         self.value = QLabel(f"{parameter.value}", self)
-        self.value.setStyleSheet(
-            "font: bold 30px;"
-            "font-family : Comic Sans MS;"
-            )
+        self.value.setStyleSheet(styles_label)
 
         self.value.adjustSize()
         self.value.move(
@@ -160,11 +154,7 @@ class ParameterReadingRange(QWidget):
         # Creating plugin name field
         self.label = QLabel(parameter.name, self)
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet(
-            "font : bold 30px;"
-            "font-family : Comic Sans MS;"
-            "background : transparent;"
-        )
+        self.label.setStyleSheet(styles_label)
 
         self.label.adjustSize()
         self.label.move(
@@ -174,10 +164,7 @@ class ParameterReadingRange(QWidget):
 
         # Indicator Label
         self.value = QLabel(f"{parameter.value}", self)
-        self.value.setStyleSheet(
-            "font: bold 30px;"
-            "font-family : Comic Sans MS;"
-            )
+        self.value.setStyleSheet(styles_label)
 
         self.value.adjustSize()
         self.value.move(
@@ -240,11 +227,7 @@ class ParameterReadingSlider(QWidget):
         # Creating plugin name field
         self.label = QLabel(parameter.name, self)
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet(
-            "font : bold 30px;"
-            "font-family : Comic Sans MS;"
-            "background : transparent;"
-        )
+        self.label.setStyleSheet(styles_label)
 
         self.label.adjustSize()
         self.label.move(
@@ -254,10 +237,7 @@ class ParameterReadingSlider(QWidget):
 
         # Indicator Label
         self.value = QLabel(f"{parameter.value}", self)
-        self.value.setStyleSheet(
-            "font: bold 30px;"
-            "font-family : Comic Sans MS;"
-            )
+        self.value.setStyleSheet(styles_label)
 
         self.value.adjustSize()
         self.value.move(

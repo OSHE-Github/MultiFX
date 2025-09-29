@@ -33,6 +33,8 @@ Below is a detailed guide on how to run the GUI locally for development.
 
 - Python
 - PyQt5
+- [KodeMono](https://kodemono.com/) font
+- [mod-host](https://github.com/mod-audio/mod-host)
 
 Commands to install dependencies may vary on system. Try pip first.
 
@@ -67,6 +69,17 @@ Running locally may yield some bugs depending on the audio configuration of
 your system. Errors will be printed when the system appears to be
 misconfigured, but the GUI should still work for testing navigation and
 visuals.
+
+For my system (Jay), this is how I set up the dummy audio servers so I can
+test the GUI.
+
+```
+jackd -d dummy
+```
+
+```
+mod-host
+```
 
 ## Run on a Raspberry Pi
 
