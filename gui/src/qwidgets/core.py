@@ -11,7 +11,8 @@ from modhostmanager import (
     updateBypass, quitModHost, updateParameter
 )
 from styles import (
-    styles_indicator, styles_label, styles_window, color_foreground
+    styles_indicator, styles_label, styles_window, color_foreground,
+    styles_error
 )
 from utils import config_dir
 from qwidgets.parameter_widgets import ParameterPanel
@@ -405,24 +406,27 @@ class BoardWindow(QWidget):
             self.update()
 
 
-# TODO: Rename this when its clearer what it does. Or at least document
-class BoxOfJsons(QWidget):
+class BoxOfProfiles(QWidget):
+    pluginsPerPage: int = 3
+
     def __init__(self, page: int, boards: list):
         super().__init__()
         self.setFixedSize(480, 800)
         self.boxes = []
-        for index in range(0, 3):
-            try:
-                box = BoxWidget(index + 3*page, boards[index + 3*page])
-                box.setParent(self)
-                box.move(0, (self.height()//3)*index)
-                self.boxes.append(box)
-            except Exception as e:
-                box = BoxWidget(index + 3*page)
-                box.setParent(self)
-                box.move(0, (self.height()//3)*index)
-                print(e)
-                self.boxes.append(box)
+        numBoxes: int = min(
+                BoxOfPlugins.pluginsPerPage,
+                len(boards) - BoxOfProfiles.pluginsPerPage * page)
+        if numBoxes == 0:
+            box = BoxWidget(-1, "Unable to load profiles!", 0)
+            box.label.setStyleSheet(styles_error)
+            box.setParent(self)
+            self.boxes.append(box)
+            return
+        for index in range(0, numBoxes):
+            box = BoxWidget(index + 3*page, boards[index + 3*page])
+            box.setParent(self)
+            box.move(0, (self.height()//3)*index)
+            self.boxes.append(box)
 
 
 class BoxWidget(QWidget):
@@ -521,23 +525,28 @@ class BoxWidget(QWidget):
 
 
 class BoxOfPlugins(QWidget):
+    pluginsPerPage: int = 3
+
     def __init__(self, page: int, plugins: PluginManager):
         super().__init__()
         self.setFixedSize(480, 800)
         self.boxes = []
-        for index in range(0, 3):
-            try:
-                plugin: Plugin = plugins.plugins[index + (3*(page))]
-                box = BoxWidget(index + 3*page, plugin.name, plugin.bypass)
-                box.setParent(self)
-                box.move(0, (self.height()//3)*index)
-                self.boxes.append(box)
-            except Exception as e:
-                box = BoxWidget(index + 3*page)
-                box.setParent(self)
-                box.move(0, (self.height()//3)*index)
-                print(e)
-                self.boxes.append(box)
+        numBoxes: int = min(
+                BoxOfPlugins.pluginsPerPage,
+                len(plugins.plugins) - BoxOfPlugins.pluginsPerPage * page)
+        if numBoxes == 0:
+            box = BoxWidget(-1, "Unable to load plugins!", 0)
+            box.label.setStyleSheet(styles_error)
+            box.setParent(self)
+            self.boxes.append(box)
+            return
+        for index in range(0, numBoxes):
+            plugin: Plugin = plugins.plugins[index + (3*(page))]
+            box = BoxWidget(index + BoxOfPlugins.pluginsPerPage*page,
+                            plugin.name, plugin.bypass)
+            box.setParent(self)
+            box.move(0, (self.height()//3)*index)
+            self.boxes.append(box)
 
     def updateBypass(self, page, position: int, bypass):
         # NOTE: this used to be a bare try-except with nothing in the except
@@ -554,7 +563,7 @@ class PedalBoardSelectWindow(QWidget):
         super().__init__()
         self.json_dir = os.path.dirname(config_dir)
         self.json_files = self.get_json_files(config_dir)
-        self.board = BoxOfJsons(0, self.json_files)
+        self.board = BoxOfProfiles(0, self.json_files)
         self.board.setParent(self)
 
         self.callback = callback

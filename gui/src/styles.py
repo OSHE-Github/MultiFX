@@ -14,6 +14,7 @@ font_family = "Kode Mono"
 
 color_background = QColor.fromRgb(0, 0, 0)
 color_foreground = QColor.fromRgb(255, 255, 255)
+color_error = QColor.fromRgb(255, 0, 0)
 
 styles_window = f"""
     background: {color_background.name()};
@@ -27,7 +28,13 @@ styles_indicator = f"""
 
 styles_label = f"""
     font : bold 30px;
-    font-family : {font_family};
+    font-family: {font_family};
     color: {color_foreground.name()};
     background: transparent;
+"""
+
+styles_error = f"""
+    font: bold 10px;
+    font-family: {font_family};
+    color: {color_error.name()};
 """
