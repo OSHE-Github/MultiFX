@@ -29,4 +29,5 @@ styles_label = f"""
     font : bold 30px;
     font-family : {font_family};
     color: {color_foreground.name()};
+    background: transparent;
 """

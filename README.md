@@ -74,7 +74,7 @@ For my system (Jay), this is how I set up the dummy audio servers so I can
 test the GUI.
 
 ```
-jackd d dummy
+jackd -d dummy
 ```
 
 ```
