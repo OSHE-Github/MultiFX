@@ -1,7 +1,6 @@
 """Core widgets for the MultiFX GUI"""
 
 import os
-import sys
 from PyQt5.QtWidgets import QWidget, QStackedWidget, QVBoxLayout, QLabel
 from PyQt5.QtGui import QColor, QPainter, QPen, QPolygon, QPixmap
 from PyQt5.QtCore import Qt, QPoint, QRect
@@ -14,14 +13,16 @@ from styles import (
     styles_indicator, styles_label, styles_window, color_foreground,
     styles_error
 )
-from utils import config_dir
+from utils import config_dir, assets_dir
 from qwidgets.parameter_widgets import ParameterPanel
+from qwidgets.controls import ControlDisplay
+from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
 
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.setGeometry(0, 0, 480, 800)
+        self.setGeometry(0, 0, SCREEN_W, SCREEN_H)
 
         self.stack = QStackedWidget(self)
         self.layout = QVBoxLayout(self)
@@ -29,8 +30,14 @@ class MainWindow(QWidget):
         self.setStyleSheet(styles_window)
 
         # Create selection screen
-        self.start_screen = PedalBoardSelectWindow(self.launch_board)
-        self.stack.addWidget(self.start_screen)
+        # self.start_screen = PedalBoardSelectWindow(self.launch_board)
+        # self.stack.addWidget(self.start_screen)
+        self.controlDisplay = ControlDisplay()
+        self.controlDisplay.move(
+            SCREEN_W - self.controlDisplay.width(),
+            SCREEN_H - self.controlDisplay.height()
+        )
+        self.controlDisplay.setParent(self)
 
         self.board_window = None  # Placeholder for later
 
@@ -435,7 +442,7 @@ class BoxWidget(QWidget):
         self.plugin_name = plugin_name
         self.indicator = indicator
         self.bypass = bypass
-        self.setFixedSize(240, 801//3)
+        self.setFixedSize(SCREEN_W // 2, SCREEN_H // 3)
         self.initUI()
 
     def initUI(self):
@@ -457,13 +464,11 @@ class BoxWidget(QWidget):
         self.indicator.adjustSize()
         self.indicator.move(30-self.indicator.width(), self.height()-45)
 
-        script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-
         self.indicator_off_path = os.path.join(
-            script_dir, "Graphics/IndicatorOff.png"
+            assets_dir, "graphics/IndicatorOff.png"
         )
         self.indicator_on_path = os.path.join(
-            script_dir, "Graphics/IndicatorOn.png"
+            assets_dir, "graphics/IndicatorOn.png"
         )
 
         if (self.bypass == 0):
