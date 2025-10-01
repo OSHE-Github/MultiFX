@@ -30,8 +30,8 @@ class MainWindow(QWidget):
         self.setStyleSheet(styles_window)
 
         # Create selection screen
-        # self.start_screen = PedalBoardSelectWindow(self.launch_board)
-        # self.stack.addWidget(self.start_screen)
+        self.start_screen = PedalBoardSelectWindow(self.launch_board)
+        self.stack.addWidget(self.start_screen)
         self.controlDisplay = ControlDisplay()
         self.controlDisplay.move(
             SCREEN_W - self.controlDisplay.width(),
