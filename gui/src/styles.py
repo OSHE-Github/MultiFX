@@ -16,6 +16,13 @@ color_background = QColor.fromRgb(0, 0, 0)
 color_foreground = QColor.fromRgb(255, 255, 255)
 color_error = QColor.fromRgb(255, 0, 0)
 
+color_top = QColor.fromRgb(255, 0, 0)
+color_top_inactive = QColor.fromRgb(102, 0, 0)
+color_mid = QColor.fromRgb(0, 255, 0)
+color_mid_inactive = QColor.fromRgb(0, 102, 0)
+color_bot = QColor.fromRgb(0, 0, 255)
+color_bot_inactive = QColor.fromRgb(0, 0, 102)
+
 styles_window = f"""
     background: {color_background.name()};
 """

@@ -23,6 +23,7 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setGeometry(0, 0, SCREEN_W, SCREEN_H)
+        self.setFixedSize(SCREEN_W, SCREEN_H)
 
         self.stack = QStackedWidget(self)
         self.layout = QVBoxLayout(self)
