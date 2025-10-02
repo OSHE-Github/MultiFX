@@ -13,6 +13,7 @@ from PyQt5.QtGui import QColor
 font_family = "Kode Mono"
 
 color_background = QColor.fromRgb(0, 0, 0)
+color_inactive = QColor.fromRgb(102, 102, 102)
 color_foreground = QColor.fromRgb(255, 255, 255)
 color_error = QColor.fromRgb(255, 0, 0)
 
@@ -37,6 +38,20 @@ styles_label = f"""
     font : bold 30px;
     font-family: {font_family};
     color: {color_foreground.name()};
+    background: transparent;
+"""
+
+styles_bind = f"""
+    font : 12px;
+    font-family: {font_family};
+    color: {color_foreground.name()};
+    background: transparent;
+"""
+
+styles_bind_inactive = f"""
+    font : 12px;
+    font-family: {font_family};
+    color: {color_inactive.name()};
     background: transparent;
 """
 

@@ -1,11 +1,13 @@
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QLabel
 from PyQt5.QtGui import QPainter, QPen, QPainterPath, QPolygonF, QBrush, QColor
-from PyQt5.QtCore import QRect, QPoint
+from PyQt5.QtCore import QRect, QPoint, Qt
 from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
 from styles import (
     color_foreground, color_top, color_top_inactive, color_mid,
-    color_mid_inactive, color_bot, color_bot_inactive
+    color_mid_inactive, color_bot, color_bot_inactive, styles_bind,
+    styles_bind_inactive
 )
+from typing import List
 from qwidgets.graphics_utils import Octagon
 
 
@@ -25,9 +27,23 @@ class RotaryEncoder:
 
 
 class ControlDisplay(QWidget):
+    PADDING = 16
+    RADIUS = 8
+    MARGIN = 2
+
+    REL_W = 1/5
+    REL_H = 1/12
+
     def __init__(self):
         super().__init__()
-        self.setFixedSize(SCREEN_W // 6, SCREEN_H // 12)
+        self.setFixedSize(
+            int(SCREEN_W * self.REL_W),
+            int(SCREEN_H * self.REL_H)
+        )
+        self.labels: List[QLabel] = [None, None, None]
+        self.drawLabel(RotaryEncoder.TOP)
+        self.drawLabel(RotaryEncoder.MIDDLE)
+        self.drawLabel(RotaryEncoder.BOTTOM)
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -40,24 +56,49 @@ class ControlDisplay(QWidget):
         painter.drawRect(rect)
 
         # Binding
-        self.drawBind(RotaryEncoder.TOP)
-        self.drawBind(RotaryEncoder.MIDDLE)
-        self.drawBind(RotaryEncoder.BOTTOM)
+        self.drawSymbol(RotaryEncoder.TOP)
+        self.drawSymbol(RotaryEncoder.MIDDLE)
+        self.drawSymbol(RotaryEncoder.BOTTOM)
 
-    def drawBind(self, enc: RotaryEncoderData):
-        PADDING = 16
-        RADIUS = 8
-        MARGIN = 2
+    def drawSymbol(self, enc: RotaryEncoderData):
+        """Draws the circle for an encoder's binding.
+
+        Must be done in paintEvent.
+        """
+
+        color = enc.inactive if enc.bind == "" else enc.color
 
         painter = QPainter(self)
-        color = enc.inactive if enc.bind == "" else enc.color
         pen = QPen(color, 1)
         painter.setPen(pen)
         brush = QBrush(color)
 
-        center = QPoint(PADDING, PADDING + enc.index * (2 * RADIUS + MARGIN))
+        # Encoder symbol
+        center = QPoint(
+            self.PADDING,
+            self.PADDING + enc.index * (2 * self.RADIUS + self.MARGIN)
+        )
         oct = Octagon(center, 8)
-        painter.drawPolygon(oct)
         path = QPainterPath()
         path.addPolygon(QPolygonF(oct))
         painter.fillPath(path, brush)
+
+    def drawLabel(self, enc: RotaryEncoderData):
+        """Draws label for an encoder's mapping
+
+        Must be done outside paintEvent
+        """
+
+        active = enc.bind != ""
+        display = enc.bind if active else "N/A"
+        # Label
+        label = QLabel(display, self)
+        self.labels[enc.index] = label
+        label.setAlignment(Qt.AlignLeft)
+        label.setStyleSheet(styles_bind if active else styles_bind_inactive)
+        label.adjustSize()
+        topLeft = QPoint(
+            self.PADDING + self.MARGIN + self.RADIUS,
+            self.RADIUS + enc.index * (2 * self.RADIUS + self.MARGIN)
+        )
+        label.move(topLeft)
