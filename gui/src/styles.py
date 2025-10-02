@@ -42,14 +42,14 @@ styles_label = f"""
 """
 
 styles_bind = f"""
-    font : 12px;
+    font : 10px;
     font-family: {font_family};
     color: {color_foreground.name()};
     background: transparent;
 """
 
 styles_bind_inactive = f"""
-    font : 12px;
+    font : 10px;
     font-family: {font_family};
     color: {color_inactive.name()};
     background: transparent;

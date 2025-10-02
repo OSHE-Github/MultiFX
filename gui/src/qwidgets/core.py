@@ -15,7 +15,7 @@ from styles import (
 )
 from utils import config_dir, assets_dir
 from qwidgets.parameter_widgets import ParameterPanel
-from qwidgets.controls import ControlDisplay
+from qwidgets.controls import ControlDisplay, RotaryEncoder
 from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
 
 
@@ -27,12 +27,12 @@ class MainWindow(QWidget):
 
         self.stack = QStackedWidget(self)
         self.layout = QVBoxLayout(self)
-        #self.layout.addWidget(self.stack)
+        self.layout.addWidget(self.stack)
         self.setStyleSheet(styles_window)
 
         # Create selection screen
         self.start_screen = PedalBoardSelectWindow(self.launch_board)
-        #self.stack.addWidget(self.start_screen)
+        self.stack.addWidget(self.start_screen)
         self.controlDisplay = ControlDisplay()
         self.controlDisplay.move(
             SCREEN_W - self.controlDisplay.width(),
@@ -43,6 +43,8 @@ class MainWindow(QWidget):
         self.board_window = None  # Placeholder for later
 
         self.show()
+
+        ControlDisplay.setBind(RotaryEncoder.TOP, "test length")
 
     def launch_board(self, selected_json):
         """Called when a JSON file is selected to load the board"""

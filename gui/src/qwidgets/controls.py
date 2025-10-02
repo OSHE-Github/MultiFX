@@ -27,10 +27,11 @@ class RotaryEncoder:
 
 
 class ControlDisplay(QWidget):
+    instance: QWidget = None
+
     PADDING = 16
     RADIUS = 8
     MARGIN = 2
-
     REL_W = 1/5
     REL_H = 1/12
 
@@ -44,6 +45,9 @@ class ControlDisplay(QWidget):
         self.drawLabel(RotaryEncoder.TOP)
         self.drawLabel(RotaryEncoder.MIDDLE)
         self.drawLabel(RotaryEncoder.BOTTOM)
+        if (ControlDisplay.instance is not None):
+            print("Multiple of ControlDisplay exist! Please only have one")
+        ControlDisplay.instance = self
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -102,3 +106,17 @@ class ControlDisplay(QWidget):
             self.RADIUS + enc.index * (2 * self.RADIUS + self.MARGIN)
         )
         label.move(topLeft)
+
+    def setBind(enc: RotaryEncoderData, newBind: str) -> None:
+        """Sets encoder binding and redraws control display.
+
+        Should be called in any scenario that rebinds an encoder
+        """
+        enc.bind = newBind
+        inst = ControlDisplay.instance
+        inst.labels[enc.index].setText(newBind)
+        active = enc.bind != ""
+        inst.labels[enc.index].setStyleSheet(
+                styles_bind if active else styles_bind_inactive)
+        inst.labels[enc.index].adjustSize()
+        inst.repaint()
