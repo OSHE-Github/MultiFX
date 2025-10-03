@@ -5,7 +5,7 @@ from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
 from styles import (
     color_foreground, color_top, color_top_inactive, color_mid,
     color_mid_inactive, color_bot, color_bot_inactive, styles_bind,
-    styles_bind_inactive
+    styles_bind_inactive, color_background
 )
 from typing import List
 from qwidgets.graphics_utils import Octagon
@@ -29,11 +29,13 @@ class RotaryEncoder:
 class ControlDisplay(QWidget):
     instance: QWidget = None
 
-    PADDING = 16
+    # NOTE: May be good to define this in styles even though its not CSS
+    PADDING = 14
     RADIUS = 8
-    MARGIN = 2
+    MARGIN = 4
     REL_W = 1/5
     REL_H = 1/12
+    LINE_WIDTH = 3
 
     def __init__(self):
         super().__init__()
@@ -51,12 +53,15 @@ class ControlDisplay(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-
-        pen = QPen(color_foreground, 5)
+        pen = QPen(color_foreground, self.LINE_WIDTH)
         painter.setPen(pen)
 
         # Border
-        rect = QRect(0, 0, self.width(), self.height())
+        # Add LINE_WIDTH to extend outside of screen so only top and left
+        # border is visible
+        rect = QRect(0, 0, self.width() + self.LINE_WIDTH,
+                     self.height() + self.LINE_WIDTH)
+        painter.fillRect(rect, color_background)
         painter.drawRect(rect)
 
         # Binding

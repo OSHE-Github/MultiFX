@@ -17,6 +17,7 @@ from utils import config_dir, assets_dir
 from qwidgets.parameter_widgets import ParameterPanel
 from qwidgets.controls import ControlDisplay, RotaryEncoder
 from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
+from qwidgets.navigation import BreadcrumbsBar
 
 
 class MainWindow(QWidget):
@@ -33,12 +34,22 @@ class MainWindow(QWidget):
         # Create selection screen
         self.start_screen = PedalBoardSelectWindow(self.launch_board)
         self.stack.addWidget(self.start_screen)
+
+        # Control Display
         self.controlDisplay = ControlDisplay()
         self.controlDisplay.move(
             SCREEN_W - self.controlDisplay.width(),
             SCREEN_H - self.controlDisplay.height()
         )
         self.controlDisplay.setParent(self)
+
+        # Breadcrumbs
+        self.breadcrumbs = BreadcrumbsBar("profile select")
+        self.breadcrumbs.move(
+            0,
+            SCREEN_H - self.controlDisplay.height()
+        )
+        self.breadcrumbs.setParent(self)
 
         self.board_window = None  # Placeholder for later
 
