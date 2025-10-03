@@ -60,3 +60,26 @@ styles_error = f"""
     font-family: {font_family};
     color: {color_error.name()};
 """
+
+styles_crumbs = f"""
+    font: 14px;
+    font-family: {font_family};
+    color: {color_foreground.name()};
+"""
+
+
+class ControlDisplayStyle:
+    PADDING = 14
+    RADIUS = 8
+    MARGIN = 4
+    REL_W = 1/5
+    REL_H = 1/12
+    LINE_WIDTH = 3
+
+
+class BreadcrumbsBarStyle:
+    LINE_WIDTH = 3
+    # Fill the left side of ControlDsplay
+    REL_H = ControlDisplayStyle.REL_H
+    REL_W = 1 - ControlDisplayStyle.REL_W
+    PADDING = 4

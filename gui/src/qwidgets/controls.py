@@ -5,7 +5,7 @@ from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
 from styles import (
     color_foreground, color_top, color_top_inactive, color_mid,
     color_mid_inactive, color_bot, color_bot_inactive, styles_bind,
-    styles_bind_inactive, color_background
+    styles_bind_inactive, color_background, ControlDisplayStyle
 )
 from typing import List
 from qwidgets.graphics_utils import Octagon
@@ -29,19 +29,11 @@ class RotaryEncoder:
 class ControlDisplay(QWidget):
     instance: QWidget = None
 
-    # NOTE: May be good to define this in styles even though its not CSS
-    PADDING = 14
-    RADIUS = 8
-    MARGIN = 4
-    REL_W = 1/5
-    REL_H = 1/12
-    LINE_WIDTH = 3
-
     def __init__(self):
         super().__init__()
         self.setFixedSize(
-            int(SCREEN_W * self.REL_W),
-            int(SCREEN_H * self.REL_H)
+            int(SCREEN_W * ControlDisplayStyle.REL_W),
+            int(SCREEN_H * ControlDisplayStyle.REL_H)
         )
         self.labels: List[QLabel] = [None, None, None]
         self.drawLabel(RotaryEncoder.TOP)
@@ -53,14 +45,14 @@ class ControlDisplay(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        pen = QPen(color_foreground, self.LINE_WIDTH)
+        pen = QPen(color_foreground, ControlDisplayStyle.LINE_WIDTH)
         painter.setPen(pen)
 
         # Border
         # Add LINE_WIDTH to extend outside of screen so only top and left
         # border is visible
-        rect = QRect(0, 0, self.width() + self.LINE_WIDTH,
-                     self.height() + self.LINE_WIDTH)
+        rect = QRect(0, 0, self.width() + ControlDisplayStyle.LINE_WIDTH,
+                     self.height() + ControlDisplayStyle.LINE_WIDTH)
         painter.fillRect(rect, color_background)
         painter.drawRect(rect)
 
@@ -84,8 +76,9 @@ class ControlDisplay(QWidget):
 
         # Encoder symbol
         center = QPoint(
-            self.PADDING,
-            self.PADDING + enc.index * (2 * self.RADIUS + self.MARGIN)
+            ControlDisplayStyle.PADDING,
+            ControlDisplayStyle.PADDING + enc.index * 
+            (2 * ControlDisplayStyle.RADIUS + ControlDisplayStyle.MARGIN)
         )
         oct = Octagon(center, 8)
         path = QPainterPath()
@@ -107,8 +100,10 @@ class ControlDisplay(QWidget):
         label.setStyleSheet(styles_bind if active else styles_bind_inactive)
         label.adjustSize()
         topLeft = QPoint(
-            self.PADDING + self.MARGIN + self.RADIUS,
-            self.RADIUS + enc.index * (2 * self.RADIUS + self.MARGIN)
+            ControlDisplayStyle.PADDING + ControlDisplayStyle.MARGIN
+            + ControlDisplayStyle.RADIUS,
+            ControlDisplayStyle.RADIUS + enc.index *
+            (2 * ControlDisplayStyle.RADIUS + ControlDisplayStyle.MARGIN)
         )
         label.move(topLeft)
 
