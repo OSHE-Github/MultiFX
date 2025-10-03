@@ -50,7 +50,6 @@ class MainWindow(QWidget):
             SCREEN_H - self.controlDisplay.height()
         )
         self.breadcrumbs.setParent(self)
-        BreadcrumbsBar.navForward("test")
 
         self.board_window = None  # Placeholder for later
 
