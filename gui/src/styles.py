@@ -83,3 +83,9 @@ class BreadcrumbsBarStyle:
     REL_H = ControlDisplayStyle.REL_H
     REL_W = 1 - ControlDisplayStyle.REL_W
     PADDING = 4
+
+
+class ScrollBarStyle:
+    LINE_WIDTH = 3
+    REL_W = 1/10
+    REL_H = 1 - BreadcrumbsBarStyle.REL_H

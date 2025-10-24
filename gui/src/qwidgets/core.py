@@ -11,13 +11,16 @@ from modhostmanager import (
 )
 from styles import (
     styles_indicator, styles_label, styles_window, color_foreground,
-    styles_error
+    styles_error, ScrollBarStyle
 )
 from utils import config_dir, assets_dir
 from qwidgets.parameter_widgets import ParameterPanel
 from qwidgets.controls import ControlDisplay, RotaryEncoder
 from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
-from qwidgets.navigation import BreadcrumbsBar
+from qwidgets.navigation import (
+    BreadcrumbsBar, ScrollBar, ScrollItem, ScrollGroup
+)
+from qwidgets.debug import GenericScrollItem
 
 
 class MainWindow(QWidget):
@@ -32,8 +35,8 @@ class MainWindow(QWidget):
         self.setStyleSheet(styles_window)
 
         # Create selection screen
-        self.start_screen = PedalBoardSelectWindow(self.launch_board)
-        self.stack.addWidget(self.start_screen)
+        #self.start_screen = PedalBoardSelectWindow(self.launch_board)
+        #self.stack.addWidget(self.start_screen)
 
         # Control Display
         self.controlDisplay = ControlDisplay()
@@ -50,6 +53,22 @@ class MainWindow(QWidget):
             SCREEN_H - self.controlDisplay.height()
         )
         self.breadcrumbs.setParent(self)
+
+        # Scrollbar and items
+        self.scroll_items = []
+        for i in range(6):
+            scroll_item = GenericScrollItem(i)
+            self.scroll_items.append(scroll_item)
+            scroll_item.setParent(self)
+        self.scroll_group = ScrollGroup(3, self.scroll_items)
+        self.scroll_bar = ScrollBar(self.scroll_group, RotaryEncoder.TOP)
+        self.scroll_bar.scroll_group = self.scroll_group
+        # move scrollbar to right side
+        self.scroll_bar.move(
+            SCREEN_W - self.scroll_bar.width(),
+            0
+        )
+        self.scroll_bar.setParent(self)
 
         self.board_window = None  # Placeholder for later
 
