@@ -17,6 +17,9 @@ class RotaryEncoderData:
         self.index = index
         self.color = color
         self.inactive = inactive
+        self.keyLeft = keyLeft
+        self.keyPress = keyPress
+        self.keyRight = keyRight
         self.bindPress = ""         # For ControlDisplay
 
 

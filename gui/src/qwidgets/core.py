@@ -20,7 +20,6 @@ from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
 from qwidgets.navigation import (
     BreadcrumbsBar, ScrollBar, ScrollItem, ScrollGroup
 )
-from qwidgets.debug import GenericScrollItem
 
 
 class MainWindow(QWidget):
@@ -57,13 +56,13 @@ class MainWindow(QWidget):
         # Scrollbar and items
         self.scroll_items = []
         for i in range(6):
-            scroll_item = GenericScrollItem(i)
+            scroll_item = ScrollItem(i)
             self.scroll_items.append(scroll_item)
+        self.scroll_bar = ScrollBar(RotaryEncoder.TOP)
         self.scroll_group = ScrollGroup(3, RotaryEncoder.TOP,
-                                        self.scroll_items)
+                                        self.scroll_items, self.scroll_bar)
+        self.scroll_group.update_bar()
         self.scroll_group.setParent(self)
-        self.scroll_bar = ScrollBar(self.scroll_group, RotaryEncoder.TOP)
-        self.scroll_bar.scroll_group = self.scroll_group
         # move scrollbar to right side
         self.scroll_bar.move(
             SCREEN_W - self.scroll_bar.width(),
