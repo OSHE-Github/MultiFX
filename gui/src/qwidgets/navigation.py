@@ -178,7 +178,7 @@ class ScrollGroup(QWidget):
         # draw all items in view
         for item in itertools.islice(
                 self.items, self.window_top, self.window_bottom + 1):
-            item.repaint()
+            item.drawEvent()
             item.move(cursor)
             cursor = QPoint(cursor.x(), cursor.y() + item.height())
             item.setParent(self)
