@@ -61,7 +61,8 @@ class MainWindow(QWidget):
     def launch_board(self, selected_json):
         """Called when a JSON file is selected to load the board"""
         board = PluginManager()
-        board.initFromJSON(selected_json)
+        ## I think Current Commit has an improper call
+        board.initFromJSON(self, selected_json)
         startModHost()
         modhost = connectToModHost()
         if modhost is None:
