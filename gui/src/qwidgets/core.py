@@ -11,20 +11,21 @@ from modhostmanager import (
 )
 from styles import (
     styles_indicator, styles_label, styles_window, color_foreground,
-    styles_error
+    styles_error, ScrollBarStyle
 )
 from utils import config_dir, assets_dir
 from qwidgets.parameter_widgets import ParameterPanel
 from qwidgets.controls import ControlDisplay, RotaryEncoder
 from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
-from qwidgets.navigation import BreadcrumbsBar
+from qwidgets.navigation import (
+    BreadcrumbsBar, ScrollBar, ScrollItem, ScrollGroup
+)
 
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setGeometry(0, 0, SCREEN_W, SCREEN_H)
-        self.setFixedSize(SCREEN_W, SCREEN_H)
 
         self.stack = QStackedWidget(self)
         self.layout = QVBoxLayout(self)
@@ -50,7 +51,25 @@ class MainWindow(QWidget):
             SCREEN_H - self.controlDisplay.height()
         )
         self.breadcrumbs.setParent(self)
-        BreadcrumbsBar.navForward("test")
+
+        # Scrollbar and items
+        """
+        self.scroll_items = []
+        for i in range(6):
+            scroll_item = ScrollItem(i)
+            self.scroll_items.append(scroll_item)
+        self.scroll_bar = ScrollBar(RotaryEncoder.TOP)
+        self.scroll_group = ScrollGroup(3, RotaryEncoder.TOP,
+                                        self.scroll_items, self.scroll_bar)
+        self.scroll_group.setParent(self)
+        self.scroll_group.update_bar()
+        # move scrollbar to right side
+        self.scroll_bar.move(
+            SCREEN_W - self.scroll_bar.width(),
+            0
+        )
+        self.scroll_bar.setParent(self)
+        """
 
         self.board_window = None  # Placeholder for later
 
