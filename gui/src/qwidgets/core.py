@@ -33,8 +33,8 @@ class MainWindow(QWidget):
         self.setStyleSheet(styles_window)
 
         # Create selection screen
-        #self.start_screen = PedalBoardSelectWindow(self.launch_board)
-        #self.stack.addWidget(self.start_screen)
+        self.start_screen = PedalBoardSelectWindow(self.launch_board)
+        self.stack.addWidget(self.start_screen)
 
         # Control Display
         self.controlDisplay = ControlDisplay()
@@ -53,6 +53,7 @@ class MainWindow(QWidget):
         self.breadcrumbs.setParent(self)
 
         # Scrollbar and items
+        """
         self.scroll_items = []
         for i in range(6):
             scroll_item = ScrollItem(i)
@@ -68,6 +69,7 @@ class MainWindow(QWidget):
             0
         )
         self.scroll_bar.setParent(self)
+        """
 
         self.board_window = None  # Placeholder for later
 
