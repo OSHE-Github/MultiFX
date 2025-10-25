@@ -26,7 +26,6 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setGeometry(0, 0, SCREEN_W, SCREEN_H)
-        self.setFixedSize(SCREEN_W, SCREEN_H)
 
         self.stack = QStackedWidget(self)
         self.layout = QVBoxLayout(self)
@@ -61,8 +60,8 @@ class MainWindow(QWidget):
         self.scroll_bar = ScrollBar(RotaryEncoder.TOP)
         self.scroll_group = ScrollGroup(3, RotaryEncoder.TOP,
                                         self.scroll_items, self.scroll_bar)
-        self.scroll_group.update_bar()
         self.scroll_group.setParent(self)
+        self.scroll_group.update_bar()
         # move scrollbar to right side
         self.scroll_bar.move(
             SCREEN_W - self.scroll_bar.width(),

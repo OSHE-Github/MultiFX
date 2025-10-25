@@ -157,7 +157,6 @@ class ScrollGroup(QWidget):
 
     def goNext(self) -> ScrollItem:
         if self.pos >= len(self.items) - 1:
-            print("END")
             return
         self.curItem().unhover()
         self.pos += 1
@@ -172,7 +171,7 @@ class ScrollGroup(QWidget):
                     self.window_top += self.page_size
                     self.window_bottom += self.page_size
             self.drawItems()
-            self.update_bar()
+        self.update_bar()
         return cur
 
     def goPrev(self) -> ScrollItem:
@@ -191,7 +190,7 @@ class ScrollGroup(QWidget):
                     self.window_top -= self.page_size
                     self.window_bottom -= self.page_size
             self.drawItems()
-            self.update_bar()
+        self.update_bar()
         return cur
 
     def drawItems(self):
@@ -234,17 +233,19 @@ class ScrollBar(QWidget):
             int(ScrollBarStyle.REL_W * SCREEN_W)+1,
             int(ScrollBarStyle.REL_H * SCREEN_H)+1
         )
+        # ratio of height used for drawing
+        self.top = 0
+        self.bottom = 1
 
     def drawFor(self, scroll_group: ScrollGroup):
         """Draws the scrollbar according to the state of a scroll group"""
-        print("UPDATING")
         n = len(scroll_group.items)
         if n <= 1:
             self.top = 0
             self.bottom = 1
         else:
-            self.top = scroll_group.window_top / (n-1)
-            self.bottom = scroll_group.window_bottom / (n-1)
+            self.top = scroll_group.window_top / n
+            self.bottom = (scroll_group.window_bottom+1) / n
         self.update()
 
     def draw(self):
