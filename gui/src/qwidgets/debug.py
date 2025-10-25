@@ -13,12 +13,12 @@ class GenericScrollItem(ScrollItem):
         self.setFixedSize(250, 200)
 
     def hover(self):
-        print(f"hovered {id}")
+        print(f"hovered {self.id}")
         self.hovered = True
         self.repaint()
 
     def unhover(self):
-        print(f"unhovered {id}")
+        print(f"unhovered {self.id}")
         self.hovered = False
         self.repaint()
 
@@ -26,14 +26,16 @@ class GenericScrollItem(ScrollItem):
         print(f"selected {id}")
 
     def paintEvent(self, event):
+        print("PAINTED GENERIC ITEM")
         painter = QPainter(self)
 
         pen = QPen(QColor.fromRgb(255, 255, 255), 10)
         painter.setPen(pen)
 
         rect = QRect(0, 0, self.width()-1, self.height())
+        fill_color = QColor.fromRgb(255, 255, 0)
+        if self.hovered:
+            fill_color = QColor.fromRgb(0, 255, 255)
+
+        painter.fillRect(rect, fill_color)
         painter.drawRect(rect)
-
-        color = QColor.fromRgb(0, 255, 255) if self.hovered else QColor.fromRgb(0,0,0)
-
-        painter.fillRect(rect, color)

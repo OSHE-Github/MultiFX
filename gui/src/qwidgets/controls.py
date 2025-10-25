@@ -13,17 +13,20 @@ from qwidgets.graphics_utils import Octagon
 
 class RotaryEncoderData:
     def __init__(self, index: int, color: QColor, inactive: QColor,
-                 binding: str):
+                 keyLeft, keyPress, keyRight):
         self.index = index
         self.color = color
         self.inactive = inactive
-        self.bind = binding
+        self.bindPress = ""         # For ControlDisplay
 
 
 class RotaryEncoder:
-    TOP = RotaryEncoderData(0, color_top, color_top_inactive, "")
-    MIDDLE = RotaryEncoderData(1, color_mid, color_mid_inactive, "")
-    BOTTOM = RotaryEncoderData(2, color_bot, color_bot_inactive, "")
+    TOP = RotaryEncoderData(0, color_top, color_top_inactive,
+                            Qt.Key_Q, Qt.Key_W, Qt.Key_E)
+    MIDDLE = RotaryEncoderData(1, color_mid, color_mid_inactive,
+                               Qt.Key_A, Qt.Key_S, Qt.Key_D)
+    BOTTOM = RotaryEncoderData(2, color_bot, color_bot_inactive,
+                               Qt.Key_Z, Qt.Key_X, Qt.Key_C)
 
 
 class ControlDisplay(QWidget):
@@ -67,7 +70,7 @@ class ControlDisplay(QWidget):
         Must be done in paintEvent.
         """
 
-        color = enc.inactive if enc.bind == "" else enc.color
+        color = enc.inactive if enc.bindPress == "" else enc.color
 
         painter = QPainter(self)
         pen = QPen(color, 1)
@@ -77,7 +80,7 @@ class ControlDisplay(QWidget):
         # Encoder symbol
         center = QPoint(
             ControlDisplayStyle.PADDING,
-            ControlDisplayStyle.PADDING + enc.index * 
+            ControlDisplayStyle.PADDING + enc.index *
             (2 * ControlDisplayStyle.RADIUS + ControlDisplayStyle.MARGIN)
         )
         oct = Octagon(center, 8)
@@ -91,8 +94,8 @@ class ControlDisplay(QWidget):
         Must be done outside paintEvent
         """
 
-        active = enc.bind != ""
-        display = enc.bind if active else "N/A"
+        active = enc.bindPress != ""
+        display = enc.bindPress if active else "N/A"
         # Label
         label = QLabel(display, self)
         self.labels[enc.index] = label
@@ -108,14 +111,14 @@ class ControlDisplay(QWidget):
         label.move(topLeft)
 
     def setBind(enc: RotaryEncoderData, newBind: str) -> None:
-        """Sets encoder binding and redraws control display.
+        """Sets encoder press binding and redraws control display.
 
         Should be called in any scenario that rebinds an encoder
         """
-        enc.bind = newBind
+        enc.bindPress = newBind
         inst = ControlDisplay.instance
         inst.labels[enc.index].setText(newBind)
-        active = enc.bind != ""
+        active = enc.bindPress != ""
         inst.labels[enc.index].setStyleSheet(
                 styles_bind if active else styles_bind_inactive)
         inst.labels[enc.index].adjustSize()

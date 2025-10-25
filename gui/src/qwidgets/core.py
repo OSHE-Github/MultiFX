@@ -59,8 +59,9 @@ class MainWindow(QWidget):
         for i in range(6):
             scroll_item = GenericScrollItem(i)
             self.scroll_items.append(scroll_item)
-            scroll_item.setParent(self)
-        self.scroll_group = ScrollGroup(3, self.scroll_items)
+        self.scroll_group = ScrollGroup(3, RotaryEncoder.TOP,
+                                        self.scroll_items)
+        self.scroll_group.setParent(self)
         self.scroll_bar = ScrollBar(self.scroll_group, RotaryEncoder.TOP)
         self.scroll_bar.scroll_group = self.scroll_group
         # move scrollbar to right side

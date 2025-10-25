@@ -106,15 +106,17 @@ class PageMode(Enum):
     JUMP = 1
 
 
-class ScrollGroup:
+class ScrollGroup(QWidget):
     """Class for grouping widgets in a scroll group and tracking
     scrolling window.
 
     Assumes widgets are all the same size.
     """
 
-    def __init__(self, page_size: int, items: List[ScrollItem] = [],
+    def __init__(self, page_size: int,
+                 encoder: RotaryEncoderData, items: List[ScrollItem] = [],
                  scroll_bar=None, page_mode: PageMode = PageMode.SCROLL):
+        super().__init__()
         self.items = items
         self.pos: int = 0
         self.page_size = page_size
@@ -124,6 +126,9 @@ class ScrollGroup:
         self.window_bottom = page_size - 1
         self.page_mode = page_mode
         self.scroll_bar = scroll_bar
+        self.encoder = encoder
+        self.setFixedSize(items[0].width(), page_size * items[0].height())
+        items[0].hover()
 
     def curItem(self):
         return self.items[self.pos]
@@ -170,20 +175,40 @@ class ScrollGroup:
 
     def draw(self):
         cursor = QPoint(0, 0)
+        # draw all items in view
         for item in itertools.islice(
-                self.items, self.window_top, self.window_bottom):
-            item.redraw()
+                self.items, self.window_top, self.window_bottom + 1):
+            item.repaint()
             item.move(cursor)
-            cursor = QPoint(cursor.x() + item.height(), cursor.y())
+            cursor = QPoint(cursor.x(), cursor.y() + item.height())
+            item.setParent(self)
+
+    def keyPressEvent(self, event):
+        key = event.key()
+
+        match key:
+            case self.encoder.bindLeft:
+                self.goPrev()
+            case self.encoder.bindRight:
+                self.goNext()
+
+    def paintEvent(self, event):
+        self.draw()
+        painter = QPainter(self)
+        pen = QPen(color_foreground, 3)
+        painter.setPen(pen)
+        rect = QRect(0, 0, self.width(), self.height())
+        painter.drawRect(rect)
 
 
 class ScrollBar(QWidget):
     def __init__(self, scroll_group: ScrollGroup, encoder: RotaryEncoderData):
         super().__init__()
         self.encoder = encoder
+        self.scroll_group = scroll_group
         self.setFixedSize(
-            int(ScrollBarStyle.REL_W * SCREEN_W),
-            int(ScrollBarStyle.REL_H * SCREEN_H)
+            int(ScrollBarStyle.REL_W * SCREEN_W)+1,
+            int(ScrollBarStyle.REL_H * SCREEN_H)+1
         )
         self.drawFor(scroll_group)
 
@@ -205,7 +230,7 @@ class ScrollBar(QWidget):
                 self.encoder.inactive, BreadcrumbsBarStyle.LINE_WIDTH)
         in_view_pen = QPen(self.encoder.color, BreadcrumbsBarStyle.LINE_WIDTH)
 
-        backdrop = QRect(0, 0, self.width(), self.height())
+        backdrop = QRect(0, 0, self.width()-1, self.height()-1)
         painter.setPen(inactive_pen)
         painter.fillRect(backdrop, self.encoder.inactive)
         painter.setPen(in_view_pen)
@@ -214,8 +239,8 @@ class ScrollBar(QWidget):
         in_view = QRect(
             0,
             int(self.top * self.height()),
-            self.width(),
-            int((self.bottom - self.top) * self.height())
+            self.width()-1,
+            int((self.bottom - self.top) * self.height())-1
         )
         painter.fillRect(in_view, self.encoder.color)
         painter.setPen(fg_pen)
@@ -223,3 +248,4 @@ class ScrollBar(QWidget):
 
     def paintEvent(self, event):
         self.draw()
+
