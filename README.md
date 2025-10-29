@@ -1,8 +1,9 @@
 # MultiFX
-This contains the code related to plugins, the GUI, and the MIDI footswitches
-of the MultiFX Pedal project.
 
-## Repo Outline 
+Code and documentation for the open-source Raspberry Pi-based audio-effects 
+pedal.
+
+## Outline 
 
 ```
 docs/                           # Documentation for specific features
@@ -33,6 +34,7 @@ Below is a detailed guide on how to run the GUI locally for development.
 
 - Python
 - PyQt5
+- PyFilesystem (fs)
 - [KodeMono](https://kodemono.com/) Recommended font for GUI. If you want to 
   have your own, you must change the `font_family` variable in 
   `gui/src/styles.py`.

@@ -3,9 +3,11 @@ import time
 from PyQt5.QtWidgets import QApplication
 from modhostmanager import startJackdServer
 from qwidgets.core import MainWindow
+import offboard
 
 
 def main():
+    print(offboard.try_load())
     app = QApplication(sys.argv)
     startJackdServer()
     time.sleep(.1)
