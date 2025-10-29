@@ -1,15 +1,16 @@
 import sys
 import time
 from PyQt5.QtWidgets import QApplication
-from modhostmanager import startJackdServer
+import modhostmanager
 from qwidgets.core import MainWindow
 import offboard
 
 
 def main():
-    print(offboard.try_load())
+    if offboard.try_load():
+        print("Loaded data from USB drive!")
     app = QApplication(sys.argv)
-    startJackdServer()
+    modhostmanager.startJackdServer()
     time.sleep(.1)
     main_window = MainWindow()
     main_window.showFullScreen()

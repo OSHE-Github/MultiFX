@@ -27,3 +27,11 @@ def try_load() -> bool:
     extcfgdir = scan_devices()
     if not extcfgdir:
         return False
+    # Copy to on-board config directory
+
+
+def try_save() -> bool:
+    """
+    Attempts to write on-board data to a USB, returns True if successful
+    """
+    extcfgdir = scan_devices()
