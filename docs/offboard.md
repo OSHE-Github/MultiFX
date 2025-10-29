@@ -1,9 +1,10 @@
 # Offboard Configuration
 
 At start, the MultiFX GUI will scan for USB drives that contain configuration
-data by matching a directory with `/dev/sd*/multifx`. In Linux, all USB drives
-will match `/dev/sd*`, so on the user end, you must plug in a USB with the
-folder `multifx` in the root directory.
+data by matching a directory with `/run/media/{username}/{device}/multifx`.
+This should support any type of external drive, but was only tested on USB
+drives. Some distros might map to a different location. Depending on your
+system, you may need to change the value of `USB_DIR` in `offboard.py`.
 
 For simplicity, everything in that directory will be copied to the app's config
 directory on startup whenever possible with `try_load()` in `offboard.py`.
