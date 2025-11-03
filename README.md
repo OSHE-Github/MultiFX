@@ -83,3 +83,16 @@ jackd -d dummy
 ```
 mod-host
 ```
+
+
+or use this bash script
+```
+set -e
+pkill -f mod-host 2>/dev/null || true
+pkill -f jackd 2>/dev/null || true
+nohup jackd -P70 -d dummy -r 48000 -p 256 -n 2 >/tmp/jack.log 2>&1 &
+sleep 1
+nohup mod-host -p 5555 >/tmp/modhost.log 2>&1 &
+source ~/MultiFX/.venv/bin/activate
+QT_QPA_PLATFORM=xcb QT_OPENGL=software python3 ~/MultiFX/gui/src/main.py
+```
