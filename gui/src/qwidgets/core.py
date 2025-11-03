@@ -104,6 +104,9 @@ class MainWindow(QWidget):
         self.stack.setCurrentWidget(self.board_window)  # Switch view
         self.board_window.setFocus()
 
+        # Update breadcrumbs
+        BreadcrumbsBar.navForward("view plugins")
+
     def show_start_screen(self):
         """Switch back to the start screen."""
         self.stack.setCurrentWidget(self.start_screen)  # Switch back
