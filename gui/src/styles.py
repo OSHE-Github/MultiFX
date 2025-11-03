@@ -89,3 +89,21 @@ class ScrollBarStyle:
     LINE_WIDTH = 3
     REL_W = 1/10
     REL_H = 1 - BreadcrumbsBarStyle.REL_H
+
+
+class FloatingWindowStyle:
+    css_title = f"""
+        font: 36px;
+        font-family: {font_family};
+        color: {color_foreground.name()};
+        background: transparent;
+    """
+    css_options = f"""
+        font: 16px;
+        font-family: {font_family};
+        color: {color_foreground.name()};
+        background: transparent;
+    """
+    REL_W = 3/4
+    REL_H = 3/4
+    LINE_WIDTH = 4

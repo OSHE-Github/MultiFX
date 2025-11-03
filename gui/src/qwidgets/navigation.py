@@ -87,6 +87,9 @@ class ScrollItem(QWidget):
         self.id = id
         self.hovered: bool = False
         self.setFixedSize(250, 200)
+        self.hover_fill = QColor.fromRgb(255, 255, 0)
+        self.unhover_fill = QColor.fromRgb(0, 255, 255)
+        self.line_width = 10
 
     def hover(self):
         self.hovered = True
@@ -101,17 +104,18 @@ class ScrollItem(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        pen = QPen(QColor.fromRgb(255, 255, 255), 10)
+        pen = QPen(QColor.fromRgb(255, 255, 255), self.line_width)
 
         painter.setPen(pen)
 
-        rect = QRect(0, 0, self.width()-1, self.height())
-        fill_color = QColor.fromRgb(255, 255, 0)
+        rect = QRect(0, 0, self.width(), self.height())
+        fill_color = self.unhover_fill
         if self.hovered:
-            fill_color = QColor.fromRgb(0, 255, 255)
+            fill_color = self.hover_fill
 
         painter.fillRect(rect, fill_color)
-        painter.drawRect(rect)
+        if (pen.width() != 0):
+            painter.drawRect(rect)
 
 
 class PageMode(Enum):
@@ -120,7 +124,8 @@ class PageMode(Enum):
 
 
 class ScrollGroup(QWidget):
-    """Class for grouping widgets in a scroll group and tracking
+    """
+    Class for grouping widgets in a scroll group and tracking
     scrolling window.
 
     Assumes widgets are all the same size.
