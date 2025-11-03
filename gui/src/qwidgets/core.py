@@ -20,6 +20,7 @@ from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
 from qwidgets.navigation import (
     BreadcrumbsBar, ScrollBar, ScrollItem, ScrollGroup
 )
+from qwidgets.floating_window import FloatingWindow, DialogItem
 
 
 class MainWindow(QWidget):
@@ -31,10 +32,6 @@ class MainWindow(QWidget):
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.stack)
         self.setStyleSheet(styles_window)
-
-        # Create selection screen
-        self.start_screen = PedalBoardSelectWindow(self.launch_board)
-        self.stack.addWidget(self.start_screen)
 
         # Control Display
         self.controlDisplay = ControlDisplay()
@@ -51,6 +48,10 @@ class MainWindow(QWidget):
             SCREEN_H - self.controlDisplay.height()
         )
         self.breadcrumbs.setParent(self)
+
+        # Create selection screen
+        self.start_screen = ProfileSelectWindow(self.launch_board)
+        self.stack.addWidget(self.start_screen)
 
         # Scrollbar and items
         """
@@ -74,8 +75,6 @@ class MainWindow(QWidget):
         self.board_window = None  # Placeholder for later
 
         self.show()
-
-        ControlDisplay.setBind(RotaryEncoder.TOP, "test length")
 
     def launch_board(self, selected_json):
         """Called when a JSON file is selected to load the board"""
@@ -597,52 +596,24 @@ class BoxOfPlugins(QWidget):
             pass
 
 
-class PedalBoardSelectWindow(QWidget):
+class ProfileSelectWindow(QWidget):
     def __init__(self, callback):
         super().__init__()
         self.json_dir = os.path.dirname(config_dir)
         self.json_files = self.get_json_files(config_dir)
-        self.board = BoxOfProfiles(0, self.json_files)
-        self.board.setParent(self)
 
         self.callback = callback
 
-        self.mycursor = 0
-        self.setGeometry(0, 0, 480, 800)
-
-        palette = self.palette()
-        palette.setColor(self.backgroundRole(), QColor("#E2C290"))
-        self.setPalette(palette)
-        self.setAutoFillBackground(True)
-
-        self.arrow = Cursor(self.mycursor)
-        self.arrow.setParent(self)
-        self.arrow.raise_()
-
-        self.setFocusPolicy(Qt.StrongFocus)
-
-    def keyPressEvent(self, event):
-        key = event.key()
-
-        match key:
-            case Qt.Key_Q:
-                self.mycursor = max(0, self.mycursor - 1)
-                self.arrow.changePointer(self.mycursor)
-
-            case Qt.Key_W:
-                selected_file = os.path.join(
-                        f"{self.json_dir}/Json",
-                        self.json_files[self.mycursor]
-                )
-                print(selected_file)
-                self.callback(selected_file)
-            case Qt.Key_E:
-                self.mycursor = min(2, self.mycursor + 1)
-                self.arrow.changePointer(self.mycursor)
+        # Floating window
+        dialog_items = []
+        for p in self.json_files:
+            item = DialogItem(p.replace(".json", ""))
+            dialog_items.append(item)
+        scroll_group = ScrollGroup(4, RotaryEncoder.TOP, dialog_items)
+        self.floating_window = FloatingWindow("SELECT PROFILE", scroll_group,
+                                              RotaryEncoder.TOP, callback)
+        self.floating_window.setParent(self)
 
     def get_json_files(self, directory):
         """Returns a list of all JSON files in the specified directory."""
         return [f for f in os.listdir(directory) if f.endswith('.json')]
-
-    def showEvent(self, event):
-        self.setFocus()

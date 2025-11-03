@@ -120,8 +120,8 @@ class ControlDisplay(QWidget):
         """
         enc.bindPress = newBind
         inst = ControlDisplay.instance
-        inst.labels[enc.index].setText(newBind)
-        active = enc.bindPress != ""
+        active = newBind != ""
+        inst.labels[enc.index].setText(newBind if active else "N/A")
         inst.labels[enc.index].setStyleSheet(
                 styles_bind if active else styles_bind_inactive)
         inst.labels[enc.index].adjustSize()
