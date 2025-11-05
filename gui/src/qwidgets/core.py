@@ -131,7 +131,7 @@ class BoardWindow(QWidget):
 
         match key:
             case Qt.Key_R | RotaryEncoder.MIDDLE.keyPress:
-                self.changeBypass(self.pluginbox.scroll_group.curItem().index)
+                self.changeBypass(self.curIndex())
             case Qt.Key_F:
                 self.changeBypass(0)
             case Qt.Key_G:
@@ -167,19 +167,19 @@ class BoardWindow(QWidget):
             case "parameters":
                 match key:
                     case Qt.Key_Q:
-                        self.descreaseParameter(0)
+                        self.decreaseParameter(0)
                     case Qt.Key_W:
                         self.closeParamPage()
                     case Qt.Key_E:
                         self.increaseParameter(0)
                     case Qt.Key_A:
-                        self.descreaseParameter(1)
+                        self.decreaseParameter(1)
                     case Qt.Key_S:
                         self.pageUpParameters()
                     case Qt.Key_D:
                         self.increaseParameter(1)
                     case Qt.Key_Z:
-                        self.descreaseParameter(2)
+                        self.decreaseParameter(2)
                     case Qt.Key_X:
                         self.pageDownParameters()
                     case Qt.Key_C:
@@ -197,7 +197,7 @@ class BoardWindow(QWidget):
     def showEvent(self, event):
         self.setFocus()
 
-    def descreaseParameter(self, position: int):
+    def decreaseParameter(self, position: int):
         params = self.plugin.parameters
         try:
             parameter: Parameter = params[position + 3*(self.param_page)]
@@ -244,13 +244,12 @@ class BoardWindow(QWidget):
             self.plugin = self.plugins.plugins[index]
             self.paramPanel = ParameterPanel(
                     self.backgroundColor,
-                    self.mycursor,
+                    self.pluginbox.scroll_group.curItem().index,
                     self.param_page,
                     self.plugin
             )
             self.paramPanel.setParent(self)
             self.paramPanel.show()
-            self.arrow.hide()
             self.update()
             self.current = "parameters"
 
@@ -269,7 +268,6 @@ class BoardWindow(QWidget):
         self.paramPanel.deleteLater()
         self.paramPanel.hide()
         self.paramPanel = None
-        self.arrow.show()
         self.update()
         self.current = "plugins"
         self.plugin = None
@@ -336,7 +334,7 @@ class BoardWindow(QWidget):
             del self.paramPanel
             self.paramPanel = ParameterPanel(
                     self.backgroundColor,
-                    self.mycursor,
+                    self.curIndex(),
                     self.param_page,
                     self.plugin
             )
@@ -358,7 +356,7 @@ class BoardWindow(QWidget):
             del self.paramPanel
             self.paramPanel = ParameterPanel(
                     self.backgroundColor,
-                    self.mycursor,
+                    self.curIndex(),
                     self.param_page,
                     self.plugin
             )
@@ -372,6 +370,9 @@ class BoardWindow(QWidget):
                     self.height()-25
             )
             self.update()
+
+    def curIndex(self):
+        return self.pluginbox.scroll_group.curItem().index
 
 
 class BoxOfPlugins(QWidget):
