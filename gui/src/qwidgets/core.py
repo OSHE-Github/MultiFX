@@ -80,7 +80,8 @@ class MainWindow(QWidget):
         """Called when a JSON file is selected to load the board"""
         board = PluginManager()
         selected_json = selected_profile + ".json"
-        board.initFromJSON(selected_json)
+        json_path = os.path.join(config_dir, selected_json)
+        board.initFromJSON(json_path)
         startModHost()
         modhost = connectToModHost()
         if modhost is None:
