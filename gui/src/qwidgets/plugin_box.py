@@ -1,14 +1,14 @@
 """Displays plugin overview for board. Replaces old BoxWidget"""
 import os
 from PyQt5.QtWidgets import QWidget, QLabel
-from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtCore import Qt, QRect, QPoint
 from PyQt5.QtGui import QPixmap, QPainter, QPen
-from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
+from qwidgets.graphics_utils import SCREEN_H, SCREEN_W, Caret
 from styles import (styles_label, styles_indicator, color_foreground,
                     ScrollBarStyle, ControlDisplayStyle, color_background)
 from utils import assets_dir
 from qwidgets.navigation import ScrollItem
-from qwidgets.controls import RotaryEncoder, ControlDisplay
+from qwidgets.controls import RotaryEncoder, ControlDisplay, RotaryEncoderData
 
 
 class PluginBox(ScrollItem):
@@ -25,6 +25,9 @@ class PluginBox(ScrollItem):
             int((1 - ControlDisplayStyle.REL_H) * SCREEN_H) // 3
         )
         self.initUI()
+
+    def unhover(self):
+        super().unhover()
 
     def hover(self):
         super().hover()
@@ -55,6 +58,33 @@ class PluginBox(ScrollItem):
             fill_color = self.hover_fill
         painter.fillRect(rect, fill_color)
         painter.drawRect(rect)
+
+        if self.hovered:
+            CARET_W = 20
+            CARET_H = 12
+            CARET_PADDING = 8
+            outlinePen = QPen(color_background, 6)
+            pen = QPen(RotaryEncoder.MIDDLE.color, 2)
+            # draw carets
+            top_caret = Caret(
+                QPoint(
+                    self.width()//2 - CARET_W,
+                    CARET_PADDING + CARET_H
+                ), CARET_W, -CARET_H)
+            painter.setPen(outlinePen)
+            painter.drawPolygon(top_caret)
+            painter.setPen(pen)
+            painter.drawPolygon(top_caret)
+            bottom_caret = Caret(
+                QPoint(
+                    self.width()//2 - CARET_W,
+                    self.height() - CARET_PADDING - CARET_H
+                ), CARET_W, CARET_H)
+            painter.setPen(outlinePen)
+            painter.drawPolygon(bottom_caret)
+            painter.setPen(pen)
+            painter.drawPolygon(bottom_caret)
+
         self.drawBypass()
 
     def updateBypass(self, bypass: int):
