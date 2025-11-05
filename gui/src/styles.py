@@ -35,7 +35,7 @@ styles_indicator = f"""
 """
 
 styles_label = f"""
-    font : bold 30px;
+    font : 48px;
     font-family: {font_family};
     color: {color_foreground.name()};
     background: transparent;

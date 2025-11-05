@@ -111,7 +111,6 @@ class BoardWindow(QWidget):
 
         self.rcount = 0
 
-        self.mycursor = 0
         self.param_page = 0
         self.current = "plugins"
 
@@ -132,7 +131,7 @@ class BoardWindow(QWidget):
 
         match key:
             case Qt.Key_R:
-                self.changeBypass(self.mycursor)
+                self.changeBypass(self.pluginbox.scroll_group.curItem().index)
             case Qt.Key_F:
                 self.changeBypass(0)
             case Qt.Key_G:
@@ -239,9 +238,10 @@ class BoardWindow(QWidget):
             pass
 
     def openParamPage(self):
+        index = self.pluginbox.scroll_group.curItem().index
         try:
             self.param_page = 0
-            self.plugin = self.plugins.plugins[self.mycursor + (3 * self.page)]
+            self.plugin = self.plugins.plugins[index]
             self.paramPanel = ParameterPanel(
                     self.backgroundColor,
                     self.mycursor,
@@ -324,7 +324,7 @@ class BoardWindow(QWidget):
             bypass = bypass ^ 1
             plugin.bypass = bypass
             updateBypass(self.mod_host_manager, position, plugin)
-            self.pluginbox.updateBypass(self.page, position, bypass)
+            self.pluginbox.updateBypass(position, bypass)
         except Exception as e:
             print(e)
             pass
@@ -387,14 +387,14 @@ class BoxOfPlugins(QWidget):
         # Create scroll group
         n = len(plugins.plugins)
         if n == 0:
-            box = PluginBox(-1, "Unable to load plugins!", 0)
+            box = PluginBox("Unable to load plugins!", 0)
             box.label.setStyleSheet(styles_error)
             box.setParent(self)
             self.boxes.append(box)
             return
-        for index in range(0, n):
-            plugin: Plugin = plugins.plugins[index]
-            box = PluginBox(index, plugin.name, plugin.bypass)
+        for i in range(0, n):
+            plugin = plugins.plugins[i]
+            box = PluginBox(i, plugin.name, plugin.bypass)
             self.boxes.append(box)
         self.scroll_bar = ScrollBar(RotaryEncoder.TOP)
         self.scroll_bar.setParent(self)
