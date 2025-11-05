@@ -157,11 +157,17 @@ class BoardWindow(QWidget):
         match self.current:
             case "plugins":
                 match key:
-                    case Qt.Key_Q:
+                    case RotaryEncoder.TOP.keyLeft:
                         self.pluginbox.scroll_group.goPrev()
-                    case Qt.Key_W:
+                    case RotaryEncoder.TOP.keyPress:
                         self.openParamPage()
-                    case Qt.Key_E:
+                    case RotaryEncoder.TOP.keyRight:
+                        self.pluginbox.scroll_group.goNext()
+                    case RotaryEncoder.MIDDLE.keyLeft:
+                        self.swap_plugins(-1)
+                        self.pluginbox.scroll_group.goPrev()
+                    case RotaryEncoder.MIDDLE.keyRight:
+                        self.swap_plugins(1)
                         self.pluginbox.scroll_group.goNext()
 
             case "parameters":
@@ -184,6 +190,20 @@ class BoardWindow(QWidget):
                         self.pageDownParameters()
                     case Qt.Key_C:
                         self.increaseParameter(2)
+
+    def swap_plugins(self, dist: int):
+        index = self.curIndex()
+        n = len(self.plugins.plugins)
+        if index + dist < 0 or index + dist >= n:
+            return
+        items = self.pluginbox.boxes
+        temp = items[index]
+        temp.unhover()
+        temp.index = index + dist
+        items[index+dist].index = index
+        items[index] = items[index+dist]
+        items[index+dist] = temp
+        self.pluginbox.scroll_group.drawItems()
 
     def paintEvent(self, event):
         painter = QPainter(self)

@@ -66,15 +66,16 @@ class PluginBox(ScrollItem):
             outlinePen = QPen(color_background, 6)
             pen = QPen(RotaryEncoder.MIDDLE.color, 2)
             # draw carets
-            top_caret = Caret(
-                QPoint(
-                    self.width()//2 - CARET_W,
-                    CARET_PADDING + CARET_H
-                ), CARET_W, -CARET_H)
-            painter.setPen(outlinePen)
-            painter.drawPolygon(top_caret)
-            painter.setPen(pen)
-            painter.drawPolygon(top_caret)
+            if self.index != 0:
+                top_caret = Caret(
+                    QPoint(
+                        self.width()//2 - CARET_W,
+                        CARET_PADDING + CARET_H
+                    ), CARET_W, -CARET_H)
+                painter.setPen(outlinePen)
+                painter.drawPolygon(top_caret)
+                painter.setPen(pen)
+                painter.drawPolygon(top_caret)
             bottom_caret = Caret(
                 QPoint(
                     self.width()//2 - CARET_W,
