@@ -76,7 +76,7 @@ class PluginBox(ScrollItem):
     def paintEvent(self, event):
         painter = QPainter(self)
 
-        pen = QPen(color_foreground, 10)
+        pen = QPen(color_foreground, ScrollBarStyle.LINE_WIDTH)
         painter.setPen(pen)
 
         rect = QRect(0, 0, self.width()-1, self.height())

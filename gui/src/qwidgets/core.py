@@ -32,6 +32,8 @@ class MainWindow(QWidget):
         self.stack = QStackedWidget(self)
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.stack)
+        self.layout.setSpacing(0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.setStyleSheet(styles_window)
 
         # Control Display
@@ -97,50 +99,6 @@ class MainWindow(QWidget):
         self.start_screen.setFocus()
 
 
-class Cursor(QWidget):
-    def __init__(self, position: int = 0):
-        super().__init__()
-        self.position = position % 3
-
-    def paintEvent(self, event):
-        arrow_color = color_foreground
-        self.setFixedSize(480, 800)
-
-        painter = QPainter(self)
-        x = 270
-        y = 266
-        width = 160
-        arrowWidth = 30
-        headOffset = 30
-        adjusted_y = (y//2) + (y*self.position)
-
-        # Line of arrow
-        start = QPoint(x, adjusted_y)
-        end = QPoint(x+width, adjusted_y)
-
-        # Arrow head
-        arrow_p1 = QPoint(
-            x+headOffset+arrowWidth,
-            adjusted_y + arrowWidth // 2
-        )
-        arrow_p2 = QPoint(
-            x+headOffset+arrowWidth,
-            adjusted_y - arrowWidth // 2
-        )
-
-        pen = QPen(arrow_color, 5)
-        painter.setPen(pen)
-        painter.drawLine(start, end)
-
-        arrow_head = QPolygon([start, arrow_p1, arrow_p2])
-        painter.setBrush(arrow_color)
-        painter.drawPolygon(arrow_head)
-
-    def changePointer(self, positon: int):
-        self.position = positon
-        self.update()
-
-
 class BoardWindow(QWidget):
     def __init__(
             self, manager: PluginManager, mod_host_manager, restart_callback
@@ -154,29 +112,19 @@ class BoardWindow(QWidget):
         self.rcount = 0
 
         self.mycursor = 0
-        self.page = 0
         self.param_page = 0
         self.current = "plugins"
 
         self.setGeometry(0, 0, SCREEN_W, SCREEN_H)
 
         palette = self.palette()
-        palette.setColor(self.backgroundRole(), QColor("#E2C290"))
+        palette.setColor(self.backgroundRole(), color_background)
         self.setPalette(palette)
         self.setAutoFillBackground(True)
 
-        self.pluginbox = BoxOfPlugins(self.page, self.plugins)
+        self.pluginbox = BoxOfPlugins(self.plugins)
         self.pluginbox.setParent(self)
 
-        self.arrow = Cursor(self.mycursor)
-        self.arrow.setParent(self)
-        self.arrow.raise_()
-
-        self.pageNum = QLabel("Pgn " + str(self.page), self)
-        self.pageNum.adjustSize()
-        self.pageNum.move(
-            self.width()-self.pageNum.width()-25, self.height()-25
-        )
         self.setFocusPolicy(Qt.StrongFocus)
 
     def keyPressEvent(self, event):
@@ -184,7 +132,7 @@ class BoardWindow(QWidget):
 
         match key:
             case Qt.Key_R:
-                self.changeBypass(self.mycursor + (3 * self.page))
+                self.changeBypass(self.mycursor)
             case Qt.Key_F:
                 self.changeBypass(0)
             case Qt.Key_G:
@@ -211,17 +159,11 @@ class BoardWindow(QWidget):
             case "plugins":
                 match key:
                     case Qt.Key_Q:
-                        self.mycursor = max(0, self.mycursor - 1)
-                        self.arrow.changePointer(self.mycursor)
+                        self.pluginbox.scroll_group.goPrev()
                     case Qt.Key_W:
                         self.openParamPage()
                     case Qt.Key_E:
-                        self.mycursor = min((2), self.mycursor + 1)
-                        self.arrow.changePointer(self.mycursor)
-                    case Qt.Key_S:
-                        self.pageUpPlugins()
-                    case Qt.Key_X:
-                        self.pageDownPlugins()
+                        self.pluginbox.scroll_group.goNext()
 
             case "parameters":
                 match key:
@@ -435,10 +377,10 @@ class BoardWindow(QWidget):
 class BoxOfPlugins(QWidget):
     pluginsPerPage: int = 3
 
-    def __init__(self, page: int, plugins: PluginManager):
+    def __init__(self, plugins: PluginManager):
         super().__init__()
-        self.setFixedSize(
-            SCREEN_W,
+        self.setGeometry(
+            0, 0, SCREEN_W,
             int((1 - ControlDisplayStyle.REL_H) * SCREEN_H)
         )
         self.boxes = []
@@ -464,11 +406,11 @@ class BoxOfPlugins(QWidget):
         self.scroll_group.update_bar()
         self.scroll_bar.move(int((1 - ScrollBarStyle.REL_W) * self.width()), 0)
 
-    def updateBypass(self, page, position: int, bypass):
+    def updateBypass(self, position: int, bypass):
         # NOTE: this used to be a bare try-except with nothing in the except
         # block. I hope this wasn't meant to error out as a feature.
         try:
-            self.boxes[position - (3*page)].updateBypass(bypass)
+            self.boxes[position].updateBypass(bypass)
         except Exception as e:
             print(e)
             pass
