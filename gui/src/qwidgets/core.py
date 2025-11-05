@@ -169,6 +169,8 @@ class BoardWindow(QWidget):
                     case RotaryEncoder.MIDDLE.keyRight:
                         self.swap_plugins(1)
                         self.pluginbox.scroll_group.goNext()
+                    case RotaryEncoder.BOTTOM.keyPress:
+                        self.remove_current_plugin()
 
             case "parameters":
                 match key:
@@ -204,6 +206,32 @@ class BoardWindow(QWidget):
         items[index] = items[index+dist]
         items[index+dist] = temp
         self.pluginbox.scroll_group.drawItems()
+        # TODO: swap in mod-host
+
+    def remove_current_plugin(self):
+        index = self.curIndex()
+        n = len(self.pluginbox.scroll_group.items)
+        if index >= n:
+            return
+        items = self.pluginbox.boxes
+        # Prevent last item from sticking around
+        items[index].hide()
+        items.pop(index)
+        # reassign plugin-box indices
+        for i in range(index, n - 1):
+            items[i].index -= 1
+        # cleared group
+        if n == 1:
+            return
+        # adjust to new position
+        if index < n - 1:
+            items[index].hover()
+        if self.pluginbox.scroll_group.window_top != 0 or index == n - 1:
+            self.pluginbox.scroll_group.goPrevEdge()
+        self.pluginbox.scroll_group.repaint()
+        self.pluginbox.scroll_group.drawItems()
+        self.pluginbox.scroll_group.update_bar()
+        # TODO: remove plugins in mod-host
 
     def paintEvent(self, event):
         painter = QPainter(self)
