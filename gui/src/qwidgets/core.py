@@ -11,7 +11,7 @@ from modhostmanager import (
 )
 from styles import (
     styles_indicator, styles_label, styles_window, color_foreground,
-    styles_error, ScrollBarStyle
+    styles_error, ScrollBarStyle, color_background, ControlDisplayStyle
 )
 from utils import config_dir, assets_dir
 from qwidgets.parameter_widgets import ParameterPanel
@@ -21,6 +21,7 @@ from qwidgets.navigation import (
     BreadcrumbsBar, ScrollBar, ScrollItem, ScrollGroup
 )
 from qwidgets.floating_window import FloatingWindow, DialogItem
+from qwidgets.plugin_box import PluginBox
 
 
 class MainWindow(QWidget):
@@ -148,7 +149,7 @@ class BoardWindow(QWidget):
         self.plugins = manager
         self.mod_host_manager = mod_host_manager
         self.restart_callback = restart_callback
-        self.backgroundColor = "#E2C290"
+        self.backgroundColor = color_background
 
         self.rcount = 0
 
@@ -157,7 +158,7 @@ class BoardWindow(QWidget):
         self.param_page = 0
         self.current = "plugins"
 
-        self.setGeometry(0, 0, 480, 800)
+        self.setGeometry(0, 0, SCREEN_W, SCREEN_H)
 
         palette = self.palette()
         palette.setColor(self.backgroundRole(), QColor("#E2C290"))
@@ -176,7 +177,6 @@ class BoardWindow(QWidget):
         self.pageNum.move(
             self.width()-self.pageNum.width()-25, self.height()-25
         )
-
         self.setFocusPolicy(Qt.StrongFocus)
 
     def keyPressEvent(self, event):
@@ -432,145 +432,37 @@ class BoardWindow(QWidget):
             self.update()
 
 
-class BoxOfProfiles(QWidget):
-    pluginsPerPage: int = 3
-
-    def __init__(self, page: int, boards: list):
-        super().__init__()
-        self.setFixedSize(480, 800)
-        self.boxes = []
-        numBoxes: int = min(
-                BoxOfPlugins.pluginsPerPage,
-                len(boards) - BoxOfProfiles.pluginsPerPage * page)
-        if numBoxes == 0:
-            box = BoxWidget(-1, "Unable to load profiles!", 0)
-            box.label.setStyleSheet(styles_error)
-            box.setParent(self)
-            self.boxes.append(box)
-            return
-        for index in range(0, numBoxes):
-            box = BoxWidget(index + 3*page, boards[index + 3*page])
-            box.setParent(self)
-            box.move(0, (self.height()//3)*index)
-            self.boxes.append(box)
-
-
-class BoxWidget(QWidget):
-    def __init__(self, indicator: int, plugin_name="", bypass: int = 0):
-        super().__init__()
-        self.plugin_name = plugin_name
-        self.indicator = indicator
-        self.bypass = bypass
-        self.setFixedSize(SCREEN_W // 2, SCREEN_H // 3)
-        self.initUI()
-
-    def initUI(self):
-        # Creating plugin name field
-        self.label = QLabel(self.plugin_name, self)
-        self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet(styles_label)
-        # Adjust size after setting text
-        self.label.adjustSize()
-        self.label.move((
-            self.width() - self.label.width()) // 2, self.height() // 2 - 20
-        )
-
-        # Indicator Label
-        self.indicator = QLabel(str(self.indicator), self)
-        self.indicator.setStyleSheet(styles_label)
-
-        # Move to bottom-left corner
-        self.indicator.adjustSize()
-        self.indicator.move(30-self.indicator.width(), self.height()-45)
-
-        self.indicator_off_path = os.path.join(
-            assets_dir, "graphics/IndicatorOff.png"
-        )
-        self.indicator_on_path = os.path.join(
-            assets_dir, "graphics/IndicatorOn.png"
-        )
-
-        if (self.bypass == 0):
-            indicator = QPixmap(self.indicator_on_path)
-        else:
-            indicator = QPixmap(self.indicator_off_path)
-
-        self.indicator = QLabel(self)
-
-        self.indicator.setPixmap(indicator)
-        self.indicator.adjustSize()
-        self.indicator.move((self.width() - self.indicator.width()) - 16, 16)
-
-        if (self.bypass == 0):
-            indicatorText = "On"
-        else:
-            indicatorText = "Off"
-
-        self.indicator_text = QLabel(indicatorText, self)
-        self.indicator_text.setStyleSheet(styles_indicator)
-        self.indicator_text.adjustSize()
-        self.indicator_text.move(
-            (self.width() - self.indicator.width()) - 16,
-            16 + indicator.width()
-        )
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-
-        pen = QPen(color_foreground, 10)
-        painter.setPen(pen)
-
-        rect = QRect(0, 0, self.width()-1, self.height())
-        painter.drawRect(rect)
-
-    def updateBypass(self, bypass: int):
-        self.bypass = bypass
-
-        if (self.bypass == 1):
-            indicator = QPixmap(self.indicator_off_path)
-        else:
-            indicator = QPixmap(self.indicator_on_path)
-
-        self.indicator.setPixmap(indicator)
-        self.indicator.adjustSize()
-        self.indicator.move((self.width() - self.indicator.width()) - 16, 16)
-
-        if (self.bypass == 0):
-            indicatorText = "On"
-        else:
-            indicatorText = "Off"
-
-        self.indicator_text.setText(indicatorText)
-        self.indicator_text.adjustSize()
-        self.indicator_text.move(
-            (self.width() - self.indicator.width()) - 16,
-            16 + indicator.width()
-        )
-
-
 class BoxOfPlugins(QWidget):
     pluginsPerPage: int = 3
 
     def __init__(self, page: int, plugins: PluginManager):
         super().__init__()
-        self.setFixedSize(480, 800)
+        self.setFixedSize(
+            SCREEN_W,
+            int((1 - ControlDisplayStyle.REL_H) * SCREEN_H)
+        )
         self.boxes = []
-        numBoxes: int = min(
-                BoxOfPlugins.pluginsPerPage,
-                len(plugins.plugins) - BoxOfPlugins.pluginsPerPage * page)
-        if numBoxes == 0:
-            box = BoxWidget(-1, "Unable to load plugins!", 0)
+        # Create scroll group
+        n = len(plugins.plugins)
+        if n == 0:
+            box = PluginBox(-1, "Unable to load plugins!", 0)
             box.label.setStyleSheet(styles_error)
             box.setParent(self)
             self.boxes.append(box)
             return
-        for index in range(0, numBoxes):
-            plugin: Plugin = plugins.plugins[index + (3*(page))]
-            box = BoxWidget(index + BoxOfPlugins.pluginsPerPage*page,
-                            plugin.name, plugin.bypass)
-            box.setParent(self)
-            box.move(0, (self.height()//3)*index)
+        for index in range(0, n):
+            plugin: Plugin = plugins.plugins[index]
+            box = PluginBox(index, plugin.name, plugin.bypass)
             self.boxes.append(box)
+        self.scroll_bar = ScrollBar(RotaryEncoder.TOP)
+        self.scroll_bar.setParent(self)
+        self.scroll_group = ScrollGroup(
+            BoxOfPlugins.pluginsPerPage, RotaryEncoder.TOP,
+            self.boxes, self.scroll_bar
+        )
+        self.scroll_group.setParent(self)
+        self.scroll_group.update_bar()
+        self.scroll_bar.move(int((1 - ScrollBarStyle.REL_W) * self.width()), 0)
 
     def updateBypass(self, page, position: int, bypass):
         # NOTE: this used to be a bare try-except with nothing in the except
