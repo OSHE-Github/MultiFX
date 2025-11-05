@@ -134,6 +134,7 @@ class PluginManager:
 
         except json.JSONDecodeError:
             print("Invalid JSON format!")
+            print(jsonFile)
             return -1
         except FileNotFoundError:
             print("Invalid path to JSON")
