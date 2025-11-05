@@ -53,25 +53,6 @@ class MainWindow(QWidget):
         self.start_screen = ProfileSelectWindow(self.launch_board)
         self.stack.addWidget(self.start_screen)
 
-        # Scrollbar and items
-        """
-        self.scroll_items = []
-        for i in range(6):
-            scroll_item = ScrollItem(i)
-            self.scroll_items.append(scroll_item)
-        self.scroll_bar = ScrollBar(RotaryEncoder.TOP)
-        self.scroll_group = ScrollGroup(3, RotaryEncoder.TOP,
-                                        self.scroll_items, self.scroll_bar)
-        self.scroll_group.setParent(self)
-        self.scroll_group.update_bar()
-        # move scrollbar to right side
-        self.scroll_bar.move(
-            SCREEN_W - self.scroll_bar.width(),
-            0
-        )
-        self.scroll_bar.setParent(self)
-        """
-
         self.board_window = None  # Placeholder for later
 
         self.show()
@@ -606,6 +587,7 @@ class ProfileSelectWindow(QWidget):
         super().__init__()
         self.json_dir = os.path.dirname(config_dir)
         self.json_files = self.get_json_files(config_dir)
+        self.json_files.sort()
 
         self.callback = callback
 
