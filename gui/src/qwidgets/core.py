@@ -130,7 +130,7 @@ class BoardWindow(QWidget):
         key = event.key()
 
         match key:
-            case Qt.Key_R:
+            case Qt.Key_R | RotaryEncoder.MIDDLE.keyPress:
                 self.changeBypass(self.pluginbox.scroll_group.curItem().index)
             case Qt.Key_F:
                 self.changeBypass(0)

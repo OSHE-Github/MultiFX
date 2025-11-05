@@ -8,7 +8,7 @@ from styles import (styles_label, styles_indicator, color_foreground,
                     ScrollBarStyle, ControlDisplayStyle, color_background)
 from utils import assets_dir
 from qwidgets.navigation import ScrollItem
-from qwidgets.controls import RotaryEncoder
+from qwidgets.controls import RotaryEncoder, ControlDisplay
 
 
 class PluginBox(ScrollItem):
@@ -25,6 +25,12 @@ class PluginBox(ScrollItem):
             int((1 - ControlDisplayStyle.REL_H) * SCREEN_H) // 3
         )
         self.initUI()
+
+    def hover(self):
+        super().hover()
+        ControlDisplay.setBind(RotaryEncoder.TOP, "select")
+        ControlDisplay.setBind(RotaryEncoder.MIDDLE, "bypass")
+        ControlDisplay.setBind(RotaryEncoder.BOTTOM, "remove")
 
     def initUI(self):
         # Creating plugin name field
