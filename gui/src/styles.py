@@ -35,9 +35,23 @@ styles_indicator = f"""
 """
 
 styles_label = f"""
-    font : bold 30px;
+    font : 48px;
     font-family: {font_family};
     color: {color_foreground.name()};
+    background: transparent;
+"""
+
+styles_sublabel = f"""
+    font : 28px;
+    font-family: {font_family};
+    color: {color_foreground.name()};
+    background: transparent;
+"""
+
+styles_proflabel = f"""
+    font : 28px;
+    font-family: {font_family};
+    color: {color_bot.name()};
     background: transparent;
 """
 

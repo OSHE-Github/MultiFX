@@ -198,6 +198,26 @@ class ScrollGroup(QWidget):
         self.update_bar()
         return cur
 
+    def goPrevEdge(self) -> ScrollItem:
+        """Used for edge case where the last item is removed"""
+        if self.pos <= 0:
+            return
+        if self.pos < len(self.items):
+            self.curItem().unhover()
+        self.pos -= 1
+        cur = self.curItem()
+        cur.hover()
+        if self.window_top == 0:
+            return
+        match self.page_mode:
+            case PageMode.SCROLL:
+                self.window_top -= 1
+                self.window_bottom -= 1
+            case PageMode.JUMP:
+                self.window_top -= self.page_size
+                self.window_bottom -= self.page_size
+        return cur
+
     def drawItems(self):
         self.hide_all()
         cursor = QPoint(0, 0)
@@ -222,7 +242,9 @@ class ScrollGroup(QWidget):
         pen = QPen(color_foreground, 3)
         painter.setPen(pen)
         rect = QRect(0, 0, self.width(), self.height())
-        painter.drawRect(rect)
+        # fill with blank for the case where items are removed
+        painter.fillRect(rect, color_background)
+        # painter.drawRect(rect)
 
     def update_bar(self):
         if not self.scroll_bar:

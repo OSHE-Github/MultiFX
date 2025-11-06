@@ -1,3 +1,4 @@
+"""Common miscelaneous utilities and constants for graphical widgets"""
 from PyQt5.QtGui import QPolygon
 from PyQt5.QtCore import QPoint
 import math
@@ -15,4 +16,10 @@ def Octagon(center: QPoint, radius: int) -> QPolygon:
             round(center.y() + math.sin(rad * i) * radius)
         ))
 
+    return QPolygon(points)
+
+
+def Caret(start: QPoint, width: int, height: int) -> QPolygon:
+    points = [start, start + QPoint(width//2, height),
+              start + QPoint(width, 0), start + QPoint(width//2, height)]
     return QPolygon(points)

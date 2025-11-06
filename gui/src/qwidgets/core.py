@@ -11,7 +11,7 @@ from modhostmanager import (
 )
 from styles import (
     styles_indicator, styles_label, styles_window, color_foreground,
-    styles_error, ScrollBarStyle
+    styles_error, ScrollBarStyle, color_background, ControlDisplayStyle
 )
 from utils import config_dir, assets_dir
 from qwidgets.parameter_widgets import ParameterPanel
@@ -21,6 +21,7 @@ from qwidgets.navigation import (
     BreadcrumbsBar, ScrollBar, ScrollItem, ScrollGroup
 )
 from qwidgets.floating_window import FloatingWindow, DialogItem
+from qwidgets.plugin_box import PluginBox, AddPluginBox
 
 
 class MainWindow(QWidget):
@@ -31,6 +32,8 @@ class MainWindow(QWidget):
         self.stack = QStackedWidget(self)
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.stack)
+        self.layout.setSpacing(0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.setStyleSheet(styles_window)
 
         # Control Display
@@ -53,33 +56,16 @@ class MainWindow(QWidget):
         self.start_screen = ProfileSelectWindow(self.launch_board)
         self.stack.addWidget(self.start_screen)
 
-        # Scrollbar and items
-        """
-        self.scroll_items = []
-        for i in range(6):
-            scroll_item = ScrollItem(i)
-            self.scroll_items.append(scroll_item)
-        self.scroll_bar = ScrollBar(RotaryEncoder.TOP)
-        self.scroll_group = ScrollGroup(3, RotaryEncoder.TOP,
-                                        self.scroll_items, self.scroll_bar)
-        self.scroll_group.setParent(self)
-        self.scroll_group.update_bar()
-        # move scrollbar to right side
-        self.scroll_bar.move(
-            SCREEN_W - self.scroll_bar.width(),
-            0
-        )
-        self.scroll_bar.setParent(self)
-        """
-
         self.board_window = None  # Placeholder for later
 
         self.show()
 
-    def launch_board(self, selected_json):
+    def launch_board(self, selected_profile):
         """Called when a JSON file is selected to load the board"""
         board = PluginManager()
-        board.initFromJSON(selected_json)
+        selected_json = selected_profile + ".json"
+        json_path = os.path.join(config_dir, selected_json)
+        board.initFromJSON(json_path)
         startModHost()
         modhost = connectToModHost()
         if modhost is None:
@@ -111,50 +97,10 @@ class MainWindow(QWidget):
         """Switch back to the start screen."""
         self.stack.setCurrentWidget(self.start_screen)  # Switch back
         self.start_screen.setFocus()
-
-
-class Cursor(QWidget):
-    def __init__(self, position: int = 0):
-        super().__init__()
-        self.position = position % 3
-
-    def paintEvent(self, event):
-        arrow_color = color_foreground
-        self.setFixedSize(480, 800)
-
-        painter = QPainter(self)
-        x = 270
-        y = 266
-        width = 160
-        arrowWidth = 30
-        headOffset = 30
-        adjusted_y = (y//2) + (y*self.position)
-
-        # Line of arrow
-        start = QPoint(x, adjusted_y)
-        end = QPoint(x+width, adjusted_y)
-
-        # Arrow head
-        arrow_p1 = QPoint(
-            x+headOffset+arrowWidth,
-            adjusted_y + arrowWidth // 2
-        )
-        arrow_p2 = QPoint(
-            x+headOffset+arrowWidth,
-            adjusted_y - arrowWidth // 2
-        )
-
-        pen = QPen(arrow_color, 5)
-        painter.setPen(pen)
-        painter.drawLine(start, end)
-
-        arrow_head = QPolygon([start, arrow_p1, arrow_p2])
-        painter.setBrush(arrow_color)
-        painter.drawPolygon(arrow_head)
-
-    def changePointer(self, positon: int):
-        self.position = positon
-        self.update()
+        BreadcrumbsBar.navBackward()
+        ControlDisplay.setBind(RotaryEncoder.TOP, "select")
+        ControlDisplay.setBind(RotaryEncoder.MIDDLE, "")
+        ControlDisplay.setBind(RotaryEncoder.BOTTOM, "delete")
 
 
 class BoardWindow(QWidget):
@@ -165,34 +111,22 @@ class BoardWindow(QWidget):
         self.plugins = manager
         self.mod_host_manager = mod_host_manager
         self.restart_callback = restart_callback
-        self.backgroundColor = "#E2C290"
+        self.backgroundColor = color_background
 
         self.rcount = 0
 
-        self.mycursor = 0
-        self.page = 0
         self.param_page = 0
         self.current = "plugins"
 
-        self.setGeometry(0, 0, 480, 800)
+        self.setGeometry(0, 0, SCREEN_W, SCREEN_H)
 
         palette = self.palette()
-        palette.setColor(self.backgroundRole(), QColor("#E2C290"))
+        palette.setColor(self.backgroundRole(), color_background)
         self.setPalette(palette)
         self.setAutoFillBackground(True)
 
-        self.pluginbox = BoxOfPlugins(self.page, self.plugins)
+        self.pluginbox = BoxOfPlugins(self.plugins)
         self.pluginbox.setParent(self)
-
-        self.arrow = Cursor(self.mycursor)
-        self.arrow.setParent(self)
-        self.arrow.raise_()
-
-        self.pageNum = QLabel("Pgn " + str(self.page), self)
-        self.pageNum.adjustSize()
-        self.pageNum.move(
-            self.width()-self.pageNum.width()-25, self.height()-25
-        )
 
         self.setFocusPolicy(Qt.StrongFocus)
 
@@ -200,8 +134,8 @@ class BoardWindow(QWidget):
         key = event.key()
 
         match key:
-            case Qt.Key_R:
-                self.changeBypass(self.mycursor + (3 * self.page))
+            case Qt.Key_R | RotaryEncoder.MIDDLE.keyPress:
+                self.changeBypass(self.curIndex())
             case Qt.Key_F:
                 self.changeBypass(0)
             case Qt.Key_G:
@@ -227,39 +161,97 @@ class BoardWindow(QWidget):
         match self.current:
             case "plugins":
                 match key:
-                    case Qt.Key_Q:
-                        self.mycursor = max(0, self.mycursor - 1)
-                        self.arrow.changePointer(self.mycursor)
-                    case Qt.Key_W:
+                    case RotaryEncoder.TOP.keyLeft:
+                        self.pluginbox.scroll_group.goPrev()
+                    case RotaryEncoder.TOP.keyPress:
                         self.openParamPage()
-                    case Qt.Key_E:
-                        self.mycursor = min((2), self.mycursor + 1)
-                        self.arrow.changePointer(self.mycursor)
-                    case Qt.Key_S:
-                        self.pageUpPlugins()
-                    case Qt.Key_X:
-                        self.pageDownPlugins()
+                    case RotaryEncoder.TOP.keyRight:
+                        self.pluginbox.scroll_group.goNext()
+                    case RotaryEncoder.MIDDLE.keyLeft:
+                        if self.swap_plugins(-1):
+                            self.pluginbox.scroll_group.goPrev()
+                    case RotaryEncoder.MIDDLE.keyPress:
+                        if self.curIndex() is None:
+                            self.restart_callback()
+                    case RotaryEncoder.MIDDLE.keyRight:
+                        if self.swap_plugins(1):
+                            self.pluginbox.scroll_group.goNext()
+                    case RotaryEncoder.BOTTOM.keyPress:
+                        self.remove_current_plugin()
 
             case "parameters":
                 match key:
                     case Qt.Key_Q:
-                        self.descreaseParameter(0)
+                        self.decreaseParameter(0)
                     case Qt.Key_W:
                         self.closeParamPage()
                     case Qt.Key_E:
                         self.increaseParameter(0)
                     case Qt.Key_A:
-                        self.descreaseParameter(1)
+                        self.decreaseParameter(1)
                     case Qt.Key_S:
                         self.pageUpParameters()
                     case Qt.Key_D:
                         self.increaseParameter(1)
                     case Qt.Key_Z:
-                        self.descreaseParameter(2)
+                        self.decreaseParameter(2)
                     case Qt.Key_X:
                         self.pageDownParameters()
                     case Qt.Key_C:
                         self.increaseParameter(2)
+
+    def swap_plugins(self, dist: int) -> bool:
+        index = self.curIndex()
+        # don't swap with add plugin widget
+        if index is None:
+            return False
+        n = len(self.pluginbox.scroll_group.items)
+        if index + dist < 0 or index + dist >= n:
+            return
+        items = self.pluginbox.boxes
+        temp = items[index]
+        other = items[index + dist]
+        if other.id == AddPluginBox.ID:
+            return
+        temp.unhover()
+        temp.index = index + dist
+        items[index+dist].index = index
+        items[index] = other
+        items[index+dist] = temp
+        temp.isLast = temp.index == n - 2
+        other.isLast = other.index == n - 2
+
+        self.pluginbox.scroll_group.drawItems()
+        # TODO: swap in mod-host
+
+        return True
+
+    def remove_current_plugin(self):
+        index = self.curIndex()
+        if index is None:
+            return
+        n = len(self.pluginbox.scroll_group.items)
+        if index >= n:
+            return
+        items = self.pluginbox.boxes
+        # Prevent last item from sticking around
+        items[index].hide()
+        items.pop(index)
+        # reassign plugin-box indices
+        for i in range(index, n - 2):
+            items[i].index -= 1
+        # cleared group
+        if n == 1:
+            return
+        # adjust to new position
+        if index < n - 1:
+            items[index].hover()
+        if self.pluginbox.scroll_group.window_top != 0 or index == n - 1:
+            self.pluginbox.scroll_group.goPrevEdge()
+        self.pluginbox.scroll_group.repaint()
+        self.pluginbox.scroll_group.drawItems()
+        self.pluginbox.scroll_group.update_bar()
+        # TODO: remove plugins in mod-host
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -273,7 +265,7 @@ class BoardWindow(QWidget):
     def showEvent(self, event):
         self.setFocus()
 
-    def descreaseParameter(self, position: int):
+    def decreaseParameter(self, position: int):
         params = self.plugin.parameters
         try:
             parameter: Parameter = params[position + 3*(self.param_page)]
@@ -314,18 +306,18 @@ class BoardWindow(QWidget):
             pass
 
     def openParamPage(self):
+        index = self.pluginbox.scroll_group.curItem().index
         try:
             self.param_page = 0
-            self.plugin = self.plugins.plugins[self.mycursor + (3 * self.page)]
+            self.plugin = self.plugins.plugins[index]
             self.paramPanel = ParameterPanel(
                     self.backgroundColor,
-                    self.mycursor,
+                    self.pluginbox.scroll_group.curItem().index,
                     self.param_page,
                     self.plugin
             )
             self.paramPanel.setParent(self)
             self.paramPanel.show()
-            self.arrow.hide()
             self.update()
             self.current = "parameters"
 
@@ -344,7 +336,6 @@ class BoardWindow(QWidget):
         self.paramPanel.deleteLater()
         self.paramPanel.hide()
         self.paramPanel = None
-        self.arrow.show()
         self.update()
         self.current = "plugins"
         self.plugin = None
@@ -389,6 +380,8 @@ class BoardWindow(QWidget):
             self.update()
 
     def changeBypass(self, position):
+        if position is None:
+            return
         try:
             # get the value of bypass from the plugin our cursor is currently
             # on
@@ -399,7 +392,7 @@ class BoardWindow(QWidget):
             bypass = bypass ^ 1
             plugin.bypass = bypass
             updateBypass(self.mod_host_manager, position, plugin)
-            self.pluginbox.updateBypass(self.page, position, bypass)
+            self.pluginbox.updateBypass(position, bypass)
         except Exception as e:
             print(e)
             pass
@@ -411,7 +404,7 @@ class BoardWindow(QWidget):
             del self.paramPanel
             self.paramPanel = ParameterPanel(
                     self.backgroundColor,
-                    self.mycursor,
+                    self.curIndex(),
                     self.param_page,
                     self.plugin
             )
@@ -433,7 +426,7 @@ class BoardWindow(QWidget):
             del self.paramPanel
             self.paramPanel = ParameterPanel(
                     self.backgroundColor,
-                    self.mycursor,
+                    self.curIndex(),
                     self.param_page,
                     self.plugin
             )
@@ -448,162 +441,61 @@ class BoardWindow(QWidget):
             )
             self.update()
 
-
-class BoxOfProfiles(QWidget):
-    pluginsPerPage: int = 3
-
-    def __init__(self, page: int, boards: list):
-        super().__init__()
-        self.setFixedSize(480, 800)
-        self.boxes = []
-        numBoxes: int = min(
-                BoxOfPlugins.pluginsPerPage,
-                len(boards) - BoxOfProfiles.pluginsPerPage * page)
-        if numBoxes == 0:
-            box = BoxWidget(-1, "Unable to load profiles!", 0)
-            box.label.setStyleSheet(styles_error)
-            box.setParent(self)
-            self.boxes.append(box)
-            return
-        for index in range(0, numBoxes):
-            box = BoxWidget(index + 3*page, boards[index + 3*page])
-            box.setParent(self)
-            box.move(0, (self.height()//3)*index)
-            self.boxes.append(box)
-
-
-class BoxWidget(QWidget):
-    def __init__(self, indicator: int, plugin_name="", bypass: int = 0):
-        super().__init__()
-        self.plugin_name = plugin_name
-        self.indicator = indicator
-        self.bypass = bypass
-        self.setFixedSize(SCREEN_W // 2, SCREEN_H // 3)
-        self.initUI()
-
-    def initUI(self):
-        # Creating plugin name field
-        self.label = QLabel(self.plugin_name, self)
-        self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet(styles_label)
-        # Adjust size after setting text
-        self.label.adjustSize()
-        self.label.move((
-            self.width() - self.label.width()) // 2, self.height() // 2 - 20
-        )
-
-        # Indicator Label
-        self.indicator = QLabel(str(self.indicator), self)
-        self.indicator.setStyleSheet(styles_label)
-
-        # Move to bottom-left corner
-        self.indicator.adjustSize()
-        self.indicator.move(30-self.indicator.width(), self.height()-45)
-
-        self.indicator_off_path = os.path.join(
-            assets_dir, "graphics/IndicatorOff.png"
-        )
-        self.indicator_on_path = os.path.join(
-            assets_dir, "graphics/IndicatorOn.png"
-        )
-
-        if (self.bypass == 0):
-            indicator = QPixmap(self.indicator_on_path)
-        else:
-            indicator = QPixmap(self.indicator_off_path)
-
-        self.indicator = QLabel(self)
-
-        self.indicator.setPixmap(indicator)
-        self.indicator.adjustSize()
-        self.indicator.move((self.width() - self.indicator.width()) - 16, 16)
-
-        if (self.bypass == 0):
-            indicatorText = "On"
-        else:
-            indicatorText = "Off"
-
-        self.indicator_text = QLabel(indicatorText, self)
-        self.indicator_text.setStyleSheet(styles_indicator)
-        self.indicator_text.adjustSize()
-        self.indicator_text.move(
-            (self.width() - self.indicator.width()) - 16,
-            16 + indicator.width()
-        )
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-
-        pen = QPen(color_foreground, 10)
-        painter.setPen(pen)
-
-        rect = QRect(0, 0, self.width()-1, self.height())
-        painter.drawRect(rect)
-
-    def updateBypass(self, bypass: int):
-        self.bypass = bypass
-
-        if (self.bypass == 1):
-            indicator = QPixmap(self.indicator_off_path)
-        else:
-            indicator = QPixmap(self.indicator_on_path)
-
-        self.indicator.setPixmap(indicator)
-        self.indicator.adjustSize()
-        self.indicator.move((self.width() - self.indicator.width()) - 16, 16)
-
-        if (self.bypass == 0):
-            indicatorText = "On"
-        else:
-            indicatorText = "Off"
-
-        self.indicator_text.setText(indicatorText)
-        self.indicator_text.adjustSize()
-        self.indicator_text.move(
-            (self.width() - self.indicator.width()) - 16,
-            16 + indicator.width()
-        )
+    def curIndex(self) -> int | None:
+        if self.pluginbox.scroll_group.curItem().id == AddPluginBox.ID:
+            return None
+        return self.pluginbox.scroll_group.curItem().index
 
 
 class BoxOfPlugins(QWidget):
     pluginsPerPage: int = 3
 
-    def __init__(self, page: int, plugins: PluginManager):
+    def __init__(self, plugins: PluginManager):
         super().__init__()
-        self.setFixedSize(480, 800)
+        self.setGeometry(
+            0, 0, SCREEN_W,
+            int((1 - ControlDisplayStyle.REL_H) * SCREEN_H)
+        )
         self.boxes = []
-        numBoxes: int = min(
-                BoxOfPlugins.pluginsPerPage,
-                len(plugins.plugins) - BoxOfPlugins.pluginsPerPage * page)
-        if numBoxes == 0:
-            box = BoxWidget(-1, "Unable to load plugins!", 0)
+        # Create scroll group
+        n = len(plugins.plugins)
+        if n == 0:
+            box = PluginBox("Unable to load plugins!", 0)
             box.label.setStyleSheet(styles_error)
             box.setParent(self)
             self.boxes.append(box)
             return
-        for index in range(0, numBoxes):
-            plugin: Plugin = plugins.plugins[index + (3*(page))]
-            box = BoxWidget(index + BoxOfPlugins.pluginsPerPage*page,
-                            plugin.name, plugin.bypass)
-            box.setParent(self)
-            box.move(0, (self.height()//3)*index)
+        for i in range(0, n):
+            plugin = plugins.plugins[i]
+            box = PluginBox(i, plugin.name, plugin.bypass)
             self.boxes.append(box)
+        self.boxes[n-1].isLast = True
+        self.boxes.append(AddPluginBox())
+        self.scroll_bar = ScrollBar(RotaryEncoder.TOP)
+        self.scroll_bar.setParent(self)
+        self.scroll_group = ScrollGroup(
+            BoxOfPlugins.pluginsPerPage, RotaryEncoder.TOP,
+            self.boxes, self.scroll_bar
+        )
+        self.scroll_group.setParent(self)
+        self.scroll_group.update_bar()
+        self.scroll_bar.move(int((1 - ScrollBarStyle.REL_W) * self.width()), 0)
 
-    def updateBypass(self, page, position: int, bypass):
+    def updateBypass(self, position: int, bypass):
         # NOTE: this used to be a bare try-except with nothing in the except
         # block. I hope this wasn't meant to error out as a feature.
         try:
-            self.boxes[position - (3*page)].updateBypass(bypass)
+            self.boxes[position].updateBypass(bypass)
         except Exception as e:
             print(e)
             pass
 
 
-class ProfileSelectWindow(QWidget):
+class ProfileSelectWindow(FloatingWindow):
     def __init__(self, callback):
-        super().__init__()
         self.json_dir = os.path.dirname(config_dir)
         self.json_files = self.get_json_files(config_dir)
+        self.json_files.sort()
 
         self.callback = callback
 
@@ -613,9 +505,40 @@ class ProfileSelectWindow(QWidget):
             item = DialogItem(p.replace(".json", ""))
             dialog_items.append(item)
         scroll_group = ScrollGroup(4, RotaryEncoder.TOP, dialog_items)
-        self.floating_window = FloatingWindow("SELECT PROFILE", scroll_group,
-                                              RotaryEncoder.TOP, callback)
-        self.floating_window.setParent(self)
+        super().__init__("SELECT PROFILE", scroll_group, RotaryEncoder.TOP,
+                         callback)
+        ControlDisplay.setBind(RotaryEncoder.BOTTOM, "delete")
+
+    def keyPressEvent(self, event):
+        super().keyPressEvent(event)
+        key = event.key()
+
+        match key:
+            case RotaryEncoder.BOTTOM.keyPress:
+                self.remove_profile()
+
+    def remove_profile(self):
+        # TODO: Prompt to confirm
+        index = self.group.pos
+        items = self.group.items
+        n = len(items)
+        if index >= n:
+            return
+        # Prevent last item from sticking around
+        items[index].hide()
+        items.pop(index)
+        # cleared group
+        if n == 1:
+            return
+        # adjust to new position
+        if index < n - 1:
+            items[index].hover()
+        if self.group.window_top != 0 or index == n - 1:
+            self.group.goPrevEdge()
+        self.group.repaint()
+        self.group.drawItems()
+        super().update_continues()
+        # TODO: actually delete plugin
 
     def get_json_files(self, directory):
         """Returns a list of all JSON files in the specified directory."""

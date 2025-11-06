@@ -23,20 +23,44 @@ class FloatingWindow(QWidget):
         self.setFocusPolicy(Qt.StrongFocus)
 
     def initUI(self):
-        self.label = QLabel(self.title, self)
-        self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet(FloatingWindowStyle.css_title)
-        self.label.adjustSize()
-        self.label.move(
-            int(self.width() / 2 - self.label.width() / 2),
+        self.title_label = QLabel(self.title, self)
+        self.title_label.setAlignment(Qt.AlignCenter)
+        self.title_label.setStyleSheet(FloatingWindowStyle.css_title)
+        self.title_label.adjustSize()
+        self.title_label.move(
+            int(self.width() / 2 - self.title_label.width() / 2),
             int(((1 - FloatingWindowStyle.REL_H) / 2) * SCREEN_H)
             + FloatingWindowStyle.LINE_WIDTH,
         )
+        self.top_continue = QLabel("...", self)
+        self.top_continue.setStyleSheet(FloatingWindowStyle.css_options)
+        self.top_continue.setAlignment(Qt.AlignCenter)
+        self.top_continue.adjustSize()
+        self.bottom_continue = QLabel("...", self)
+        self.bottom_continue.setAlignment(Qt.AlignCenter)
+        self.bottom_continue.setStyleSheet(FloatingWindowStyle.css_options)
+        self.bottom_continue.adjustSize()
+        group_x = int(self.width() / 2 - self.group.width() / 2)
+        group_y = self.height() // 2 - self.group.height() // 2
         self.group.move(
-            int(self.width() / 2 - self.group.width() / 2),
-            self.height() // 2 - self.group.height() // 2
+            group_x,
+            group_y
         )
+        self.top_continue.move(
+            group_x + self.group.width()//2 - self.top_continue.width() // 2,
+            group_y - self.top_continue.height()
+        )
+        self.bottom_continue.move(
+            group_x + self.group.width()//2 - self.top_continue.width() // 2,
+            group_y + self.group.height() + self.top_continue.height()
+        )
+        self.update_continues()
         ControlDisplay.setBind(self.encoder, "select")
+
+    def update_continues(self):
+        n = len(self.group.items)
+        self.top_continue.setHidden(self.group.window_top == 0)
+        self.bottom_continue.setHidden(self.group.window_bottom >= n - 1)
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -59,8 +83,10 @@ class FloatingWindow(QWidget):
         match key:
             case self.encoder.keyLeft:
                 self.group.goPrev()
+                self.update_continues()
             case self.encoder.keyRight:
                 self.group.goNext()
+                self.update_continues()
             case self.encoder.keyPress:
                 self.callback(self.group.curItem().id)
 
@@ -69,13 +95,13 @@ class DialogItem(ScrollItem):
     def __init__(self, id: str):
         super().__init__(id)
         self.setFixedSize(180, 48)
-        self.label = QLabel(self.id, self)
-        self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet(FloatingWindowStyle.css_options)
-        self.label.adjustSize()
-        self.label.move(
-            self.width() // 2 - self.label.width() // 2,
-            self.height() // 2 - self.label.height() // 2
+        self.title_label = QLabel(self.id, self)
+        self.title_label.setAlignment(Qt.AlignCenter)
+        self.title_label.setStyleSheet(FloatingWindowStyle.css_options)
+        self.title_label.adjustSize()
+        self.title_label.move(
+            self.width() // 2 - self.title_label.width() // 2,
+            self.height() // 2 - self.title_label.height() // 2
         )
         self.hover_fill = RotaryEncoder.TOP.color
         self.unhover_fill = color_background
