@@ -93,7 +93,6 @@ class ParameterPanel(QWidget):
                     self.pluginbox.index,
                     parameter
             )
-            print(f"RES: {res}")
             if res != 0:
                 print("Failed to update")
                 pass
