@@ -62,6 +62,10 @@ class MainWindow(QWidget):
 
     def launch_board(self, selected_profile):
         """Called when a JSON file is selected to load the board"""
+        # Loading the profile takes a little, here for feedback
+        BreadcrumbsBar.navForward("LOADING PLUGINS...")
+        self.repaint()
+
         board = PluginManager()
         selected_json = selected_profile + ".json"
         json_path = os.path.join(config_dir, selected_json)
@@ -92,6 +96,7 @@ class MainWindow(QWidget):
         self.board_window.setFocus()
 
         # Update breadcrumbs
+        BreadcrumbsBar.navBackward()
         BreadcrumbsBar.navForward("view plugins")
 
     def show_start_screen(self):

@@ -254,8 +254,6 @@ def updateParameter(sock, instanceNum, parameter: plugin_manager.Parameter) -> i
         command = f"param_set {instanceNum} {parameter.symbol} {parameter.value}"
         try:
             res = sendCommand(sock, command)
-            print(res)
-            print(res.split()[1])
             return int(res.split()[1])
         except Exception as e:
             print(f"param_set error: {e}")
@@ -264,8 +262,6 @@ def updateParameter(sock, instanceNum, parameter: plugin_manager.Parameter) -> i
         command = f"patch_set {instanceNum} {parameter.symbol} {parameter.value}"
         try:
             res = sendCommand(sock, command)
-            print(res)
-            print(res.split()[1])
             return int(res.split()[1])
         except Exception as e:
             print(f"patch_set error: {e}")
