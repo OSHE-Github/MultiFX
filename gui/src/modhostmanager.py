@@ -257,14 +257,16 @@ def updateParameter(sock, instanceNum, parameter: plugin_manager.Parameter) -> i
             print(res)
             return res.split()[1]
         except Exception as e:
-            print(f"Error updatingParameter {e}")
+            print(f"param_set error: {e}")
             return -5
     if (parameter.type == "plug"):
         command = f"patch_set {instanceNum} {parameter.symbol} {parameter.value}"
         try:
-            return sendCommand(sock, command).split()[1]
+            res = sendCommand(sock, command)
+            print(res)
+            return res.split()[1]
         except Exception as e:
-            print(f"Error updatingParameter {e}")
+            print(f"patch_set error: {e}")
             return -5
     return -1
 
