@@ -371,9 +371,8 @@ class BoardWindow(QWidget):
         """Switch to the param screen for a plugin.
         Uses PluginBox for easier indexing.
         """
-        self.param_window = ParameterPanel(
-            color_background, 0, plugin, self.mod_host_manager,
-            self.back_to_board)
+        self.param_window = ParameterPanel(plugin, self.mod_host_manager,
+                                           self.back_to_board)
         MainWindow.stack.addWidget(self.param_window)
         MainWindow.stack.setCurrentWidget(self.param_window)
         BreadcrumbsBar.navForward(plugin.id)

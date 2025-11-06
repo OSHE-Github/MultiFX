@@ -6,7 +6,8 @@ from PyQt5.QtWidgets import QWidget, QLabel
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QTransform
 from PyQt5.QtCore import Qt, QRect
 from plugin_manager import Plugin, Parameter
-from styles import styles_label, BreadcrumbsBarStyle, ScrollBarStyle
+from styles import (styles_label, BreadcrumbsBarStyle, ScrollBarStyle,
+                    styles_paramlabel, styles_vallabel, color_background)
 from modhostmanager import updateParameter
 from qwidgets.graphics_utils import SCREEN_W, SCREEN_H
 from qwidgets.controls import RotaryEncoder
@@ -19,17 +20,14 @@ class ParameterPanel(QWidget):
     paramCount = 3
 
     def __init__(
-            self, background_color: str = "white",
-            page: int = 0, pluginbox: PluginBox = None,
+            self, pluginbox: PluginBox = None,
             mod_host_manager=None, back_callback=None):
         super().__init__()
         self.setFixedSize(SCREEN_W, SCREEN_H)
-        self.background_color = QColor(background_color)
         self.pluginbox = pluginbox
         self.plugin = pluginbox.plugin
-        self.page = page
         self.parameters = []
-        self.param_page = 0
+        self.top_param = 0
         self.mod_host_manager = mod_host_manager
         self.back_callback = back_callback
         self.setFocusPolicy(Qt.StrongFocus)
@@ -62,30 +60,15 @@ class ParameterPanel(QWidget):
     def updateParameter(self, position: int = 0):
         try:
             self.parameters[position].updateValue(
-                self.plugin.parameters[position + (self.page * 3)]
-            )
+                self.plugin.parameters[position])
         except Exception as e:
             print(e)
             pass
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-
-        pen = QPen(QColor(self.background_color), 10)
-        painter.setPen(pen)
-
-        rect = QRect(
-            0,
-            0,
-            self.width(),
-            self.height()
-        )
-        painter.fillRect(rect, self.background_color)
-
     def decreaseParameter(self, position: int):
         params = self.plugin.parameters
         try:
-            parameter: Parameter = params[position + 3*(self.param_page)]
+            parameter: Parameter = params[position]
             parameter.setValue(round(max(
                 parameter.minimum, parameter.value - parameter.increment), 2)
             )
@@ -106,7 +89,7 @@ class ParameterPanel(QWidget):
     def increaseParameter(self, position: int):
         params = self.plugin.parameters
         try:
-            parameter: Parameter = params[position + 3*(self.param_page)]
+            parameter: Parameter = params[position]
             parameter.setValue(round(min(
                 parameter.max, parameter.value + parameter.increment), 2)
             )
@@ -128,37 +111,42 @@ class ParameterPanel(QWidget):
 
         match key:
             case RotaryEncoder.TOP.keyLeft:
-                self.decreaseParameter(0)
+                self.decreaseParameter(self.top_param)
             case RotaryEncoder.TOP.keyPress:
                 # TODO: presets page
                 """"""
             case RotaryEncoder.TOP.keyRight:
-                self.increaseParameter(0)
+                self.increaseParameter(self.top_param)
             case RotaryEncoder.MIDDLE.keyLeft:
-                self.decreaseParameter(1)
+                self.decreaseParameter(self.top_param+1)
             case RotaryEncoder.MIDDLE.keyPress:
                 self.scroll_group.jump()
+                self.top_param = self.scroll_group.window_top
             case RotaryEncoder.MIDDLE.keyRight:
-                self.increaseParameter(1)
+                self.increaseParameter(self.top_param+1)
             case RotaryEncoder.BOTTOM.keyLeft:
-                self.decreaseParameter(2)
+                self.decreaseParameter(self.top_param+2)
             case RotaryEncoder.BOTTOM.keyPress:
                 self.back_callback()
             case RotaryEncoder.BOTTOM.keyRight:
-                self.increaseParameter(2)
+                self.increaseParameter(self.top_param+2)
 
 
 class ParameterReadingButton(ScrollItem):
     def __init__(self, parameter: Parameter):
         super().__init__(parameter.name)
-        self.setFixedSize(240, 801//3)
+        self.setFixedSize(int((1 - ScrollBarStyle.REL_W) * SCREEN_W),
+                          int((1 - BreadcrumbsBarStyle.REL_H) * SCREEN_H)//3)
         self.initUI(parameter)
+        self.unhover_fill = color_background
+        self.hover_fill = color_background
+        self.line_width = 0
 
     def initUI(self, parameter: Parameter):
         # Creating plugin name field
         self.label = QLabel(parameter.name, self)
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet(styles_label)
+        self.label.setStyleSheet(styles_paramlabel)
 
         self.label.adjustSize()
         self.label.move(
@@ -168,7 +156,7 @@ class ParameterReadingButton(ScrollItem):
 
         # Indicator Label
         self.value = QLabel(f"{parameter.value}", self)
-        self.value.setStyleSheet(styles_label)
+        self.value.setStyleSheet(styles_vallabel)
 
         self.value.adjustSize()
         self.value.move(
@@ -221,12 +209,15 @@ class ParameterReadingRange(ScrollItem):
         self.setFixedSize(int((1 - ScrollBarStyle.REL_W) * SCREEN_W),
                           int((1 - BreadcrumbsBarStyle.REL_H) * SCREEN_H)//3)
         self.initUI(parameter)
+        self.unhover_fill = color_background
+        self.hover_fill = color_background
+        self.line_width = 0
 
     def initUI(self, parameter: Parameter):
         # Creating plugin name field
         self.label = QLabel(parameter.name, self)
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet(styles_label)
+        self.label.setStyleSheet(styles_paramlabel)
 
         self.label.adjustSize()
         self.label.move(
@@ -236,7 +227,7 @@ class ParameterReadingRange(ScrollItem):
 
         # Indicator Label
         self.value = QLabel(f"{parameter.value}", self)
-        self.value.setStyleSheet(styles_label)
+        self.value.setStyleSheet(styles_vallabel)
 
         self.value.adjustSize()
         self.value.move(
@@ -290,14 +281,18 @@ class ParameterReadingRange(ScrollItem):
 class ParameterReadingSlider(ScrollItem):
     def __init__(self, parameter: Parameter):
         super().__init__(parameter.name)
-        self.setFixedSize(240, 801//3)
+        self.setFixedSize(int((1 - ScrollBarStyle.REL_W) * SCREEN_W),
+                          int((1 - BreadcrumbsBarStyle.REL_H) * SCREEN_H)//3)
         self.initUI(parameter)
+        self.unhover_fill = color_background
+        self.hover_fill = color_background
+        self.line_width = 0
 
     def initUI(self, parameter: Parameter):
         # Creating plugin name field
         self.label = QLabel(parameter.name, self)
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet(styles_label)
+        self.label.setStyleSheet(styles_paramlabel)
 
         self.label.adjustSize()
         self.label.move(
@@ -307,7 +302,7 @@ class ParameterReadingSlider(ScrollItem):
 
         # Indicator Label
         self.value = QLabel(f"{parameter.value}", self)
-        self.value.setStyleSheet(styles_label)
+        self.value.setStyleSheet(styles_vallabel)
 
         self.value.adjustSize()
         self.value.move(
