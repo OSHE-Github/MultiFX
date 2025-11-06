@@ -6,7 +6,7 @@ from PyQt5.QtGui import QPixmap, QPainter, QPen
 from qwidgets.graphics_utils import SCREEN_H, SCREEN_W, Caret
 from styles import (styles_label, styles_indicator, color_foreground,
                     ScrollBarStyle, ControlDisplayStyle, color_background,
-                    styles_sublabel)
+                    styles_sublabel, styles_proflabel)
 from utils import assets_dir
 from qwidgets.navigation import ScrollItem
 from qwidgets.controls import RotaryEncoder, ControlDisplay, RotaryEncoderData
@@ -20,6 +20,7 @@ class PluginBox(ScrollItem):
         self.bypass = bypass
         self.hover_fill = RotaryEncoder.TOP.color
         self.unhover_fill = color_background
+        self.preset_name = "preset name"
         # Make room for scroll bar and breadcrumbs
         self.setFixedSize(
             int((1 - ScrollBarStyle.REL_W) * SCREEN_W),
@@ -30,12 +31,14 @@ class PluginBox(ScrollItem):
 
     def unhover(self):
         super().unhover()
+        self.setLabel(self.preset_name)
 
     def hover(self):
         super().hover()
         ControlDisplay.setBind(RotaryEncoder.TOP, "select")
         ControlDisplay.setBind(RotaryEncoder.MIDDLE, "bypass")
         ControlDisplay.setBind(RotaryEncoder.BOTTOM, "remove")
+        self.setLabel(f"< {self.preset_name} >")
 
     def initUI(self):
         # Creating plugin name field
@@ -45,7 +48,20 @@ class PluginBox(ScrollItem):
         # Adjust size after setting text
         self.label.adjustSize()
         self.label.move((
-            self.width() - self.label.width()) // 2, self.height() // 2 - 20
+            self.width() - self.label.width()) // 2 + 16,
+            self.height() // 2 - 20
+        )
+        self.preset_label = QLabel(self.preset_name, self)
+        self.setLabel(self.preset_name)
+
+    def setLabel(self, text: str):
+        self.preset_label.setText(text)
+        self.preset_label.setAlignment(Qt.AlignCenter)
+        self.preset_label.setStyleSheet(styles_proflabel)
+        self.preset_label.adjustSize()
+        self.preset_label.move((
+            self.width() - self.preset_label.width()) // 2 + 16,
+            self.height() // 2 + 32
         )
 
     def paintEvent(self, event):
@@ -71,7 +87,7 @@ class PluginBox(ScrollItem):
             if self.index != 0:
                 top_caret = Caret(
                     QPoint(
-                        self.width()//2 - CARET_W,
+                        self.width()//2 - CARET_W + 16,
                         CARET_PADDING + CARET_H
                     ), CARET_W, -CARET_H)
                 painter.setPen(outlinePen)
@@ -81,7 +97,7 @@ class PluginBox(ScrollItem):
             if not self.isLast:
                 bottom_caret = Caret(
                     QPoint(
-                        self.width()//2 - CARET_W,
+                        self.width()//2 - CARET_W + 16,
                         self.height() - CARET_PADDING - CARET_H
                     ), CARET_W, CARET_H)
                 painter.setPen(outlinePen)
@@ -146,6 +162,12 @@ class AddPluginBox(ScrollItem):
             self.width()//2 - self.label.width()//2,
             self.height()//2 + self.label.height()
         )
+
+    def hover(self):
+        super().hover()
+        ControlDisplay.setBind(RotaryEncoder.TOP, "add plugin")
+        ControlDisplay.setBind(RotaryEncoder.MIDDLE, "profiles")
+        ControlDisplay.setBind(RotaryEncoder.BOTTOM, "save all")
 
     def paintEvent(self, event):
         painter = QPainter(self)

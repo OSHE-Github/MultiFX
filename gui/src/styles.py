@@ -48,6 +48,13 @@ styles_sublabel = f"""
     background: transparent;
 """
 
+styles_proflabel = f"""
+    font : 28px;
+    font-family: {font_family};
+    color: {color_bot.name()};
+    background: transparent;
+"""
+
 styles_bind = f"""
     font : 10px;
     font-family: {font_family};
