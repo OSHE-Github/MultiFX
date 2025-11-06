@@ -6,12 +6,12 @@ from PyQt5.QtWidgets import QWidget, QLabel
 from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QTransform
 from PyQt5.QtCore import Qt, QRect
 from plugin_manager import Plugin, Parameter
-from styles import styles_label
+from styles import styles_label, BreadcrumbsBarStyle, ScrollBarStyle
 from modhostmanager import updateParameter
 from qwidgets.graphics_utils import SCREEN_W, SCREEN_H
 from qwidgets.controls import RotaryEncoder
 from qwidgets.plugin_box import PluginBox
-from qwidgets.navigation import ScrollItem
+from qwidgets.navigation import ScrollItem, ScrollGroup, PageMode, ScrollBar
 from utils import assets_dir
 
 
@@ -38,28 +38,26 @@ class ParameterPanel(QWidget):
     def initUI(self):
         params = self.plugin.parameters
         # Change to be done dynamically
-        for index in range(0, self.paramCount):
-            try:
-                parameter: Parameter = params[index + (self.page*3)]
-                match parameter.mode:
-                    case "dial":
-                        dial = ParameterReadingRange(parameter)
-                        dial.setParent(self)
-                        dial.move(self.width()//2, (801//3) * index)
-                        self.parameters.append(dial)
-                    case "button":
-                        button = ParameterReadingButton(parameter)
-                        button.setParent(self)
-                        button.move(self.width()//2, (801//3) * index)
-                        self.parameters.append(button)
-                    case "selector":
-                        selector = ParameterReadingSlider(parameter)
-                        selector.setParent(self)
-                        selector.move(self.width()//2, (801//3) * index)
-                        self.parameters.append(selector)
-            except Exception as e:
-                print(e)
-                pass
+        for parameter in params:
+            match parameter.mode:
+                case "dial":
+                    dial = ParameterReadingRange(parameter)
+                    self.parameters.append(dial)
+                case "button":
+                    button = ParameterReadingButton(parameter)
+                    self.parameters.append(button)
+                case "selector":
+                    selector = ParameterReadingSlider(parameter)
+                    self.parameters.append(selector)
+        self.scroll_bar = ScrollBar(RotaryEncoder.MIDDLE)
+        self.scroll_bar.setParent(self)
+        self.scroll_bar.move(int((1 - ScrollBarStyle.REL_W) * self.width()), 0)
+        self.scroll_group = ScrollGroup(
+                self.paramCount, RotaryEncoder.MIDDLE, self.parameters,
+                self.scroll_bar, PageMode.JUMP
+        )
+        self.scroll_group.setParent(self)
+        self.scroll_group.update_bar()
 
     def updateParameter(self, position: int = 0):
         try:
@@ -139,8 +137,7 @@ class ParameterPanel(QWidget):
             case RotaryEncoder.MIDDLE.keyLeft:
                 self.decreaseParameter(1)
             case RotaryEncoder.MIDDLE.keyPress:
-                # TODO: jump next page
-                """"""
+                self.scroll_group.jump()
             case RotaryEncoder.MIDDLE.keyRight:
                 self.increaseParameter(1)
             case RotaryEncoder.BOTTOM.keyLeft:
@@ -221,7 +218,8 @@ class ParameterReadingButton(ScrollItem):
 class ParameterReadingRange(ScrollItem):
     def __init__(self, parameter: Parameter):
         super().__init__(parameter.name)
-        self.setFixedSize(240, 801//3)
+        self.setFixedSize(int((1 - ScrollBarStyle.REL_W) * SCREEN_W),
+                          int((1 - BreadcrumbsBarStyle.REL_H) * SCREEN_H)//3)
         self.initUI(parameter)
 
     def initUI(self, parameter: Parameter):

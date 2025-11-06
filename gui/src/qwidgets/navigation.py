@@ -198,6 +198,16 @@ class ScrollGroup(QWidget):
         self.update_bar()
         return cur
 
+    def jump(self):
+        self.window_top += self.page_size
+        self.window_bottom += self.page_size
+        n = len(self.items)
+        if self.window_bottom > n:
+            self.window_top = 0
+            self.window_bottom = self.page_size - 1
+        self.drawItems()
+        self.update_bar()
+
     def goPrevEdge(self) -> ScrollItem:
         """Used for edge case where the last item is removed"""
         if self.pos <= 0:

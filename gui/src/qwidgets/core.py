@@ -378,7 +378,10 @@ class BoardWindow(QWidget):
         MainWindow.stack.setCurrentWidget(self.param_window)
         BreadcrumbsBar.navForward(plugin.id)
         ControlDisplay.setBind(RotaryEncoder.TOP, "presets")
-        ControlDisplay.setBind(RotaryEncoder.MIDDLE, "next page")
+        if len(plugin.plugin.parameters) > 3:
+            ControlDisplay.setBind(RotaryEncoder.MIDDLE, "next page")
+        else:
+            ControlDisplay.setBind(RotaryEncoder.MIDDLE, "")
         ControlDisplay.setBind(RotaryEncoder.BOTTOM, "back")
 
     def back_to_board(self):
