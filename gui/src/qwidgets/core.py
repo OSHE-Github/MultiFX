@@ -140,8 +140,11 @@ class BoardWindow(QWidget):
         key = event.key()
 
         match key:
+            # handle footswitches/bypass
             case Qt.Key_R | RotaryEncoder.MIDDLE.keyPress:
                 self.changeBypass(self.curIndex())
+                if self.curIndex() is None:
+                    self.restart_callback()
             case Qt.Key_F:
                 self.changeBypass(0)
             case Qt.Key_G:
@@ -154,49 +157,21 @@ class BoardWindow(QWidget):
                 self.changeBypass(4)
             case Qt.Key_L:
                 self.changeBypass(5)
-
-        match self.current:
-            case "plugins":
-                match key:
-                    case RotaryEncoder.TOP.keyLeft:
-                        self.pluginbox.scroll_group.goPrev()
-                    case RotaryEncoder.TOP.keyPress:
-                        self.show_param_screen(self.curItem())
-                        # self.openParamPage()
-                    case RotaryEncoder.TOP.keyRight:
-                        self.pluginbox.scroll_group.goNext()
-                    case RotaryEncoder.MIDDLE.keyLeft:
-                        if self.swap_plugins(-1):
-                            self.pluginbox.scroll_group.goPrev()
-                    case RotaryEncoder.MIDDLE.keyPress:
-                        if self.curIndex() is None:
-                            self.restart_callback()
-                    case RotaryEncoder.MIDDLE.keyRight:
-                        if self.swap_plugins(1):
-                            self.pluginbox.scroll_group.goNext()
-                    case RotaryEncoder.BOTTOM.keyPress:
-                        self.remove_current_plugin()
-
-            case "parameters":
-                match key:
-                    case Qt.Key_Q:
-                        self.decreaseParameter(0)
-                    case Qt.Key_W:
-                        self.closeParamPage()
-                    case Qt.Key_E:
-                        self.increaseParameter(0)
-                    case Qt.Key_A:
-                        self.decreaseParameter(1)
-                    case Qt.Key_S:
-                        self.pageUpParameters()
-                    case Qt.Key_D:
-                        self.increaseParameter(1)
-                    case Qt.Key_Z:
-                        self.decreaseParameter(2)
-                    case Qt.Key_X:
-                        self.pageDownParameters()
-                    case Qt.Key_C:
-                        self.increaseParameter(2)
+            # navigation
+            case RotaryEncoder.TOP.keyLeft:
+                self.pluginbox.scroll_group.goPrev()
+            case RotaryEncoder.TOP.keyPress:
+                self.show_param_screen(self.curItem())
+            case RotaryEncoder.TOP.keyRight:
+                self.pluginbox.scroll_group.goNext()
+            case RotaryEncoder.MIDDLE.keyLeft:
+                if self.swap_plugins(-1):
+                    self.pluginbox.scroll_group.goPrev()
+            case RotaryEncoder.MIDDLE.keyRight:
+                if self.swap_plugins(1):
+                    self.pluginbox.scroll_group.goNext()
+            case RotaryEncoder.BOTTOM.keyPress:
+                self.remove_current_plugin()
 
     def swap_plugins(self, dist: int) -> bool:
         index = self.curIndex()
@@ -263,48 +238,6 @@ class BoardWindow(QWidget):
     def showEvent(self, event):
         self.setFocus()
 
-    def openParamPage(self):
-        index = self.pluginbox.scroll_group.curItem().index
-        try:
-            self.param_page = 0
-            self.plugin = self.plugins.plugins[index]
-            self.paramPanel = ParameterPanel(
-                    self.backgroundColor,
-                    self.pluginbox.scroll_group.curItem().index,
-                    self.param_page,
-                    self.plugin
-            )
-            self.paramPanel.setParent(self)
-            self.paramPanel.show()
-            self.update()
-            self.current = "parameters"
-
-            self.pageNum.setText("Pgn " + str(self.param_page))
-            self.pageNum.adjustSize()
-            self.pageNum.move(
-                    self.width() - self.pageNum.width() - 25,
-                    self.height() - 25
-            )
-            self.update()
-        except Exception as e:
-            print(e)
-            pass
-
-    def closeParamPage(self):
-        self.paramPanel.deleteLater()
-        self.paramPanel.hide()
-        self.paramPanel = None
-        self.update()
-        self.current = "plugins"
-        self.plugin = None
-
-        self.pageNum.setText("Pgn " + str(self.page))
-        self.pageNum.adjustSize()
-        self.pageNum.move(
-            self.width()-self.pageNum.width()-25, self.height()-25
-        )
-        self.update()
-
     def changeBypass(self, position):
         if position is None:
             return
@@ -322,50 +255,6 @@ class BoardWindow(QWidget):
         except Exception as e:
             print(e)
             pass
-
-    def pageUpParameters(self):
-        if (self.param_page == 0):
-            self.param_page = self.param_page + 1
-            self.paramPanel.deleteLater()
-            del self.paramPanel
-            self.paramPanel = ParameterPanel(
-                    self.backgroundColor,
-                    self.curIndex(),
-                    self.param_page,
-                    self.plugin
-            )
-            self.paramPanel.setParent(self)
-            self.paramPanel.show()
-
-            self.pageNum.setText("Pgn " + str(self.param_page))
-            self.pageNum.adjustSize()
-            self.pageNum.move(
-                    self.width() - self.pageNum.width() - 25,
-                    self.height()-25
-            )
-            self.update()
-
-    def pageDownParameters(self):
-        if (self.param_page == 1):
-            self.param_page = self.param_page - 1
-            self.paramPanel.deleteLater()
-            del self.paramPanel
-            self.paramPanel = ParameterPanel(
-                    self.backgroundColor,
-                    self.curIndex(),
-                    self.param_page,
-                    self.plugin
-            )
-            self.paramPanel.setParent(self)
-            self.paramPanel.show()
-
-            self.pageNum.setText("Pgn " + str(self.param_page))
-            self.pageNum.adjustSize()
-            self.pageNum.move(
-                    self.width() - self.pageNum.width() - 25,
-                    self.height()-25
-            )
-            self.update()
 
     def show_param_screen(self, plugin: PluginBox):
         """Switch to the param screen for a plugin.
@@ -429,8 +318,6 @@ class BoxOfPlugins(QWidget):
         self.scroll_bar.move(int((1 - ScrollBarStyle.REL_W) * self.width()), 0)
 
     def updateBypass(self, position: int, bypass):
-        # NOTE: this used to be a bare try-except with nothing in the except
-        # block. I hope this wasn't meant to error out as a feature.
         try:
             self.boxes[position].updateBypass(bypass)
         except Exception as e:
