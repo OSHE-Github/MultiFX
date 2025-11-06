@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QPoint, QRect
 from plugin_manager import PluginManager, Parameter, Plugin
 from modhostmanager import (
     startModHost, connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
-    updateBypass, quitModHost, updateParameter
+    updateBypass, quitModHost
 )
 from styles import (
     styles_indicator, styles_label, styles_window, color_foreground,
@@ -105,9 +105,12 @@ class MainWindow(QWidget):
         ControlDisplay.setBind(RotaryEncoder.MIDDLE, "")
         ControlDisplay.setBind(RotaryEncoder.BOTTOM, "delete")
 
-    def show_param_screen(self, plugin: Plugin):
-        """Switch to the param screen for a plugin"""
-        self.param_window = ParameterPanel(color_background, 0, plugin)
+    def show_param_screen(self, plugin: PluginBox):
+        """Switch to the param screen for a plugin.
+        Uses PluginBox for easier indexing.
+        """
+        self.param_window = ParameterPanel(
+            color_background, 0, plugin, self.board_window.mod_host_manager)
         self.stack.addWidget(self.param_window)
         self.stack.setCurrentWidget(self.param_window)
         ControlDisplay.setBind(RotaryEncoder.TOP, "presets")
@@ -174,7 +177,7 @@ class BoardWindow(QWidget):
                     case RotaryEncoder.TOP.keyLeft:
                         self.pluginbox.scroll_group.goPrev()
                     case RotaryEncoder.TOP.keyPress:
-                        self.param_callback(self.curItem().plugin)
+                        self.param_callback(self.curItem())
                         # self.openParamPage()
                     case RotaryEncoder.TOP.keyRight:
                         self.pluginbox.scroll_group.goNext()
@@ -276,46 +279,6 @@ class BoardWindow(QWidget):
     def showEvent(self, event):
         self.setFocus()
 
-    def decreaseParameter(self, position: int):
-        params = self.plugin.parameters
-        try:
-            parameter: Parameter = params[position + 3*(self.param_page)]
-            parameter.setValue(round(max(
-                parameter.minimum, parameter.value - parameter.increment), 2)
-            )
-            if updateParameter(
-                    self.mod_host_manager,
-                    self.mycursor + 3*self.page,
-                    parameter
-            ) != 0:
-                print("Failed to update")
-                pass
-            self.paramPanel.updateParameter(position)
-            self.update()
-        except Exception as e:
-            print(e)
-            pass
-
-    def increaseParameter(self, position: int):
-        params = self.plugin.parameters
-        try:
-            parameter: Parameter = params[position + 3*(self.param_page)]
-            parameter.setValue(round(min(
-                parameter.max, parameter.value + parameter.increment), 2)
-            )
-            if updateParameter(
-                    self.mod_host_manager,
-                    self.mycursor + 3*self.page,
-                    parameter
-            ) != 0:
-                print("Failed to update")
-                pass
-            self.paramPanel.updateParameter(position)
-            self.update()
-        except Exception as e:
-            print(e)
-            pass
-
     def openParamPage(self):
         index = self.pluginbox.scroll_group.curItem().index
         try:
@@ -357,38 +320,6 @@ class BoardWindow(QWidget):
             self.width()-self.pageNum.width()-25, self.height()-25
         )
         self.update()
-
-    def pageUpPlugins(self):
-        if (self.page == 0):
-            self.page = self.page + 1
-            self.pluginbox.deleteLater()
-            del self.pluginbox
-            self.pluginbox = BoxOfPlugins(self.page, self.plugins)
-            self.pluginbox.setParent(self)
-            self.pluginbox.show()
-
-            self.pageNum.setText("Pgn " + str(self.page))
-            self.pageNum.adjustSize()
-            self.pageNum.move(
-                self.width()-self.pageNum.width()-25, self.height()-25
-            )
-            self.update()
-
-    def pageDownPlugins(self):
-        if (self.page == 1):
-            self.page = self.page - 1
-            self.pluginbox.deleteLater()
-            del self.pluginbox
-            self.pluginbox = BoxOfPlugins(self.page, self.plugins)
-            self.pluginbox.setParent(self)
-            self.pluginbox.show()
-
-            self.pageNum.setText("Pgn " + str(self.page))
-            self.pageNum.adjustSize()
-            self.pageNum.move(
-                self.width()-self.pageNum.width()-25, self.height()-25
-            )
-            self.update()
 
     def changeBypass(self, position):
         if position is None:

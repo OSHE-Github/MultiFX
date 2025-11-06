@@ -7,7 +7,10 @@ from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QTransform
 from PyQt5.QtCore import Qt, QRect
 from plugin_manager import Plugin, Parameter
 from styles import styles_label
+from modhostmanager import updateParameter
 from qwidgets.graphics_utils import SCREEN_W, SCREEN_H
+from qwidgets.controls import RotaryEncoder
+from qwidgets.plugin_box import PluginBox
 
 
 class ParameterPanel(QWidget):
@@ -15,13 +18,18 @@ class ParameterPanel(QWidget):
 
     def __init__(
             self, background_color: str = "white",
-            page: int = 0, plugin: Plugin = None):
+            page: int = 0, pluginbox: PluginBox = None,
+            mod_host_manager=None):
         super().__init__()
         self.setFixedSize(SCREEN_W, SCREEN_H)
         self.background_color = QColor(background_color)
-        self.plugin = plugin
+        self.pluginbox = pluginbox
+        self.plugin = pluginbox.plugin
         self.page = page
         self.parameters = []
+        self.param_page = 0
+        self.mod_host_manager = mod_host_manager
+        self.setFocusPolicy(Qt.StrongFocus)
         self.initUI()
 
     def initUI(self):
@@ -72,6 +80,72 @@ class ParameterPanel(QWidget):
             self.height()
         )
         painter.fillRect(rect, self.background_color)
+
+    def decreaseParameter(self, position: int):
+        params = self.plugin.parameters
+        try:
+            parameter: Parameter = params[position + 3*(self.param_page)]
+            parameter.setValue(round(max(
+                parameter.minimum, parameter.value - parameter.increment), 2)
+            )
+            if updateParameter(
+                    self.mod_host_manager,
+                    self.pluginbox.index,
+                    parameter
+            ) != 0:
+                print("Failed to update")
+                pass
+            self.updateParameter(position)
+            self.update()
+        except Exception as e:
+            print(e)
+            pass
+
+    def increaseParameter(self, position: int):
+        params = self.plugin.parameters
+        try:
+            parameter: Parameter = params[position + 3*(self.param_page)]
+            parameter.setValue(round(min(
+                parameter.max, parameter.value + parameter.increment), 2)
+            )
+            if updateParameter(
+                    self.mod_host_manager,
+                    self.pluginbox.index,
+                    parameter
+            ) != 0:
+                print("Failed to update")
+                pass
+            self.updateParameter(position)
+            self.update()
+        except Exception as e:
+            print(e)
+            pass
+
+    def keyPressEvent(self, event):
+        key = event.key()
+
+        match key:
+            case RotaryEncoder.TOP.keyLeft:
+                self.decreaseParameter(0)
+            case RotaryEncoder.TOP.keyPress:
+                # TODO: presets page
+                """"""
+            case RotaryEncoder.TOP.keyRight:
+                self.increaseParameter(0)
+            case RotaryEncoder.MIDDLE.keyLeft:
+                self.decreaseParameter(1)
+            case RotaryEncoder.MIDDLE.keyPress:
+                # TODO: jump next page
+                """"""
+            case RotaryEncoder.MIDDLE.keyRight:
+                self.increaseParameter(1)
+            case RotaryEncoder.BOTTOM.keyLeft:
+                self.decreaseParameter(2)
+            case RotaryEncoder.BOTTOM.keyPress:
+                # TODO: back
+                """"""
+            case RotaryEncoder.BOTTOM.keyRight:
+                self.increaseParameter(2)
 
 
 class ParameterReadingButton(QWidget):
