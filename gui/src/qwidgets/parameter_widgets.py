@@ -241,7 +241,9 @@ class ParameterReadingRange(ScrollItem):
         self.dialImage = QPixmap(image_path)
         self.dial = QLabel(self)
         # rotate Dial
-        angle = -140 + 280*(parameter.value)/(parameter.max-parameter.minimum)
+        ratio = ((parameter.value - parameter.minimum) /
+                 (parameter.max - parameter.minimum))
+        angle = -140 + 280 * ratio
 
         transformedPixelMap = self.dialImage.transformed(
             QTransform().rotate(angle)
@@ -255,6 +257,19 @@ class ParameterReadingRange(ScrollItem):
             (transformedPixelMap.height() // 2)
         )
 
+        self.min_label = QLabel(str(parameter.minimum), self)
+        self.min_label.setStyleSheet(styles_vallabel)
+        self.min_label.adjustSize()
+        self.min_label.move(
+                self.width()//2 - 64 - self.min_label.width()//2,
+                self.height()//2 + 64)
+        self.max_label = QLabel(str(parameter.max), self)
+        self.max_label.setStyleSheet(styles_vallabel)
+        self.max_label.adjustSize()
+        self.max_label.move(
+                self.width()//2 + 64 - self.max_label.width()//2,
+                self.height()//2 + 64)
+
     def updateValue(self, parameter: Parameter):
         self.value.setText(f"{parameter.value}")
         self.value.adjustSize()
@@ -263,7 +278,9 @@ class ParameterReadingRange(ScrollItem):
             self.height() // 6 + self.label.height()
         )
 
-        angle = -140 + 280*(parameter.value)/(parameter.max-parameter.minimum)
+        ratio = ((parameter.value - parameter.minimum) /
+                 (parameter.max - parameter.minimum))
+        angle = -140 + 280 * ratio
 
         transformedPixelMap = self.dialImage.transformed(
             QTransform().rotate(angle)
