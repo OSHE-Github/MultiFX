@@ -88,11 +88,12 @@ class ParameterPanel(QWidget):
             parameter.setValue(round(max(
                 parameter.minimum, parameter.value - parameter.increment), 2)
             )
-            if updateParameter(
+            res = updateParameter(
                     self.mod_host_manager,
                     self.pluginbox.index,
                     parameter
-            ) != 0:
+            )
+            if res != 0:
                 print("Failed to update")
                 pass
             self.updateParameter(position)

@@ -253,7 +253,9 @@ def updateParameter(sock, instanceNum, parameter: plugin_manager.Parameter) -> i
     if (parameter.type == "lv2"):
         command = f"param_set {instanceNum} {parameter.symbol} {parameter.value}"
         try:
-            return sendCommand(sock, command).split()[1]
+            res = sendCommand(sock, command)
+            print(res)
+            return res.split()[1]
         except Exception as e:
             print(f"Error updatingParameter {e}")
             return -5
@@ -264,7 +266,7 @@ def updateParameter(sock, instanceNum, parameter: plugin_manager.Parameter) -> i
         except Exception as e:
             print(f"Error updatingParameter {e}")
             return -5
-    return 0
+    return -1
 
 
 def updateBypass(sock, instanceNum, plugin: plugin_manager.Plugin):
