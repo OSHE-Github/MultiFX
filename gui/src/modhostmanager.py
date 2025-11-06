@@ -256,7 +256,7 @@ def updateParameter(sock, instanceNum, parameter: plugin_manager.Parameter) -> i
             res = sendCommand(sock, command)
             print(res)
             print(res.split()[1])
-            return res.split()[1]
+            return int(res.split()[1])
         except Exception as e:
             print(f"param_set error: {e}")
             return -5
@@ -266,7 +266,7 @@ def updateParameter(sock, instanceNum, parameter: plugin_manager.Parameter) -> i
             res = sendCommand(sock, command)
             print(res)
             print(res.split()[1])
-            return res.split()[1]
+            return int(res.split()[1])
         except Exception as e:
             print(f"patch_set error: {e}")
             return -5
