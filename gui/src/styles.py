@@ -41,6 +41,13 @@ styles_label = f"""
     background: transparent;
 """
 
+styles_sublabel = f"""
+    font : 28px;
+    font-family: {font_family};
+    color: {color_foreground.name()};
+    background: transparent;
+"""
+
 styles_bind = f"""
     font : 10px;
     font-family: {font_family};

@@ -54,7 +54,7 @@ class FloatingWindow(QWidget):
             group_x + self.group.width()//2 - self.top_continue.width() // 2,
             group_y + self.group.height() + self.top_continue.height()
         )
-        self.update_continues() 
+        self.update_continues()
         ControlDisplay.setBind(self.encoder, "select")
 
     def update_continues(self):
@@ -75,7 +75,7 @@ class FloatingWindow(QWidget):
             int(FloatingWindowStyle.REL_H * SCREEN_H) - 2
         )
         painter.fillRect(rect, color_background)
-        # painter.drawRect(rect)
+        painter.drawRect(rect)
 
     def keyPressEvent(self, event):
         key = event.key()

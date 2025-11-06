@@ -21,7 +21,7 @@ from qwidgets.navigation import (
     BreadcrumbsBar, ScrollBar, ScrollItem, ScrollGroup
 )
 from qwidgets.floating_window import FloatingWindow, DialogItem
-from qwidgets.plugin_box import PluginBox
+from qwidgets.plugin_box import PluginBox, AddPluginBox
 
 
 class MainWindow(QWidget):
@@ -164,11 +164,11 @@ class BoardWindow(QWidget):
                     case RotaryEncoder.TOP.keyRight:
                         self.pluginbox.scroll_group.goNext()
                     case RotaryEncoder.MIDDLE.keyLeft:
-                        self.swap_plugins(-1)
-                        self.pluginbox.scroll_group.goPrev()
+                        if self.swap_plugins(-1):
+                            self.pluginbox.scroll_group.goPrev()
                     case RotaryEncoder.MIDDLE.keyRight:
-                        self.swap_plugins(1)
-                        self.pluginbox.scroll_group.goNext()
+                        if self.swap_plugins(1):
+                            self.pluginbox.scroll_group.goNext()
                     case RotaryEncoder.BOTTOM.keyPress:
                         self.remove_current_plugin()
 
@@ -193,23 +193,36 @@ class BoardWindow(QWidget):
                     case Qt.Key_C:
                         self.increaseParameter(2)
 
-    def swap_plugins(self, dist: int):
+    def swap_plugins(self, dist: int) -> bool:
         index = self.curIndex()
-        n = len(self.plugins.plugins)
+        # don't swap with add plugin widget
+        if index is None:
+            return False
+        n = len(self.pluginbox.scroll_group.items)
         if index + dist < 0 or index + dist >= n:
             return
         items = self.pluginbox.boxes
         temp = items[index]
+        other = items[index + dist]
+        if other.id == AddPluginBox.ID:
+            return
         temp.unhover()
         temp.index = index + dist
         items[index+dist].index = index
-        items[index] = items[index+dist]
+        items[index] = other
         items[index+dist] = temp
+        temp.isLast = temp.index == n - 2
+        other.isLast = other.index == n - 2
+
         self.pluginbox.scroll_group.drawItems()
         # TODO: swap in mod-host
 
+        return True
+
     def remove_current_plugin(self):
         index = self.curIndex()
+        if index is None:
+            return
         n = len(self.pluginbox.scroll_group.items)
         if index >= n:
             return
@@ -218,7 +231,7 @@ class BoardWindow(QWidget):
         items[index].hide()
         items.pop(index)
         # reassign plugin-box indices
-        for i in range(index, n - 1):
+        for i in range(index, n - 2):
             items[i].index -= 1
         # cleared group
         if n == 1:
@@ -360,6 +373,8 @@ class BoardWindow(QWidget):
             self.update()
 
     def changeBypass(self, position):
+        if position is None:
+            return
         try:
             # get the value of bypass from the plugin our cursor is currently
             # on
@@ -419,7 +434,9 @@ class BoardWindow(QWidget):
             )
             self.update()
 
-    def curIndex(self):
+    def curIndex(self) -> int | None:
+        if self.pluginbox.scroll_group.curItem().id == AddPluginBox.ID:
+            return None
         return self.pluginbox.scroll_group.curItem().index
 
 
@@ -445,6 +462,8 @@ class BoxOfPlugins(QWidget):
             plugin = plugins.plugins[i]
             box = PluginBox(i, plugin.name, plugin.bypass)
             self.boxes.append(box)
+        self.boxes[n-1].isLast = True
+        self.boxes.append(AddPluginBox())
         self.scroll_bar = ScrollBar(RotaryEncoder.TOP)
         self.scroll_bar.setParent(self)
         self.scroll_group = ScrollGroup(

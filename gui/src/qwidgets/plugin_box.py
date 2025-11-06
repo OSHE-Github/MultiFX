@@ -5,7 +5,8 @@ from PyQt5.QtCore import Qt, QRect, QPoint
 from PyQt5.QtGui import QPixmap, QPainter, QPen
 from qwidgets.graphics_utils import SCREEN_H, SCREEN_W, Caret
 from styles import (styles_label, styles_indicator, color_foreground,
-                    ScrollBarStyle, ControlDisplayStyle, color_background)
+                    ScrollBarStyle, ControlDisplayStyle, color_background,
+                    styles_sublabel)
 from utils import assets_dir
 from qwidgets.navigation import ScrollItem
 from qwidgets.controls import RotaryEncoder, ControlDisplay, RotaryEncoderData
@@ -24,6 +25,7 @@ class PluginBox(ScrollItem):
             int((1 - ScrollBarStyle.REL_W) * SCREEN_W),
             int((1 - ControlDisplayStyle.REL_H) * SCREEN_H) // 3
         )
+        self.isLast = False
         self.initUI()
 
     def unhover(self):
@@ -76,15 +78,16 @@ class PluginBox(ScrollItem):
                 painter.drawPolygon(top_caret)
                 painter.setPen(pen)
                 painter.drawPolygon(top_caret)
-            bottom_caret = Caret(
-                QPoint(
-                    self.width()//2 - CARET_W,
-                    self.height() - CARET_PADDING - CARET_H
-                ), CARET_W, CARET_H)
-            painter.setPen(outlinePen)
-            painter.drawPolygon(bottom_caret)
-            painter.setPen(pen)
-            painter.drawPolygon(bottom_caret)
+            if not self.isLast:
+                bottom_caret = Caret(
+                    QPoint(
+                        self.width()//2 - CARET_W,
+                        self.height() - CARET_PADDING - CARET_H
+                    ), CARET_W, CARET_H)
+                painter.setPen(outlinePen)
+                painter.drawPolygon(bottom_caret)
+                painter.setPen(pen)
+                painter.drawPolygon(bottom_caret)
 
         self.drawBypass()
 
@@ -105,5 +108,54 @@ class PluginBox(ScrollItem):
         pen = QPen(color_foreground, ScrollBarStyle.LINE_WIDTH)
         painter.setPen(pen)
 
+        painter.fillRect(rect, fill_color)
+        painter.drawRect(rect)
+
+
+class AddPluginBox(ScrollItem):
+    ID = "add plugin"
+
+    def __init__(self):
+        super().__init__("add plugin")
+        self.hover_fill = RotaryEncoder.TOP.color
+        self.unhover_fill = color_background
+        # Make room for scroll bar and breadcrumbs
+        self.setFixedSize(
+            int((1 - ScrollBarStyle.REL_W) * SCREEN_W),
+            int((1 - ControlDisplayStyle.REL_H) * SCREEN_H) // 3
+        )
+        self.initUI()
+
+    def initUI(self):
+        self.plus = QLabel("+")
+        self.plus.setStyleSheet(styles_label)
+        self.plus.setAlignment(Qt.AlignCenter)
+        self.plus.adjustSize()
+        self.plus.setParent(self)
+        self.plus.move(
+            self.width()//2 - self.plus.width()//2,
+            self.height()//2 - self.plus.height()
+        )
+
+        self.label = QLabel(AddPluginBox.ID)
+        self.label.setStyleSheet(styles_sublabel)
+        self.label.setAlignment(Qt.AlignCenter)
+        self.label.adjustSize()
+        self.label.setParent(self)
+        self.label.move(
+            self.width()//2 - self.label.width()//2,
+            self.height()//2 + self.label.height()
+        )
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+
+        pen = QPen(color_foreground, ScrollBarStyle.LINE_WIDTH)
+        painter.setPen(pen)
+
+        rect = QRect(0, 0, self.width()-1, self.height())
+        fill_color = self.unhover_fill
+        if self.hovered:
+            fill_color = self.hover_fill
         painter.fillRect(rect, fill_color)
         painter.drawRect(rect)
