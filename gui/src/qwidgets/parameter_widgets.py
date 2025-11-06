@@ -7,19 +7,19 @@ from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap, QTransform
 from PyQt5.QtCore import Qt, QRect
 from plugin_manager import Plugin, Parameter
 from styles import styles_label
+from qwidgets.graphics_utils import SCREEN_W, SCREEN_H
 
 
 class ParameterPanel(QWidget):
     paramCount = 3
 
     def __init__(
-            self, background_color: str = "white", positon: int = 0,
+            self, background_color: str = "white",
             page: int = 0, plugin: Plugin = None):
         super().__init__()
-        self.setFixedSize(480, 800)
+        self.setFixedSize(SCREEN_W, SCREEN_H)
         self.background_color = QColor(background_color)
         self.plugin = plugin
-        self.position = positon
         self.page = page
         self.parameters = []
         self.initUI()
@@ -66,10 +66,10 @@ class ParameterPanel(QWidget):
         painter.setPen(pen)
 
         rect = QRect(
-            (self.width()//2) - 7,
-            (self.height()//3)*self.position + 5,
-            15,
-            self.height()//3 - 9
+            0,
+            0,
+            self.width(),
+            self.height()
         )
         painter.fillRect(rect, self.background_color)
 

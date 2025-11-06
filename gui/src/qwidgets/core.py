@@ -84,7 +84,8 @@ class MainWindow(QWidget):
         self.board_window = BoardWindow(
             board,
             mod_host_manager=modhost,
-            restart_callback=self.show_start_screen
+            restart_callback=self.show_start_screen,
+            param_callback=self.show_param_screen
         )
         self.stack.addWidget(self.board_window)
         self.stack.setCurrentWidget(self.board_window)  # Switch view
@@ -96,24 +97,42 @@ class MainWindow(QWidget):
     def show_start_screen(self):
         """Switch back to the start screen."""
         self.stack.setCurrentWidget(self.start_screen)  # Switch back
+        self.stack.removeWidget(self.board_window)
+        del self.board_window
         self.start_screen.setFocus()
         BreadcrumbsBar.navBackward()
         ControlDisplay.setBind(RotaryEncoder.TOP, "select")
         ControlDisplay.setBind(RotaryEncoder.MIDDLE, "")
         ControlDisplay.setBind(RotaryEncoder.BOTTOM, "delete")
 
+    def show_param_screen(self, plugin: Plugin):
+        """Switch to the param screen for a plugin"""
+        self.param_window = ParameterPanel(color_background, 0, plugin)
+        self.stack.addWidget(self.param_window)
+        self.stack.setCurrentWidget(self.param_window)
+        ControlDisplay.setBind(RotaryEncoder.TOP, "presets")
+        ControlDisplay.setBind(RotaryEncoder.MIDDLE, "next page")
+        ControlDisplay.setBind(RotaryEncoder.BOTTOM, "back")
+
+    def back_to_board(self):
+        """Switches back to board screen from parameter screen"""
+        self.stack.setCurrentWidget(self.board_window)
+        self.stack.removeWidget(self.param_window)
+        del self.param_window
+        self.board_window.curItem().hover()
+
 
 class BoardWindow(QWidget):
     def __init__(
-            self, manager: PluginManager, mod_host_manager, restart_callback
+            self, manager: PluginManager, mod_host_manager, restart_callback,
+            param_callback
     ):
         super().__init__()
         self.plugins = manager
         self.mod_host_manager = mod_host_manager
         self.restart_callback = restart_callback
+        self.param_callback = param_callback
         self.backgroundColor = color_background
-
-        self.rcount = 0
 
         self.param_page = 0
         self.current = "plugins"
@@ -149,22 +168,14 @@ class BoardWindow(QWidget):
             case Qt.Key_L:
                 self.changeBypass(5)
 
-        if key == Qt.Key_R:
-            self.rcount += 1
-            if self.rcount >= 7:
-                self.rcount = 0
-                quitModHost(self.mod_host_manager)
-                self.restart_callback()
-        else:
-            self.rcount = 0
-
         match self.current:
             case "plugins":
                 match key:
                     case RotaryEncoder.TOP.keyLeft:
                         self.pluginbox.scroll_group.goPrev()
                     case RotaryEncoder.TOP.keyPress:
-                        self.openParamPage()
+                        self.param_callback(self.curItem().plugin)
+                        # self.openParamPage()
                     case RotaryEncoder.TOP.keyRight:
                         self.pluginbox.scroll_group.goNext()
                     case RotaryEncoder.MIDDLE.keyLeft:
@@ -446,6 +457,9 @@ class BoardWindow(QWidget):
             return None
         return self.pluginbox.scroll_group.curItem().index
 
+    def curItem(self) -> PluginBox | AddPluginBox:
+        return self.pluginbox.scroll_group.items[self.curIndex()]
+
 
 class BoxOfPlugins(QWidget):
     pluginsPerPage: int = 3
@@ -459,15 +473,9 @@ class BoxOfPlugins(QWidget):
         self.boxes = []
         # Create scroll group
         n = len(plugins.plugins)
-        if n == 0:
-            box = PluginBox("Unable to load plugins!", 0)
-            box.label.setStyleSheet(styles_error)
-            box.setParent(self)
-            self.boxes.append(box)
-            return
         for i in range(0, n):
             plugin = plugins.plugins[i]
-            box = PluginBox(i, plugin.name, plugin.bypass)
+            box = PluginBox(i, plugin, plugin.bypass)
             self.boxes.append(box)
         self.boxes[n-1].isLast = True
         self.boxes.append(AddPluginBox())

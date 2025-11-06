@@ -10,13 +10,15 @@ from styles import (styles_label, styles_indicator, color_foreground,
 from utils import assets_dir
 from qwidgets.navigation import ScrollItem
 from qwidgets.controls import RotaryEncoder, ControlDisplay, RotaryEncoderData
+from plugin_manager import Plugin
 
 
 class PluginBox(ScrollItem):
-    def __init__(self, index: int, plugin_name="", bypass: int = 0):
-        super().__init__(plugin_name)
+    def __init__(self, index: int, plugin: Plugin, bypass: int = 0):
+        super().__init__(plugin.name)
         self.index = index
-        self.plugin_name = plugin_name
+        self.plugin = plugin
+        self.plugin_name = plugin.name
         self.bypass = bypass
         self.hover_fill = RotaryEncoder.TOP.color
         self.unhover_fill = color_background
