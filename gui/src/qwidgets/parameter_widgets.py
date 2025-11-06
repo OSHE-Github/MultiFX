@@ -153,7 +153,7 @@ class ParameterPanel(QWidget):
 
 class ParameterReadingButton(ScrollItem):
     def __init__(self, parameter: Parameter):
-        super().__init__()
+        super().__init__(parameter.name)
         self.setFixedSize(240, 801//3)
         self.initUI(parameter)
 
@@ -218,9 +218,9 @@ class ParameterReadingButton(ScrollItem):
         )
 
 
-class ParameterReadingRange(QWidget):
+class ParameterReadingRange(ScrollItem):
     def __init__(self, parameter: Parameter):
-        super().__init__()
+        super().__init__(parameter.name)
         self.setFixedSize(240, 801//3)
         self.initUI(parameter)
 
@@ -289,9 +289,9 @@ class ParameterReadingRange(QWidget):
         )
 
 
-class ParameterReadingSlider(QWidget):
+class ParameterReadingSlider(ScrollItem):
     def __init__(self, parameter: Parameter):
-        super().__init__()
+        super().__init__(parameter.name)
         self.setFixedSize(240, 801//3)
         self.initUI(parameter)
 

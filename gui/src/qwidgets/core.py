@@ -118,6 +118,7 @@ class MainWindow(QWidget):
             color_background, 0, plugin, self.board_window.mod_host_manager)
         self.stack.addWidget(self.param_window)
         self.stack.setCurrentWidget(self.param_window)
+        BreadcrumbsBar.navForward(plugin.id)
         ControlDisplay.setBind(RotaryEncoder.TOP, "presets")
         ControlDisplay.setBind(RotaryEncoder.MIDDLE, "next page")
         ControlDisplay.setBind(RotaryEncoder.BOTTOM, "back")
