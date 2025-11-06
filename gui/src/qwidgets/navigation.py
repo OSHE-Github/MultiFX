@@ -244,7 +244,7 @@ class ScrollGroup(QWidget):
         rect = QRect(0, 0, self.width(), self.height())
         # fill with blank for the case where items are removed
         painter.fillRect(rect, color_background)
-        painter.drawRect(rect)
+        # painter.drawRect(rect)
 
     def update_bar(self):
         if not self.scroll_bar:

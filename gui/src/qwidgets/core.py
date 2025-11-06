@@ -465,9 +465,8 @@ class BoxOfPlugins(QWidget):
             pass
 
 
-class ProfileSelectWindow(QWidget):
+class ProfileSelectWindow(FloatingWindow):
     def __init__(self, callback):
-        super().__init__()
         self.json_dir = os.path.dirname(config_dir)
         self.json_files = self.get_json_files(config_dir)
         self.json_files.sort()
@@ -480,9 +479,40 @@ class ProfileSelectWindow(QWidget):
             item = DialogItem(p.replace(".json", ""))
             dialog_items.append(item)
         scroll_group = ScrollGroup(4, RotaryEncoder.TOP, dialog_items)
-        self.floating_window = FloatingWindow("SELECT PROFILE", scroll_group,
-                                              RotaryEncoder.TOP, callback)
-        self.floating_window.setParent(self)
+        super().__init__("SELECT PROFILE", scroll_group, RotaryEncoder.TOP,
+                         callback)
+        ControlDisplay.setBind(RotaryEncoder.BOTTOM, "delete")
+
+    def keyPressEvent(self, event):
+        super().keyPressEvent(event)
+        key = event.key()
+
+        match key:
+            case RotaryEncoder.BOTTOM.keyPress:
+                self.remove_profile()
+
+    def remove_profile(self):
+        # TODO: Prompt to confirm
+        index = self.group.pos
+        items = self.group.items
+        n = len(items)
+        if index >= n:
+            return
+        # Prevent last item from sticking around
+        items[index].hide()
+        items.pop(index)
+        # cleared group
+        if n == 1:
+            return
+        # adjust to new position
+        if index < n - 1:
+            items[index].hover()
+        if self.group.window_top != 0 or index == n - 1:
+            self.group.goPrevEdge()
+        self.group.repaint()
+        self.group.drawItems()
+        super().update_continues()
+        # TODO: actually delete plugin
 
     def get_json_files(self, directory):
         """Returns a list of all JSON files in the specified directory."""
