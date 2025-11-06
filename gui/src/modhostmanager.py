@@ -249,21 +249,24 @@ def connectSystemPlaybackMono(sock, source):
         return -5
 
 
-def updateParameter(sock, instanceNum, parameter: plugin_manager.Parameter):
+def updateParameter(sock, instanceNum, parameter: plugin_manager.Parameter) -> int:
     if (parameter.type == "lv2"):
         command = f"param_set {instanceNum} {parameter.symbol} {parameter.value}"
         try:
-            return sendCommand(sock, command).split()[1]
+            res = sendCommand(sock, command)
+            return int(res.split()[1])
         except Exception as e:
-            print(f"Error updatingParameter {e}")
+            print(f"param_set error: {e}")
             return -5
     if (parameter.type == "plug"):
         command = f"patch_set {instanceNum} {parameter.symbol} {parameter.value}"
         try:
-            return sendCommand(sock, command).split()[1]
+            res = sendCommand(sock, command)
+            return int(res.split()[1])
         except Exception as e:
-            print(f"Error updatingParameter {e}")
+            print(f"patch_set error: {e}")
             return -5
+    return -1
 
 
 def updateBypass(sock, instanceNum, plugin: plugin_manager.Plugin):

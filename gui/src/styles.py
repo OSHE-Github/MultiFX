@@ -48,10 +48,25 @@ styles_sublabel = f"""
     background: transparent;
 """
 
+# Used for values of parameters
+styles_vallabel = f"""
+    font : 18px;
+    font-family: {font_family};
+    color: {color_inactive.name()};
+    background: transparent;
+"""
+
 styles_proflabel = f"""
     font : 28px;
     font-family: {font_family};
     color: {color_bot.name()};
+    background: transparent;
+"""
+
+styles_paramlabel = f"""
+    font : bold 28px;
+    font-family: {font_family};
+    color: {color_foreground.name()};
     background: transparent;
 """
 

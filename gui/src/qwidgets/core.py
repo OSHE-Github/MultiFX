@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QPoint, QRect
 from plugin_manager import PluginManager, Parameter, Plugin
 from modhostmanager import (
     startModHost, connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
-    updateBypass, quitModHost, updateParameter
+    updateBypass, quitModHost
 )
 from styles import (
     styles_indicator, styles_label, styles_window, color_foreground,
@@ -25,11 +25,14 @@ from qwidgets.plugin_box import PluginBox, AddPluginBox
 
 
 class MainWindow(QWidget):
+    stack: QStackedWidget = None
+
     def __init__(self):
         super().__init__()
         self.setGeometry(0, 0, SCREEN_W, SCREEN_H)
 
         self.stack = QStackedWidget(self)
+        MainWindow.stack = self.stack
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.stack)
         self.layout.setSpacing(0)
@@ -62,6 +65,10 @@ class MainWindow(QWidget):
 
     def launch_board(self, selected_profile):
         """Called when a JSON file is selected to load the board"""
+        # Loading the profile takes a little, here for feedback
+        BreadcrumbsBar.navForward("LOADING PLUGINS...")
+        self.repaint()
+
         board = PluginManager()
         selected_json = selected_profile + ".json"
         json_path = os.path.join(config_dir, selected_json)
@@ -84,18 +91,20 @@ class MainWindow(QWidget):
         self.board_window = BoardWindow(
             board,
             mod_host_manager=modhost,
-            restart_callback=self.show_start_screen
+            restart_callback=self.show_start_screen,
         )
         self.stack.addWidget(self.board_window)
         self.stack.setCurrentWidget(self.board_window)  # Switch view
         self.board_window.setFocus()
 
         # Update breadcrumbs
+        BreadcrumbsBar.navBackward()
         BreadcrumbsBar.navForward("view plugins")
 
     def show_start_screen(self):
         """Switch back to the start screen."""
         self.stack.setCurrentWidget(self.start_screen)  # Switch back
+        self.stack.removeWidget(self.board_window)
         self.start_screen.setFocus()
         BreadcrumbsBar.navBackward()
         ControlDisplay.setBind(RotaryEncoder.TOP, "select")
@@ -105,15 +114,12 @@ class MainWindow(QWidget):
 
 class BoardWindow(QWidget):
     def __init__(
-            self, manager: PluginManager, mod_host_manager, restart_callback
-    ):
+            self, manager: PluginManager, mod_host_manager, restart_callback):
         super().__init__()
         self.plugins = manager
         self.mod_host_manager = mod_host_manager
         self.restart_callback = restart_callback
         self.backgroundColor = color_background
-
-        self.rcount = 0
 
         self.param_page = 0
         self.current = "plugins"
@@ -149,22 +155,14 @@ class BoardWindow(QWidget):
             case Qt.Key_L:
                 self.changeBypass(5)
 
-        if key == Qt.Key_R:
-            self.rcount += 1
-            if self.rcount >= 7:
-                self.rcount = 0
-                quitModHost(self.mod_host_manager)
-                self.restart_callback()
-        else:
-            self.rcount = 0
-
         match self.current:
             case "plugins":
                 match key:
                     case RotaryEncoder.TOP.keyLeft:
                         self.pluginbox.scroll_group.goPrev()
                     case RotaryEncoder.TOP.keyPress:
-                        self.openParamPage()
+                        self.show_param_screen(self.curItem())
+                        # self.openParamPage()
                     case RotaryEncoder.TOP.keyRight:
                         self.pluginbox.scroll_group.goNext()
                     case RotaryEncoder.MIDDLE.keyLeft:
@@ -265,46 +263,6 @@ class BoardWindow(QWidget):
     def showEvent(self, event):
         self.setFocus()
 
-    def decreaseParameter(self, position: int):
-        params = self.plugin.parameters
-        try:
-            parameter: Parameter = params[position + 3*(self.param_page)]
-            parameter.setValue(round(max(
-                parameter.minimum, parameter.value - parameter.increment), 2)
-            )
-            if updateParameter(
-                    self.mod_host_manager,
-                    self.mycursor + 3*self.page,
-                    parameter
-            ) != 0:
-                print("Failed to update")
-                pass
-            self.paramPanel.updateParameter(position)
-            self.update()
-        except Exception as e:
-            print(e)
-            pass
-
-    def increaseParameter(self, position: int):
-        params = self.plugin.parameters
-        try:
-            parameter: Parameter = params[position + 3*(self.param_page)]
-            parameter.setValue(round(min(
-                parameter.max, parameter.value + parameter.increment), 2)
-            )
-            if updateParameter(
-                    self.mod_host_manager,
-                    self.mycursor + 3*self.page,
-                    parameter
-            ) != 0:
-                print("Failed to update")
-                pass
-            self.paramPanel.updateParameter(position)
-            self.update()
-        except Exception as e:
-            print(e)
-            pass
-
     def openParamPage(self):
         index = self.pluginbox.scroll_group.curItem().index
         try:
@@ -346,38 +304,6 @@ class BoardWindow(QWidget):
             self.width()-self.pageNum.width()-25, self.height()-25
         )
         self.update()
-
-    def pageUpPlugins(self):
-        if (self.page == 0):
-            self.page = self.page + 1
-            self.pluginbox.deleteLater()
-            del self.pluginbox
-            self.pluginbox = BoxOfPlugins(self.page, self.plugins)
-            self.pluginbox.setParent(self)
-            self.pluginbox.show()
-
-            self.pageNum.setText("Pgn " + str(self.page))
-            self.pageNum.adjustSize()
-            self.pageNum.move(
-                self.width()-self.pageNum.width()-25, self.height()-25
-            )
-            self.update()
-
-    def pageDownPlugins(self):
-        if (self.page == 1):
-            self.page = self.page - 1
-            self.pluginbox.deleteLater()
-            del self.pluginbox
-            self.pluginbox = BoxOfPlugins(self.page, self.plugins)
-            self.pluginbox.setParent(self)
-            self.pluginbox.show()
-
-            self.pageNum.setText("Pgn " + str(self.page))
-            self.pageNum.adjustSize()
-            self.pageNum.move(
-                self.width()-self.pageNum.width()-25, self.height()-25
-            )
-            self.update()
 
     def changeBypass(self, position):
         if position is None:
@@ -441,10 +367,37 @@ class BoardWindow(QWidget):
             )
             self.update()
 
+    def show_param_screen(self, plugin: PluginBox):
+        """Switch to the param screen for a plugin.
+        Uses PluginBox for easier indexing.
+        """
+        self.param_window = ParameterPanel(plugin, self.mod_host_manager,
+                                           self.back_to_board)
+        MainWindow.stack.addWidget(self.param_window)
+        MainWindow.stack.setCurrentWidget(self.param_window)
+        BreadcrumbsBar.navForward(plugin.id)
+        ControlDisplay.setBind(RotaryEncoder.TOP, "presets")
+        if len(plugin.plugin.parameters) > 3:
+            ControlDisplay.setBind(RotaryEncoder.MIDDLE, "next page")
+        else:
+            ControlDisplay.setBind(RotaryEncoder.MIDDLE, "")
+        ControlDisplay.setBind(RotaryEncoder.BOTTOM, "back")
+
+    def back_to_board(self):
+        """Switches back to board screen from parameter screen"""
+        MainWindow.stack.setCurrentWidget(self)
+        MainWindow.stack.removeWidget(self.param_window)
+        del self.param_window
+        BreadcrumbsBar.navBackward()
+        self.curItem().hover()
+
     def curIndex(self) -> int | None:
         if self.pluginbox.scroll_group.curItem().id == AddPluginBox.ID:
             return None
         return self.pluginbox.scroll_group.curItem().index
+
+    def curItem(self) -> PluginBox | AddPluginBox:
+        return self.pluginbox.scroll_group.items[self.curIndex()]
 
 
 class BoxOfPlugins(QWidget):
@@ -459,15 +412,9 @@ class BoxOfPlugins(QWidget):
         self.boxes = []
         # Create scroll group
         n = len(plugins.plugins)
-        if n == 0:
-            box = PluginBox("Unable to load plugins!", 0)
-            box.label.setStyleSheet(styles_error)
-            box.setParent(self)
-            self.boxes.append(box)
-            return
         for i in range(0, n):
             plugin = plugins.plugins[i]
-            box = PluginBox(i, plugin.name, plugin.bypass)
+            box = PluginBox(i, plugin, plugin.bypass)
             self.boxes.append(box)
         self.boxes[n-1].isLast = True
         self.boxes.append(AddPluginBox())
