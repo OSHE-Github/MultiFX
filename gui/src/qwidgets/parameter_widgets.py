@@ -11,6 +11,8 @@ from modhostmanager import updateParameter
 from qwidgets.graphics_utils import SCREEN_W, SCREEN_H
 from qwidgets.controls import RotaryEncoder
 from qwidgets.plugin_box import PluginBox
+from qwidgets.navigation import ScrollItem
+from utils import assets_dir
 
 
 class ParameterPanel(QWidget):
@@ -149,7 +151,7 @@ class ParameterPanel(QWidget):
                 self.increaseParameter(2)
 
 
-class ParameterReadingButton(QWidget):
+class ParameterReadingButton(ScrollItem):
     def __init__(self, parameter: Parameter):
         super().__init__()
         self.setFixedSize(240, 801//3)
@@ -177,11 +179,8 @@ class ParameterReadingButton(QWidget):
             self.height() // 6 + self.label.height()
         )
 
-        # find path to Dial.png
-        script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-
-        self.button_on_path = os.path.join(script_dir, "Graphics/BP.png")
-        self.button_off_path = os.path.join(script_dir, "Graphics/BNP.png")
+        self.button_on_path = os.path.join(assets_dir, "BP.png")
+        self.button_off_path = os.path.join(assets_dir, "BNP.png")
 
         # Create Dial on screen
         if (parameter.value == 0):
@@ -247,9 +246,7 @@ class ParameterReadingRange(QWidget):
             self.height() // 6 + self.label.height()
         )
 
-        # find path to Dial.png
-        script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-        image_path = os.path.join(script_dir, "Graphics/Dial.png")
+        image_path = os.path.join(assets_dir, "Dial.png")
 
         # Create Dial on screen
         self.dialImage = QPixmap(image_path)
@@ -320,9 +317,7 @@ class ParameterReadingSlider(QWidget):
             self.height() // 6 + self.label.height()
         )
 
-        # find path to Dial.png
-        script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-        slider = os.path.join(script_dir, "Graphics/Slider.png")
+        slider = os.path.join(assets_dir, "Slider.png")
         sliderPix = QPixmap(slider)
 
         self.slider = QLabel(self)
