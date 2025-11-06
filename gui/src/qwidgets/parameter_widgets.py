@@ -21,7 +21,7 @@ class ParameterPanel(QWidget):
     def __init__(
             self, background_color: str = "white",
             page: int = 0, pluginbox: PluginBox = None,
-            mod_host_manager=None):
+            mod_host_manager=None, back_callback=None):
         super().__init__()
         self.setFixedSize(SCREEN_W, SCREEN_H)
         self.background_color = QColor(background_color)
@@ -31,6 +31,7 @@ class ParameterPanel(QWidget):
         self.parameters = []
         self.param_page = 0
         self.mod_host_manager = mod_host_manager
+        self.back_callback = back_callback
         self.setFocusPolicy(Qt.StrongFocus)
         self.initUI()
 
@@ -145,8 +146,7 @@ class ParameterPanel(QWidget):
             case RotaryEncoder.BOTTOM.keyLeft:
                 self.decreaseParameter(2)
             case RotaryEncoder.BOTTOM.keyPress:
-                # TODO: back
-                """"""
+                self.back_callback()
             case RotaryEncoder.BOTTOM.keyRight:
                 self.increaseParameter(2)
 

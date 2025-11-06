@@ -25,11 +25,14 @@ from qwidgets.plugin_box import PluginBox, AddPluginBox
 
 
 class MainWindow(QWidget):
+    stack: QStackedWidget = None
+
     def __init__(self):
         super().__init__()
         self.setGeometry(0, 0, SCREEN_W, SCREEN_H)
 
         self.stack = QStackedWidget(self)
+        MainWindow.stack = self.stack
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.stack)
         self.layout.setSpacing(0)
@@ -89,7 +92,6 @@ class MainWindow(QWidget):
             board,
             mod_host_manager=modhost,
             restart_callback=self.show_start_screen,
-            param_callback=self.show_param_screen
         )
         self.stack.addWidget(self.board_window)
         self.stack.setCurrentWidget(self.board_window)  # Switch view
@@ -103,44 +105,20 @@ class MainWindow(QWidget):
         """Switch back to the start screen."""
         self.stack.setCurrentWidget(self.start_screen)  # Switch back
         self.stack.removeWidget(self.board_window)
-        del self.board_window
         self.start_screen.setFocus()
         BreadcrumbsBar.navBackward()
         ControlDisplay.setBind(RotaryEncoder.TOP, "select")
         ControlDisplay.setBind(RotaryEncoder.MIDDLE, "")
         ControlDisplay.setBind(RotaryEncoder.BOTTOM, "delete")
 
-    def show_param_screen(self, plugin: PluginBox):
-        """Switch to the param screen for a plugin.
-        Uses PluginBox for easier indexing.
-        """
-        self.param_window = ParameterPanel(
-            color_background, 0, plugin, self.board_window.mod_host_manager)
-        self.stack.addWidget(self.param_window)
-        self.stack.setCurrentWidget(self.param_window)
-        BreadcrumbsBar.navForward(plugin.id)
-        ControlDisplay.setBind(RotaryEncoder.TOP, "presets")
-        ControlDisplay.setBind(RotaryEncoder.MIDDLE, "next page")
-        ControlDisplay.setBind(RotaryEncoder.BOTTOM, "back")
-
-    def back_to_board(self):
-        """Switches back to board screen from parameter screen"""
-        self.stack.setCurrentWidget(self.board_window)
-        self.stack.removeWidget(self.param_window)
-        del self.param_window
-        self.board_window.curItem().hover()
-
 
 class BoardWindow(QWidget):
     def __init__(
-            self, manager: PluginManager, mod_host_manager, restart_callback,
-            param_callback
-    ):
+            self, manager: PluginManager, mod_host_manager, restart_callback):
         super().__init__()
         self.plugins = manager
         self.mod_host_manager = mod_host_manager
         self.restart_callback = restart_callback
-        self.param_callback = param_callback
         self.backgroundColor = color_background
 
         self.param_page = 0
@@ -183,7 +161,7 @@ class BoardWindow(QWidget):
                     case RotaryEncoder.TOP.keyLeft:
                         self.pluginbox.scroll_group.goPrev()
                     case RotaryEncoder.TOP.keyPress:
-                        self.param_callback(self.curItem())
+                        self.show_param_screen(self.curItem())
                         # self.openParamPage()
                     case RotaryEncoder.TOP.keyRight:
                         self.pluginbox.scroll_group.goNext()
@@ -388,6 +366,28 @@ class BoardWindow(QWidget):
                     self.height()-25
             )
             self.update()
+
+    def show_param_screen(self, plugin: PluginBox):
+        """Switch to the param screen for a plugin.
+        Uses PluginBox for easier indexing.
+        """
+        self.param_window = ParameterPanel(
+            color_background, 0, plugin, self.mod_host_manager,
+            self.back_to_board)
+        MainWindow.stack.addWidget(self.param_window)
+        MainWindow.stack.setCurrentWidget(self.param_window)
+        BreadcrumbsBar.navForward(plugin.id)
+        ControlDisplay.setBind(RotaryEncoder.TOP, "presets")
+        ControlDisplay.setBind(RotaryEncoder.MIDDLE, "next page")
+        ControlDisplay.setBind(RotaryEncoder.BOTTOM, "back")
+
+    def back_to_board(self):
+        """Switches back to board screen from parameter screen"""
+        MainWindow.stack.setCurrentWidget(self)
+        MainWindow.stack.removeWidget(self.param_window)
+        del self.param_window
+        BreadcrumbsBar.navBackward()
+        self.curItem().hover()
 
     def curIndex(self) -> int | None:
         if self.pluginbox.scroll_group.curItem().id == AddPluginBox.ID:
