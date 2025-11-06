@@ -97,6 +97,10 @@ class MainWindow(QWidget):
         """Switch back to the start screen."""
         self.stack.setCurrentWidget(self.start_screen)  # Switch back
         self.start_screen.setFocus()
+        BreadcrumbsBar.navBackward()
+        ControlDisplay.setBind(RotaryEncoder.TOP, "select")
+        ControlDisplay.setBind(RotaryEncoder.MIDDLE, "")
+        ControlDisplay.setBind(RotaryEncoder.BOTTOM, "delete")
 
 
 class BoardWindow(QWidget):
@@ -166,6 +170,9 @@ class BoardWindow(QWidget):
                     case RotaryEncoder.MIDDLE.keyLeft:
                         if self.swap_plugins(-1):
                             self.pluginbox.scroll_group.goPrev()
+                    case RotaryEncoder.MIDDLE.keyPress:
+                        if self.curIndex() is None:
+                            self.restart_callback()
                     case RotaryEncoder.MIDDLE.keyRight:
                         if self.swap_plugins(1):
                             self.pluginbox.scroll_group.goNext()

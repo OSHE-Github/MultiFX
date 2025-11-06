@@ -150,7 +150,7 @@ class AddPluginBox(ScrollItem):
         self.plus.setParent(self)
         self.plus.move(
             self.width()//2 - self.plus.width()//2,
-            self.height()//2 - self.plus.height()
+            self.height()//2 - self.plus.height()//2
         )
 
         self.label = QLabel(AddPluginBox.ID)
@@ -160,7 +160,7 @@ class AddPluginBox(ScrollItem):
         self.label.setParent(self)
         self.label.move(
             self.width()//2 - self.label.width()//2,
-            self.height()//2 + self.label.height()
+            self.height()//2 + self.label.height()//2
         )
 
     def hover(self):
