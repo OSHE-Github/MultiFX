@@ -51,7 +51,10 @@ def startJackdServer():
                 if process.poll() is not None:
                     # process ended
                     print("JACK server failed to start. Falling back to dummy.")
-                    jackd_cmd = ["/usr/bin/jackd", "-d", "dummy"]
+                    jackd_cmd = [
+                            "/usr/bin/jackd", "-d", "dummy", "-r", "96000",
+                            "-p", "128", "-n", "2"
+                    ]
                     process = subprocess.Popen(
                         jackd_cmd,
                         stdout=subprocess.PIPE,
@@ -299,13 +302,10 @@ def setUpPlugins(sock, manager: plugin_manager.PluginManager):
         if (response != instanceNum):
             print(instanceNum)
             print(response)
-            print(f"Invalid Plugin found {plugin.name}")
-            print("invalid JSON")
+            print(f"Error adding plugins starting at: {plugin.name}.")
             return -5
         else:
             print(f"added {plugin.name}")
-            # NOTE: This was changed from =+ 1 to += 1 because I assumed it
-            # was a mistake. -Jay
             added += 1
     return added
 
