@@ -78,6 +78,7 @@ class MainWindow(QWidget):
         modhost = connectToModHost()
         if modhost is None:
             print("Failed Closing...")
+            exit(1)
             return
         setUpPlugins(modhost, board)
         setUpPatch(modhost, board)

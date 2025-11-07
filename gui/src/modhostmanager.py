@@ -46,7 +46,21 @@ def startJackdServer():
                     # Makes it independent of the parent process
                     preexec_fn=os.setpgrp,
                 )
-                print("JACK server started successfully.")
+                # check to make sure that process doesn't error out
+                time.sleep(0.25)
+                if process.poll() is not None:
+                    # process ended
+                    print("JACK server failed to start. Falling back to dummy.")
+                    jackd_cmd = ["/usr/bin/jackd", "-d", "dummy"]
+                    process = subprocess.Popen(
+                        jackd_cmd,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        # Makes it independent of the parent process
+                        preexec_fn=os.setpgrp,
+                    )
+                else:
+                    print("JACK server started successfully.")
             except Exception as e:
                 print(f"Error starting JACK server: {e}")
                 return None
