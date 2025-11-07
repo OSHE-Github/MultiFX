@@ -214,6 +214,7 @@ class BoardWindow(QWidget):
         items = self.pluginbox.boxes
         # Prevent last item from sticking around
         items[index].hide()
+        self.plugins.plugins.remove(items[index].plugin)
         items.pop(index)
         # reassign plugin-box indices
         for i in range(index, n - 2):
@@ -312,6 +313,7 @@ class BoardWindow(QWidget):
             MainWindow.stack.removeWidget(self.add_plugin_window)
             del self.add_plugin_window
         BreadcrumbsBar.navBackward()
+        self.curItem().hover()
         self.setFocusPolicy(Qt.StrongFocus)
 
     def curIndex(self) -> int | None:
