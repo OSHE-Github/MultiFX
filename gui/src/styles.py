@@ -70,6 +70,13 @@ styles_paramlabel = f"""
     background: transparent;
 """
 
+styles_tabletitle = f"""
+    font : 36px;
+    font-family: {font_family};
+    color: {color_foreground.name()};
+    background: transparent;
+"""
+
 styles_bind = f"""
     font : 10px;
     font-family: {font_family};
