@@ -231,6 +231,21 @@ class BoardWindow(QWidget):
         self.pluginbox.scroll_group.update_bar()
         # TODO: remove plugins in mod-host
 
+    def add_plugin(self, plugin: Plugin):
+        self.curItem().unhover()
+        # add plugin to board visual
+        n = len(self.plugins.plugins)
+        self.plugins.plugins.append(plugin)
+        newbox = PluginBox(n, plugin, plugin.bypass)
+        newbox.setParent(self.pluginbox.scroll_group)
+        self.pluginbox.scroll_group.items.insert(n, newbox)
+        self.pluginbox.scroll_group.repaint()
+        self.pluginbox.scroll_group.drawItems()
+        self.pluginbox.scroll_group.update_bar()
+        # hover new item
+        newbox.hover()
+        self.pluginbox.scroll_group.pos = n
+
     def paintEvent(self, event):
         painter = QPainter(self)
 
@@ -278,7 +293,8 @@ class BoardWindow(QWidget):
         ControlDisplay.setBind(RotaryEncoder.BOTTOM, "back")
 
     def show_add_plugin_screen(self):
-        self.add_plugin_window = PluginTable(self.plugins, self.back_to_board)
+        self.add_plugin_window = PluginTable(self.plugins, self.back_to_board,
+                                             self.add_plugin)
         MainWindow.stack.addWidget(self.add_plugin_window)
         MainWindow.stack.setCurrentWidget(self.add_plugin_window)
         BreadcrumbsBar.navForward("add plugin")
@@ -296,7 +312,7 @@ class BoardWindow(QWidget):
             MainWindow.stack.removeWidget(self.add_plugin_window)
             del self.add_plugin_window
         BreadcrumbsBar.navBackward()
-        self.curItem().hover()
+        self.setFocusPolicy(Qt.StrongFocus)
 
     def curIndex(self) -> int | None:
         if self.pluginbox.scroll_group.curItem().id == AddPluginBox.ID:
@@ -320,11 +336,15 @@ class BoxOfPlugins(QWidget):
             0, 0, SCREEN_W,
             int((1 - ControlDisplayStyle.REL_H) * SCREEN_H)
         )
-        self.boxes = []
+        self.plugins = plugins
+        self.initGroup()
+
+    def initGroup(self):
         # Create scroll group
-        n = len(plugins.plugins)
+        self.boxes = []
+        n = len(self.plugins.plugins)
         for i in range(0, n):
-            plugin = plugins.plugins[i]
+            plugin = self.plugins.plugins[i]
             box = PluginBox(i, plugin, plugin.bypass)
             self.boxes.append(box)
         self.boxes[n-1].isLast = True
@@ -409,7 +429,7 @@ class PluginTable(QWidget):
     PADDING = 8
     PAGE_SIZE = 8
 
-    def __init__(self, manager: PluginManager, back_callback):
+    def __init__(self, manager: PluginManager, back_callback, add_callback):
         super().__init__()
         self.setFixedSize(
             SCREEN_W,
@@ -417,6 +437,7 @@ class PluginTable(QWidget):
         )
         self.plugins = manager
         self.back_callback = back_callback
+        self.add_callback = add_callback
         self.setFocusPolicy(Qt.StrongFocus)
         self.initUI()
 
@@ -440,7 +461,7 @@ class PluginTable(QWidget):
         items = []
         # TODO: replace iterator with list of total plugins and # in board
         for plugin in self.plugins.plugins:
-            items.append(PluginTableEntry(plugin.name, 1, self))
+            items.append(PluginTableEntry(plugin, 1, self))
         self.scroll_group = ScrollGroup(
             self.PAGE_SIZE, RotaryEncoder.TOP, items, self.scroll_bar
         )
@@ -470,26 +491,29 @@ class PluginTable(QWidget):
         match key:
             case RotaryEncoder.BOTTOM.keyPress:
                 self.back_callback()
-        """
             case RotaryEncoder.TOP.keyLeft:
+                self.scroll_group.goPrev()
             case RotaryEncoder.TOP.keyPress:
+                self.add_callback(self.scroll_group.curItem().plugin)
+                self.back_callback()
             case RotaryEncoder.TOP.keyRight:
-        """
+                self.scroll_group.goNext()
 
 
 class PluginTableEntry(ScrollItem):
-    def __init__(self, id: str, count: int, table: PluginTable):
-        super().__init__(id)
+    def __init__(self, plugin: Plugin, count: int, table: PluginTable):
+        super().__init__(plugin.name)
         self.hover_fill = RotaryEncoder.TOP.color
         self.unhover_fill = color_background
         self.line_width = 0  # prevent drawing rectagle edges
         self.table = table
+        self.plugin = plugin
         self.setFixedSize(
             table.end_x,
             int((1 - BreadcrumbsBarStyle.REL_H) * SCREEN_H - table.start_y) //
             PluginTable.PAGE_SIZE
         )
-        self.name_label = QLabel(id, self)
+        self.name_label = QLabel(plugin.name, self)
         self.name_label.setStyleSheet(styles_tableitem)
         self.name_label.adjustSize()
         # pad and center
