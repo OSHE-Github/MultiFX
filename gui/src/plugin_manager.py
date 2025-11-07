@@ -2,12 +2,13 @@ import json
 
 
 class Parameter():
-    def __init__(self, type: str, name: str, symbol: str, mode: str, value: float, min: float, max: float):
+    def __init__(self, type: str, name: str, symbol: str, mode: str,
+                 value: float, min: float, max: float):
         self.type = type
         self.name = name
         self.symbol = symbol
         self.mode = mode
-        self.value = value        
+        self.value = value
         self.minimum = min
         self.max = max
         match self.mode:
@@ -15,26 +16,26 @@ class Parameter():
                 self.increment = (max - min)/100
             case "button" | "selector":
                 self.increment = 1
-        
-    
+
     def setValue(self, value: float):
         self.value = value
-    
-    
+
 
 class Plugin():
-    def __init__(self, name: str, uri: str,channels : str, inputs : list, outputs: list, bypass: float = 0, paramters: list = None):
+    def __init__(self, name: str, uri: str, channels: str, inputs: list,
+                 outputs: list, bypass: float = 0, paramters: list = None):
         self.name = name
         self.uri = uri
         self.bypass = bypass
         self.channels = channels
         self.inputs = inputs
         self.outputs = outputs
-        #initalize parameters if there are any otherwise initalize an empty list
+        # initalize parameters if there are any otherwise initalize an empty list
         self.parameters = paramters if paramters else []
-    
-    def add_parameter(self,parameter: Parameter):
+
+    def add_parameter(self, parameter: Parameter):
         self.parameters.append(parameter)
+
 
 class PluginManager:
     def __init__(self, plugins: list = None):
@@ -44,10 +45,9 @@ class PluginManager:
         names = []
         for plugin in self.plugins:
             names.append(plugin.name)
-        
         return names
-    
-    def getParameterNames(self, x : int):
+
+    def getParameterNames(self, x: int):
         try:
             names = []
             for parameter in self.plugins[x].parameters:
@@ -74,7 +74,8 @@ class PluginManager:
     def addPlugin(self, plugin: Plugin):
         self.plugins.append(plugin)
 
-    def changeParameter(self, pluginIndex: int, parameterIndex: int, value: float):
+    def changeParameter(self, pluginIndex: int, parameterIndex: int,
+                        value: float):
         try:
             plugin = self.plugins[pluginIndex]
             try:
