@@ -12,7 +12,7 @@ from modhostmanager import (
 from styles import (
     styles_indicator, styles_label, styles_window, color_foreground,
     styles_error, ScrollBarStyle, color_background, ControlDisplayStyle,
-    BreadcrumbsBarStyle, styles_tabletitle
+    BreadcrumbsBarStyle, styles_tabletitle, styles_tableitem
 )
 from utils import config_dir, assets_dir
 from qwidgets.parameter_widgets import ParameterPanel
@@ -489,6 +489,12 @@ class PluginTableEntry(ScrollItem):
             int((1 - BreadcrumbsBarStyle.REL_H) * SCREEN_H - table.start_y) //
             PluginTable.PAGE_SIZE
         )
+        self.name_label = QLabel(id, self)
+        self.name_label.setStyleSheet(styles_tableitem)
+        self.name_label.adjustSize()
+        # pad and center
+        self.name_label.move(PluginTable.PADDING,
+                             self.height()//2 - self.name_label.height()//2)
 
     def paintEvent(self, event):
         super().paintEvent(event)

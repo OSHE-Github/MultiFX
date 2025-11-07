@@ -71,6 +71,13 @@ styles_paramlabel = f"""
 """
 
 styles_tabletitle = f"""
+    font : bold 36px;
+    font-family: {font_family};
+    color: {color_foreground.name()};
+    background: transparent;
+"""
+
+styles_tableitem = f"""
     font : 36px;
     font-family: {font_family};
     color: {color_foreground.name()};
