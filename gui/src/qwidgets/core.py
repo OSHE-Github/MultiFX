@@ -430,7 +430,7 @@ class PluginTable(QWidget):
         self.col2title.adjustSize()
         self.col2title.move(
             int((1 - self.COL2_REL_W) * (1 - ScrollBarStyle.REL_W) *
-                self.width()) + self.PADDING, self.PADDING
+                self.width()) + 2*self.PADDING, self.PADDING
         )
         self.start_y = 2*self.PADDING + self.col1title.height()
         self.end_x = int((1 - ScrollBarStyle.REL_W) * self.width())
@@ -500,7 +500,7 @@ class PluginTableEntry(ScrollItem):
         self.count_label.setStyleSheet(styles_tableitem)
         self.count_label.adjustSize()
         # pad and center
-        self.count_label.move(self.table.col2title.x() + PluginTable.PADDING,
+        self.count_label.move(self.table.col2title.x(),
                               self.height()//2 - self.count_label.height()//2)
 
     def paintEvent(self, event):
