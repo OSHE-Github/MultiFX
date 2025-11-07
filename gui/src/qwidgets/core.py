@@ -440,7 +440,7 @@ class PluginTable(QWidget):
         items = []
         # TODO: replace iterator with list of total plugins and # in board
         for plugin in self.plugins.plugins:
-            items.append(PluginTableEntry(plugin.name, self))
+            items.append(PluginTableEntry(plugin.name, 1, self))
         self.scroll_group = ScrollGroup(
             self.PAGE_SIZE, RotaryEncoder.TOP, items, self.scroll_bar
         )
@@ -478,7 +478,7 @@ class PluginTable(QWidget):
 
 
 class PluginTableEntry(ScrollItem):
-    def __init__(self, id: str, table: PluginTable):
+    def __init__(self, id: str, count: int, table: PluginTable):
         super().__init__(id)
         self.hover_fill = RotaryEncoder.TOP.color
         self.unhover_fill = color_background
@@ -495,6 +495,13 @@ class PluginTableEntry(ScrollItem):
         # pad and center
         self.name_label.move(PluginTable.PADDING,
                              self.height()//2 - self.name_label.height()//2)
+
+        self.count_label = QLabel(str(count), self)
+        self.count_label.setStyleSheet(styles_tableitem)
+        self.count_label.adjustSize()
+        # pad and center
+        self.count_label.move(self.table.col2title.x() + PluginTable.PADDING,
+                              self.height()//2 - self.count_label.height()//2)
 
     def paintEvent(self, event):
         super().paintEvent(event)
