@@ -459,9 +459,15 @@ class PluginTable(QWidget):
         self.scroll_bar = ScrollBar(RotaryEncoder.TOP)
         self.scroll_bar.setParent(self)
         items = []
+        plugincounts = {}
         # TODO: replace iterator with list of total plugins and # in board
         for plugin in self.plugins.plugins:
-            items.append(PluginTableEntry(plugin, 1, self))
+            if plugin.uri in map(lambda p: p.uri, plugincounts):
+                plugincounts[plugin] += 1
+            else:
+                plugincounts[plugin] = 1
+        for key, value in plugincounts.items():
+            items.append(PluginTableEntry(key, value, self))
         self.scroll_group = ScrollGroup(
             self.PAGE_SIZE, RotaryEncoder.TOP, items, self.scroll_bar
         )
