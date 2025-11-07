@@ -105,6 +105,7 @@ def sendCommand(sock, command):
         response = sock.recv(1024)
         return response.decode().replace('\x00', '')
     except socket.timeout:
+        print(f"Socket timeout for command: {command}")
         return ""
     except Exception as e:
         print(f"Failed to send command: {e}")
@@ -303,6 +304,8 @@ def setUpPlugins(sock, manager: plugin_manager.PluginManager):
             print(instanceNum)
             print(response)
             print(f"Error adding plugins starting at: {plugin.name}.")
+            if response == -101:
+                print("mod-host responded -101: ERR_LV2_INVALID_URI. Is plugin installed?")
             return -5
         else:
             print(f"added {plugin.name}")
