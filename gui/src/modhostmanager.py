@@ -330,47 +330,14 @@ def setUpPatch(sock, manager: plugin_manager.PluginManager):
             else:
                 print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
                 return -5
-        else:
-            # TODO: Figure out what's going on here. "previous" is undefined.
-            # I commented out because it would crash otherwise
-            """
-            if (previous.channels == "mono"):
-                if (plugin.channels == "mono"):
-                    connectMonoToMono(sock, f"effect_{instanceNum-1}:{previous.outputs[0]}",
-                                      f"effect_{instanceNum}:{plugin.inputs[0]}")
-                elif(plugin.channels == "stereo"):
-                    connectMonoToStereo(sock, f"effect_{instanceNum-1}:{previous.outputs[0]}",
-                                        f"effect_{instanceNum}:{plugin.inputs[0]}",
-                                        f"effect_{instanceNum}:{plugin.inputs[1]}")
-                else:
-                    print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
-                    return -5
-            elif(previous.channels == "stereo"):
-                if(plugin.channels == "mono"):
-                    connectStereoToMono(sock, f"effect_{instanceNum-1}:{previous.outputs[0]}",
-                                        f"effect_{instanceNum-1}:{previous.outputs[1]}",
-                                        f"effect_{instanceNum}:{plugin.inputs[0]}" )
-                elif(plugin.channels == "stereo"):
-                    connectStereoToStereo(sock, f"effect_{instanceNum-1}:{previous.outputs[0]}",
-                                        f"effect_{instanceNum-1}:{previous.outputs[1]}",
-                                        f"effect_{instanceNum}:{plugin.inputs[0]}",
-                                        f"effect_{instanceNum}:{plugin.inputs[1]}" )
-                else:
-                    print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
-                    return -5
+        elif instanceNum == len(manager.plugins) - 1:
+            if (plugin.channels == "mono"):
+                connectSystemPlaybackMono(sock, f"effect_{instanceNum}:{plugin.outputs[0]}")
+            elif (plugin.channels == "stereo"):
+                connectSystemPlaybackStereo(sock, f"effect_{instanceNum}:{plugin.outputs[0]}", f"effect_{instanceNum}:{plugin.outputs[1]}")
             else:
-                print(f"Error in plugin JSON {previous.name}. Invalid channel type: {previous.channels}")
+                print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
                 return -5
-            """
-            if instanceNum == len(manager.plugins) - 1:
-                if (plugin.channels == "mono"):
-                    connectSystemPlaybackMono(sock, f"effect_{instanceNum}:{plugin.outputs[0]}")
-                elif (plugin.channels == "stereo"):
-                    connectSystemPlaybackStereo(sock, f"effect_{instanceNum}:{plugin.outputs[0]}", f"effect_{instanceNum}:{plugin.outputs[1]}")
-                else:
-                    print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
-                    return -5
-        #previous = plugin
 
 
 def verifyParameters(sock, manager: plugin_manager.PluginManager):
