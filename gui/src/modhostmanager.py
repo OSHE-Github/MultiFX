@@ -6,12 +6,13 @@ import sys
 import plugin_manager
 
 PRINT_CMDS = False
+MODHOST_PORT = 55555
 
 
 def startModHost():
     try:
         # Starting mod-host -n(no ui) -p 5555(w/ port 5555)
-        mod_host_cmd = ["mod-host", "-n", "-p", "5555"]
+        mod_host_cmd = ["mod-host", "-n", "-p", str(MODHOST_PORT)]
 
         subprocess.run(["killall", "mod-host"], check=False)
 
@@ -36,7 +37,7 @@ def startJackdServer():
     try:
         jackd_cmd = [
                 "/usr/bin/jackd", "-d", "alsa", "-d", "hw:sndrpihifiberry",
-                "-r", "96000", "-p", "128", "-n", "2"
+                "-r", "96000", "-p", "128"
         ]
 
         if sys.platform.startswith("linux"):
@@ -55,7 +56,7 @@ def startJackdServer():
                     print("JACK server failed to start. Falling back to dummy.")
                     jackd_cmd = [
                             "/usr/bin/jackd", "-d", "dummy", "-r", "96000",
-                            "-p", "128", "-n", "2"
+                            "-p", "128"
                     ]
                     process = subprocess.Popen(
                         jackd_cmd,
@@ -82,19 +83,18 @@ def startJackdServer():
 
 def connectToModHost():
     HOST = "localhost"
-    PORT = 5555
 
     sock = None
 
     for _ in range(5):
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(.5)  # Set the response timeout to 2 seconds
-            sock.connect((HOST, PORT))
+            sock.settimeout(2)  # Set the response timeout to 2 seconds
+            sock.connect((HOST, MODHOST_PORT))
             print("Connected via socket")
             return sock
-        except ConnectionRefusedError:
-            print("Socket couldn't connect...")
+        except ConnectionRefusedError as e:
+            print(f"Socket couldn't connect: {e}")
             time.sleep(1)
 
     print("Socket couldn't make a connection")
