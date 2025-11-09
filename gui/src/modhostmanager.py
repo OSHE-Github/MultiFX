@@ -354,7 +354,7 @@ def setUpPatch(sock, manager: plugin_manager.PluginManager):
                 connectStereoToStereo(
                     sock,
                     f"effect_{instanceNum-1}:{prev.outputs[0]}",
-                    f"effect_{instanceNum-1}:{prev.outputs[1]}"
+                    f"effect_{instanceNum-1}:{prev.outputs[1]}",
                     f"effect_{instanceNum}:{plugin.outputs[0]}",
                     f"effect_{instanceNum}:{plugin.outputs[1]}"
                 )
