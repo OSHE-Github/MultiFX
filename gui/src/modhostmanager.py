@@ -39,6 +39,8 @@ def startJackdServer():
                 "-r", "96000", "-p", "128", "-n", "2"
         ]
 
+        subprocess.run(["killall", "jackd"], check=False)
+
         if sys.platform.startswith("linux"):
             try:
                 process = subprocess.Popen(

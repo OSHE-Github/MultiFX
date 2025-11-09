@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import QApplication
 import modhostmanager
 from qwidgets.core import MainWindow
 import offboard
-from modhostmanager import startModHost
 
 
 def main():
@@ -12,7 +11,7 @@ def main():
         print("Loaded data from USB drive!")
     app = QApplication(sys.argv)
     modhostmanager.startJackdServer()
-    startModHost()
+    modhostmanager.startModHost()
     time.sleep(.1)
     main_window = MainWindow()
     main_window.showFullScreen()
