@@ -6,7 +6,7 @@ from PyQt5.QtGui import QColor, QPainter, QPen, QPolygon, QPixmap
 from PyQt5.QtCore import Qt, QPoint, QRect, QLine
 from plugin_manager import PluginManager, Parameter, Plugin
 from modhostmanager import (
-    startModHost, connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
+    connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
     updateBypass, quitModHost
 )
 from styles import (
@@ -74,7 +74,6 @@ class MainWindow(QWidget):
         selected_json = selected_profile + ".json"
         json_path = os.path.join(config_dir, selected_json)
         board.initFromJSON(json_path)
-        startModHost()
         modhost = connectToModHost()
         if modhost is None:
             print("Failed Closing...")
