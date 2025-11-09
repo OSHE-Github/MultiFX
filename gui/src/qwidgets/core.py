@@ -23,6 +23,7 @@ from qwidgets.navigation import (
 )
 from qwidgets.floating_window import FloatingWindow, DialogItem
 from qwidgets.plugin_box import PluginBox, AddPluginBox
+from offboard import try_save
 
 
 class MainWindow(QWidget):
@@ -176,7 +177,13 @@ class BoardWindow(QWidget):
                 if self.swap_plugins(1):
                     self.pluginbox.scroll_group.goNext()
             case RotaryEncoder.BOTTOM.keyPress:
-                self.remove_current_plugin()
+                cur = self.curItem()
+                if type(cur) is PluginBox:
+                    self.remove_current_plugin()
+                if type(cur) is AddPluginBox:
+                    BreadcrumbsBar.navForward("SAVING...")
+                    try_save()
+                    BreadcrumbsBar.navBackward()
 
     def swap_plugins(self, dist: int) -> bool:
         index = self.curIndex()

@@ -36,7 +36,7 @@ def startJackdServer():
     try:
         jackd_cmd = [
                 "/usr/bin/jackd", "-d", "alsa", "-d", "hw:sndrpihifiberry",
-                "-r", "96000", "-p", "128", "-n", "2"
+                "-r", "96000", "-p", "128"
         ]
 
         subprocess.run(["killall", "jackd"], check=False)
@@ -57,7 +57,7 @@ def startJackdServer():
                     print("JACK server failed to start. Falling back to dummy.")
                     jackd_cmd = [
                             "/usr/bin/jackd", "-d", "dummy", "-r", "96000",
-                            "-p", "128", "-n", "2"
+                            "-p", "128"
                     ]
                     process = subprocess.Popen(
                         jackd_cmd,
