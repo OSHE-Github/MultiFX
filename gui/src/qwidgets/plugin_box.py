@@ -17,6 +17,9 @@ class PluginBox(ScrollItem):
     def __init__(self, index: int, plugin: Plugin, bypass: int = 0):
         super().__init__(plugin.name)
         self.index = index
+        # corresponds to instanceNum in plugin-manager. Should NOT change
+        # when re-ordered
+        self.instanceNum = index
         self.plugin = plugin
         self.plugin_name = plugin.name
         self.bypass = bypass

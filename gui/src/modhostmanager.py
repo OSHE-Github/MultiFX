@@ -348,15 +348,15 @@ def setUpPatch(sock, manager: plugin_manager.PluginManager):
                 connectMonoToMono(
                     sock,
                     f"effect_{instanceNum-1}:{prev.outputs[0]}",
-                    f"effect_{instanceNum}:{plugin.outputs[0]}"
+                    f"effect_{instanceNum}:{plugin.inputs[0]}"
                 )
             elif (plugin.channels == "stereo"):
                 connectStereoToStereo(
                     sock,
                     f"effect_{instanceNum-1}:{prev.outputs[0]}",
                     f"effect_{instanceNum-1}:{prev.outputs[1]}",
-                    f"effect_{instanceNum}:{plugin.outputs[0]}",
-                    f"effect_{instanceNum}:{plugin.outputs[1]}"
+                    f"effect_{instanceNum}:{plugin.inputs[0]}",
+                    f"effect_{instanceNum}:{plugin.inputs[1]}"
                 )
             else:
                 print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
