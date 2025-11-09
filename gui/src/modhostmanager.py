@@ -319,7 +319,8 @@ def setUpPlugins(sock, manager: plugin_manager.PluginManager):
 
 def setUpPatch(sock, manager: plugin_manager.PluginManager):
     for instanceNum, plugin in enumerate(manager.plugins):
-        if instanceNum == 0:
+        # connect all plugins
+        if instanceNum > len(manager.plugins) - 1:
             if (plugin.channels == "mono"):
                 connectSystemCapturMono(
                         sock,
@@ -334,7 +335,7 @@ def setUpPatch(sock, manager: plugin_manager.PluginManager):
             else:
                 print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
                 return -5
-        elif instanceNum == len(manager.plugins) - 1:
+        else:  # connect to final output
             if (plugin.channels == "mono"):
                 connectSystemPlaybackMono(sock, f"effect_{instanceNum}:{plugin.outputs[0]}")
             elif (plugin.channels == "stereo"):
