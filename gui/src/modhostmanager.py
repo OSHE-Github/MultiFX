@@ -345,9 +345,19 @@ def setUpPatch(sock, manager: plugin_manager.PluginManager):
                 return -5
         elif prev is not None:  # CONNECT ALL OTHER PLUGINS
             if (plugin.channels == "mono"):
-                connectMonoToMono(sock, f"effect_{instanceNum}:{plugin.outputs[0]}")
+                connectMonoToMono(
+                    sock,
+                    f"effect_{instanceNum-1}:{prev.outputs[0]}",
+                    f"effect_{instanceNum}:{plugin.outputs[0]}"
+                )
             elif (plugin.channels == "stereo"):
-                connectStereoToStereo(sock, f"effect_{instanceNum}:{plugin.outputs[0]}", f"effect_{instanceNum}:{plugin.outputs[1]}")
+                connectStereoToStereo(
+                    sock,
+                    f"effect_{instanceNum-1}:{prev.outputs[0]}",
+                    f"effect_{instanceNum-1}:{prev.outputs[1]}"
+                    f"effect_{instanceNum}:{plugin.outputs[0]}",
+                    f"effect_{instanceNum}:{plugin.outputs[1]}"
+                )
             else:
                 print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
                 return -5
