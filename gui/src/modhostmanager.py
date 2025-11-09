@@ -320,7 +320,7 @@ def setUpPlugins(sock, manager: plugin_manager.PluginManager):
 def setUpPatch(sock, manager: plugin_manager.PluginManager):
     for instanceNum, plugin in enumerate(manager.plugins):
         # connect all plugins
-        if instanceNum > len(manager.plugins) - 1:
+        if instanceNum < len(manager.plugins) - 1:
             if (plugin.channels == "mono"):
                 connectSystemCapturMono(
                         sock,
