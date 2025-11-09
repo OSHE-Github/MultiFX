@@ -2,19 +2,19 @@
 
 import os
 from PyQt5.QtWidgets import QWidget, QStackedWidget, QVBoxLayout, QLabel
-from PyQt5.QtGui import QColor, QPainter, QPen, QPolygon, QPixmap
-from PyQt5.QtCore import Qt, QPoint, QRect, QLine
-from plugin_manager import PluginManager, Parameter, Plugin
+from PyQt5.QtGui import QPainter, QPen
+from PyQt5.QtCore import Qt, QRect, QLine
+from plugin_manager import PluginManager, Plugin
 from modhostmanager import (
     connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
-    updateBypass, quitModHost
+    updateBypass
 )
 from styles import (
-    styles_indicator, styles_label, styles_window, color_foreground,
-    styles_error, ScrollBarStyle, color_background, ControlDisplayStyle,
+    styles_window, color_foreground,
+    ScrollBarStyle, color_background, ControlDisplayStyle,
     BreadcrumbsBarStyle, styles_tabletitle, styles_tableitem
 )
-from utils import config_dir, assets_dir
+from utils import config_dir
 from qwidgets.parameter_widgets import ParameterPanel
 from qwidgets.controls import ControlDisplay, RotaryEncoder
 from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
