@@ -5,7 +5,7 @@ import time
 import sys
 import plugin_manager
 
-PRINT_CMDS = True
+PRINT_CMDS = False
 
 
 def startModHost():
