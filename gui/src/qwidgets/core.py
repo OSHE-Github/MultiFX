@@ -182,6 +182,7 @@ class BoardWindow(QWidget):
                     self.remove_current_plugin()
                 if type(cur) is AddPluginBox:
                     BreadcrumbsBar.navForward("SAVING...")
+                    BreadcrumbsBar.instance.repaint()
                     try_save()
                     BreadcrumbsBar.navBackward()
 
