@@ -5,6 +5,8 @@ import time
 import sys
 import plugin_manager
 
+PRINT_CMDS = True
+
 
 def startModHost():
     try:
@@ -100,6 +102,8 @@ def connectToModHost():
 
 
 def sendCommand(sock, command):
+    if PRINT_CMDS:
+        print(command)
     try:
         sock.sendall(command.encode()+b"\n")
         response = sock.recv(1024)
