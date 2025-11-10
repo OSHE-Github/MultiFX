@@ -5,9 +5,7 @@
 // Keyboard.h from https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json pico library
 // RotaryEncoder.H by Matthias Hertel
 // Bounce2 by Thomas O Fredericks
-// Packages Used:
-// Pico RP2040 package https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
-//
+// 
 // TARGET: Seeed Xiao RP2040
 // Using GPIO numbers from Seeed Xiao pinout
 //------------------------------------------------------------
@@ -74,6 +72,7 @@ void checkEncoder3() { enc3.tick(); }
 void setup()
 {
   Serial.begin(115200);
+  Serial1.begin(31250);
   delay(1000);
   Serial.println("\n=== RP2040 Pedal Controller ===");
   Serial.println("Using corrected GPIO mapping for Seeed Xiao\n");
@@ -206,6 +205,63 @@ void handleButtonPresses()
   {
     Serial.println("FOOTSWITCH → 'f'");
     Keyboard.write('f');
+  }
+}
+
+//------------------------------------------------------------
+// Midi Switch Handler
+//------------------------------------------------------------
+void check_midi(){
+  if(Serial1.available()){
+    int midiMessage = 0;
+
+    midiMessage=Serial1.read();
+    Serial.print(midiMessage, HEX);
+    midiMessage = midiMessage & 0x000F;
+    Serial.println("");
+    Serial.print(midiMessage, HEX);
+    Serial.println("");
+
+    switch(midiMessage){
+      case(0):
+      {
+        Keyboard.print("f");
+        break;
+      }
+      case(1):
+      {
+        Keyboard.print("g");
+        break;
+      }
+      case(2):
+      {
+        Keyboard.print("h");
+        break;
+      }
+      case(3):
+      {
+        Keyboard.print("j");
+        break;
+      }
+      case(4):
+      {
+        Keyboard.print("k");
+        break;
+      }
+      case(5):
+      {
+        Keyboard.print("l");
+        break;
+      }
+      default:
+        break;
+
+    }
+    delay(50);
+    while(Serial1.available()){
+      delay(10);
+      Serial1.read();
+    }
   }
 }
 
