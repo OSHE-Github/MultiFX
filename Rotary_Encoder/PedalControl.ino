@@ -1,113 +1,228 @@
 //------------------------------------------------------------
 // Guitar Pedal Keyboard Controller
-// Also Vibe Coded, will check and debug.
 //
-// CONTROLS:
-// 3 Rotary Encoders
-// 1 Footswitch (on D0)
+// Libraries Used:
+// Keyboard.h from https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json pico library
+// RotaryEncoder.H by Matthias Hertel
+// Bounce2 by Thomas O Fredericks
 //
+// TARGET: Seeed Xiao RP2040
+// Using GPIO numbers from Seeed Xiao pinout
 //------------------------------------------------------------
 
-// For sending HID keyboard commands
 #include <Keyboard.h>
+#include <RotaryEncoder.h>
+#include <Bounce2.h>
 
-// Rotary encoder library (your original)
-#include "encoders.h"
-encoders encoder;
-ISR (TIMER0_COMPA_vect) { encoder.msecTick(); }
+// --- Pin Definitions for Seeed Xiao RP2040 ---
+#define NUM_ENCODERS 3 
 
-// --- Pin Definitions ---
-// Encoder pins are defined in encoders.h
-#define FS_PIN 0 // Footswitch (FS) on D0
+// Encoder 1 (Top, Red) - D10, D9, D8
+#define A1_PIN    4   // D10 = GPIO3
+#define B1_PIN    3   // D9  = GPIO4
+#define SW1_PIN   2   // D8  = GPIO2
 
-// --- Footswitch Debounce Variables ---
-unsigned long lastFsTime = 0;
-bool lastFsState = HIGH; // Assumes INPUT_PULLUP
+// Encoder 2 (Middle, Green) - D6, D5, D4
+#define A2_PIN    7   // D6 = GPIO0
+#define B2_PIN    0   // D5 = GPIO7
+#define SW2_PIN   6   // D4 = GPIO6
+
+// Encoder 3 (Bottom, Blue) - D3, D2, D1
+#define A3_PIN    28  // D3 = GPIO29
+#define B3_PIN    29  // D2 = GPIO28
+#define SW3_PIN   27  // D1 = GPIO27
+
+// Footswitch - D0
+#define FS_PIN    26  // D0 = GPIO26
+
+// --- Keyboard Mappings ---
+const char enc_left_key[] = { 'q', 'a', 'z' };
+const char enc_click_key[] = { 'w', 's', 'x' };
+const char enc_right_key[] = { 'e', 'd', 'c' };
+const char fs_key = 'f';
+
+// --- Encoder Objects (using FOUR0 latch mode - library default) ---
+RotaryEncoder enc1(A1_PIN, B1_PIN, RotaryEncoder::LatchMode::FOUR0);
+RotaryEncoder enc2(A2_PIN, B2_PIN, RotaryEncoder::LatchMode::FOUR0);
+RotaryEncoder enc3(A3_PIN, B3_PIN, RotaryEncoder::LatchMode::FOUR0);
+
+// --- Button Objects ---
+Bounce btn1 = Bounce();
+Bounce btn2 = Bounce();
+Bounce btn3 = Bounce();
+Bounce fs_btn = Bounce();
+
+#define DEBOUNCE_MS 10
+
+// --- Position Tracking ---
+long enc1_oldPos = 0;
+long enc2_oldPos = 0;
+long enc3_oldPos = 0;
+
+//------------------------------------------------------------
+// Interrupt Service Routines
+//------------------------------------------------------------
+void checkEncoder1() { enc1.tick(); }
+void checkEncoder2() { enc2.tick(); }
+void checkEncoder3() { enc3.tick(); }
 
 //------------------------------------------------------------
 // Setup
 //------------------------------------------------------------
 void setup()
 {
-  Serial.begin(115200); // diagnostic messages
-  Serial.println("Guitar Pedal Controller Starting...");
+  Serial.begin(115200);
+  delay(1000);
+  Serial.println("\n=== RP2040 Pedal Controller ===");
+  Serial.println("Using corrected GPIO mapping for Seeed Xiao\n");
 
-  // --- Initialize Footswitch Pin ---
-  pinMode(FS_PIN, INPUT_PULLUP);
+  // --- Initialize Encoder Pins ---
+  pinMode(A1_PIN, INPUT_PULLUP);
+  pinMode(B1_PIN, INPUT_PULLUP);
+  pinMode(A2_PIN, INPUT_PULLUP);
+  pinMode(B2_PIN, INPUT_PULLUP);
+  pinMode(A3_PIN, INPUT_PULLUP);
+  pinMode(B3_PIN, INPUT_PULLUP);
 
-  // --- Initialize Encoders ---
-  encoder.begin();
-  // hook timer0 (1 ms interrupt) by adding interrupt-on-compare-match
-  OCR0A   = 0x80;         
-  TIMSK0 |= _BV(OCIE0A);  
+  // --- Attach Interrupts ---
+  attachInterrupt(digitalPinToInterrupt(A1_PIN), checkEncoder1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(B1_PIN), checkEncoder1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(A2_PIN), checkEncoder2, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(B2_PIN), checkEncoder2, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(A3_PIN), checkEncoder3, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(B3_PIN), checkEncoder3, CHANGE);
 
-  // --- Start Keyboard ---
+  // --- Initialize Buttons ---
+  btn1.attach(SW1_PIN, INPUT_PULLUP);
+  btn2.attach(SW2_PIN, INPUT_PULLUP);
+  btn3.attach(SW3_PIN, INPUT_PULLUP);
+  fs_btn.attach(FS_PIN, INPUT_PULLUP);
+
+  btn1.interval(DEBOUNCE_MS);
+  btn2.interval(DEBOUNCE_MS);
+  btn3.interval(DEBOUNCE_MS);
+  fs_btn.interval(DEBOUNCE_MS);
+
+  // --- Start Keyboard HID ---
   Keyboard.begin();
   
-  Serial.println("Setup Complete.");
+  Serial.println("Key Mappings:");
+  Serial.println("  Encoder 1 (Top):    q(left) w(click) e(right)");
+  Serial.println("  Encoder 2 (Middle): a(left) s(click) d(right)");
+  Serial.println("  Encoder 3 (Bottom): z(left) x(click) c(right)");
+  Serial.println("  Footswitch:         f");
+  Serial.println("\nReady!\n");
 }
 
 //------------------------------------------------------------
-// Loop
+// Encoder 1 Rotation Handler
+//------------------------------------------------------------
+void handleEncoder1Rotation()
+{
+  long newPos = enc1.getPosition();
+  
+  if (newPos > enc1_oldPos)
+  {
+    Serial.println("ENC1 RIGHT → 'e'");
+    Keyboard.write('e');
+    enc1_oldPos = newPos;
+  }
+  else if (newPos < enc1_oldPos)
+  {
+    Serial.println("ENC1 LEFT → 'q'");
+    Keyboard.write('q');
+    enc1_oldPos = newPos;
+  }
+}
+
+//------------------------------------------------------------
+// Encoder 2 Rotation Handler
+//------------------------------------------------------------
+void handleEncoder2Rotation()
+{
+  long newPos = enc2.getPosition();
+  
+  if (newPos > enc2_oldPos)
+  {
+    Serial.println("ENC2 RIGHT → 'd'");
+    Keyboard.write('d');
+    enc2_oldPos = newPos;
+  }
+  else if (newPos < enc2_oldPos)
+  {
+    Serial.println("ENC2 LEFT → 'a'");
+    Keyboard.write('a');
+    enc2_oldPos = newPos;
+  }
+}
+
+//------------------------------------------------------------
+// Encoder 3 Rotation Handler
+//------------------------------------------------------------
+void handleEncoder3Rotation()
+{
+  long newPos = enc3.getPosition();
+  
+  if (newPos > enc3_oldPos)
+  {
+    Serial.println("ENC3 RIGHT → 'c'");
+    Keyboard.write('c');
+    enc3_oldPos = newPos;
+  }
+  else if (newPos < enc3_oldPos)
+  {
+    Serial.println("ENC3 LEFT → 'z'");
+    Keyboard.write('z');
+    enc3_oldPos = newPos;
+  }
+}
+
+//------------------------------------------------------------
+// Button Press Handler
+//------------------------------------------------------------
+void handleButtonPresses()
+{
+  if (btn1.fell())
+  {
+    Serial.println("BTN1 CLICK → 'w'");
+    Keyboard.write('w');
+  }
+  
+  if (btn2.fell())
+  {
+    Serial.println("BTN2 CLICK → 's'");
+    Keyboard.write('s');
+  }
+  
+  if (btn3.fell())
+  {
+    Serial.println("BTN3 CLICK → 'x'");
+    Keyboard.write('x');
+  }
+  
+  if (fs_btn.fell())
+  {
+    Serial.println("FOOTSWITCH → 'f'");
+    Keyboard.write('f');
+  }
+}
+
+//------------------------------------------------------------
+// Main Loop
 //------------------------------------------------------------
 void loop()
 {
-  //-- Watch for encoder button events
-  // Note: getButtonEvent() returns 1, 2, or 3
-  if (uint8_t btn = encoder.getButtonEvent()) // button pressed?
-  { 
-    Serial.print("BUTTON "); Serial.println(btn); 
-    
-    switch (btn) {
-      case 1: // Top (Red) Encoder Click
-        Keyboard.write('w');
-        break;
-      case 2: // Middle (Green) Encoder Click
-        Keyboard.write('s');
-        break;
-      case 3: // Bottom (Blue) Encoder Click
-        Keyboard.write('x');
-        break;
-    }
-  }
+  // Update all button states
+  btn1.update();
+  btn2.update();
+  btn3.update();
+  fs_btn.update();
 
-  //-- Watch for encoder spin events
-  for (uint8_t i = 0; i < NUM_ENCODERS; i++)
-  {
-    // i = 0 (Encoder 1, Top)
-    // i = 1 (Encoder 2, Middle)
-    // i = 2 (Encoder 3, Bottom)
-    if (int8_t spin = encoder.getSpin(i)) 
-    { 
-      Serial.print("SPIN "); Serial.print(i); 
-      Serial.print(" = "); Serial.println(spin); 
-      
-      if (spin > 0) { // Turned Right
-        switch (i) {
-          case 0: Keyboard.write('e'); break; // Top Right
-          case 1: Keyboard.write('d'); break; // Middle Right
-          case 2: Keyboard.write('c'); break; // Bottom Right
-        }
-      } else { // Turned Left
-        switch (i) {
-          case 0: Keyboard.write('q'); break; // Top Left
-          case 1: Keyboard.write('a'); break; // Middle Left
-          case 2: Keyboard.write('z'); break; // Bottom Left
-        }
-      }
-    }
-  }
+  // Handle all inputs
+  handleEncoder1Rotation();
+  handleEncoder2Rotation();
+  handleEncoder3Rotation();
+  handleButtonPresses();
 
-  //-- Watch for Footswitch (D0)
-  bool fsState = digitalRead(FS_PIN);
-  // Check if state changed AND debounce time has passed
-  if (fsState != lastFsState && millis() - lastFsTime > DEBOUNCE_MS) {
-    lastFsTime = millis();
-    // Check for a press (HIGH to LOW)
-    if (fsState == LOW) {
-      Serial.println("Footswitch, Sending: f");
-      Keyboard.write('f');
-    }
-    lastFsState = fsState; // Save the new state
-  }
+  delay(1);
 }
