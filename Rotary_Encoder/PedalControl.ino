@@ -275,12 +275,14 @@ void loop()
   btn2.update();
   btn3.update();
   fs_btn.update();
+  
 
   // Handle all inputs
   handleEncoder1Rotation();
   handleEncoder2Rotation();
   handleEncoder3Rotation();
   handleButtonPresses();
+  check_midi();
 
   delay(1);
 }
