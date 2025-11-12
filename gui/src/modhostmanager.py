@@ -434,22 +434,44 @@ def remove(sock, instanceNum: int):
     tryCommand(sock, command)
 
 
-def removeFirst(sock, instanceNum: int):
+def removeFirst(sock, rmInstanceNum: int, rmPlugin: plugin_manager.Plugin,
+                nextInstanceNum: int, nextPlugin: plugin_manager.Plugin):
     """Removes the first plugin. Note that the first instanceNum isn't always
     0 due to re-ordering and adding"""
-    remove(sock, instanceNum)
+    remove(sock, rmInstanceNum)
+    connectSystemCapturStereo(
+            sock,
+            f"effect_{nextInstanceNum}:{nextPlugin.outputs[0]}",
+            f"effect_{nextInstanceNum}:{nextPlugin.outputs[1]}"
+    )
 
 
-def removeMiddle(sock, instanceNum: int):
+def removeMiddle(sock, rmInstanceNum: int, rmPlugin: plugin_manager.Plugin,
+                 prevInstanceNum: int, prevPlugin: plugin_manager.Plugin,
+                 nextInstanceNum: int, nextPlugin: plugin_manager.Plugin):
     """General use case for removing plugin. Not first or last plugin"""
-    remove(sock, instanceNum)
+    remove(sock, rmInstanceNum)
+    connectStereoToStereo(
+            sock,
+            f"effect_{prevInstanceNum}:{prevPlugin.outputs[0]}",
+            f"effect_{prevInstanceNum}:{prevPlugin.outputs[1]}",
+            f"effect_{nextInstanceNum}:{nextPlugin.outputs[0]}",
+            f"effect_{nextInstanceNum}:{nextPlugin.outputs[1]}"
+    )
 
 
-def removeLast(sock, instanceNum: int):
+def removeLast(sock, rmInstanceNum: int, rmPlugin: plugin_manager.Plugin,
+               prevInstanceNum: int, prevPlugin: plugin_manager.Plugin):
     """Removes the final plugin. Patches previous to system out."""
-    remove(sock, instanceNum)
+    remove(sock, rmInstanceNum)
+    connectSystemPlaybackStereo(
+            sock,
+            f"effect_{prevInstanceNum}:{prevPlugin.outputs[0]}",
+            f"effect_{prevInstanceNum}:{prevPlugin.outputs[1]}"
+    )
 
 
 def removeFinal(sock, instanceNum: int):
     """Removes final plugin. Patches system in to system out"""
     remove(sock, instanceNum)
+    patchThrough(sock)
