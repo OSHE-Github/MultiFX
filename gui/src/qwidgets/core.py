@@ -65,6 +65,8 @@ class MainWindow(QWidget):
 
         self.board_window = None  # Placeholder for later
 
+        patchThrough(modhost)  # Bypass all before we load plugins
+
         self.show()
 
     def launch_board(self, selected_profile):
@@ -97,7 +99,6 @@ class MainWindow(QWidget):
             self.stack.removeWidget(self.board_window)
             self.board_window.deleteLater()
 
-        patchThrough(modhost)  # Bypass all before we load plugins
         # Create new board window and add it to the stack
         self.board_window = BoardWindow(
             board,
