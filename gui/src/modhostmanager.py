@@ -95,6 +95,7 @@ def connectToModHost():
     HOST = "localhost"
 
     sock = None
+    error_list: list[str] = []
 
     for _ in range(5):
         try:
@@ -104,10 +105,12 @@ def connectToModHost():
             print("Connected via socket")
             return sock
         except ConnectionRefusedError as e:
-            print(f"Socket couldn't connect: {e}")
+            error_list.append(f"Socket couldn't connect: {e}")
             time.sleep(1)
 
     print("Socket couldn't make a connection")
+    for err in error_list:
+        print(err)
     return None
 
 
