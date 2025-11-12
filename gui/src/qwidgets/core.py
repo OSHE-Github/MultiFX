@@ -7,7 +7,8 @@ from PyQt5.QtCore import Qt, QRect, QLine
 from plugin_manager import PluginManager, Plugin
 from modhostmanager import (
     connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
-    updateBypass, startModHost, patchThrough
+    updateBypass, startModHost, patchThrough, removeFirst, removeMiddle,
+    removeLast, removeFinal
 )
 from styles import (
     styles_window, color_foreground,
@@ -231,12 +232,28 @@ class BoardWindow(QWidget):
 
     def remove_current_plugin(self):
         index = self.curIndex()
-        if index is None:
+        if index is None:  # don't remove AddPluginBox
             return
         n = len(self.pluginbox.scroll_group.items)
         if index >= n:
             return
         items = self.pluginbox.boxes
+
+        # remove in mod-host
+        if n == 2:  # use 2 because AddPluginBox will always stay
+            removeFinal(modhost, items[index].instanceNum)
+        elif index == n - 2:
+            removeLast(modhost, items[index].instanceNum, items[index].plugin,
+                       items[index-1].instanceNum, items[index-1].plugin)
+        elif index == 0:
+            removeFirst(modhost, items[index].instanceNum, items[index].plugin,
+                        items[index+1].instanceNum, items[index+1].plugin)
+        else:
+            removeMiddle(modhost, items[index].instanceNum, items[index].plugin,
+                         items[index-1].instanceNum, items[index-1].plugin,
+                         items[index+1].instanceNum, items[index+1].plugin)
+
+        # remove and adjust visuals
         # Prevent last item from sticking around
         items[index].hide()
         self.plugins.plugins.remove(items[index].plugin)
@@ -244,7 +261,7 @@ class BoardWindow(QWidget):
         # reassign plugin-box indices
         for i in range(index, n - 2):
             items[i].index -= 1
-        # cleared group
+        # skip scrollgroup logic when last item is removed
         if n == 1:
             return
         # adjust to new position
@@ -255,7 +272,6 @@ class BoardWindow(QWidget):
         self.pluginbox.scroll_group.repaint()
         self.pluginbox.scroll_group.drawItems()
         self.pluginbox.scroll_group.update_bar()
-        # TODO: remove plugins in mod-host
 
     def add_plugin(self, plugin: Plugin):
         self.curItem().unhover()
