@@ -65,6 +65,8 @@ class MainWindow(QWidget):
 
         self.board_window = None  # Placeholder for later
 
+        global modhost
+        modhost = connectToModHost()
         patchThrough(modhost)  # Bypass all before we load plugins
 
         self.show()
@@ -116,6 +118,8 @@ class MainWindow(QWidget):
     def show_start_screen(self):
         """Switch back to the start screen."""
         startModHost()
+        global modhost
+        modhost = connectToModHost()
         patchThrough(modhost)  # Bypass all before we load plugins
         self.stack.setCurrentWidget(self.start_screen)  # Switch back
         self.stack.removeWidget(self.board_window)
