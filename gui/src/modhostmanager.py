@@ -5,11 +5,14 @@ import time
 import sys
 import plugin_manager
 
+PRINT_CMDS = False
+MODHOST_PORT = 55555
+
 
 def startModHost():
     try:
         # Starting mod-host -n(no ui) -p 5555(w/ port 5555)
-        mod_host_cmd = ["mod-host", "-n", "-p", "5555"]
+        mod_host_cmd = ["mod-host", "-n", "-p", str(MODHOST_PORT)]
 
         subprocess.run(["killall", "mod-host"], check=False)
 
@@ -34,7 +37,7 @@ def startJackdServer():
     try:
         jackd_cmd = [
                 "/usr/bin/jackd", "-d", "alsa", "-d", "hw:sndrpihifiberry",
-                "-r", "96000", "-p", "128", "-n", "2"
+                "-r", "96000", "-p", "128"
         ]
 
         if sys.platform.startswith("linux"):
@@ -46,7 +49,30 @@ def startJackdServer():
                     # Makes it independent of the parent process
                     preexec_fn=os.setpgrp,
                 )
-                print("JACK server started successfully.")
+                # check to make sure that process doesn't error out
+                time.sleep(2)  # give time to become stable
+
+                # check for failure by seeing if process has ended or open failed
+                jackd_failed: bool = process.poll() is not None
+                if not jackd_failed and "Failed to open" in subprocess.Popen.communicate(timeout=2):
+                    jackd_failed = True
+                if jackd_failed:
+                    # process ended
+                    print("JACK server failed to start. Falling back to dummy.")
+                    subprocess.run(["killall", "mod-host"], check=False)
+                    jackd_cmd = [
+                            "/usr/bin/jackd", "-d", "dummy", "-r", "96000",
+                            "-p", "128"
+                    ]
+                    process = subprocess.Popen(
+                        jackd_cmd,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        # Makes it independent of the parent process
+                        preexec_fn=os.setpgrp,
+                    )
+                else:
+                    print("JACK server started successfully.")
             except Exception as e:
                 print(f"Error starting JACK server: {e}")
                 return None
@@ -63,19 +89,18 @@ def startJackdServer():
 
 def connectToModHost():
     HOST = "localhost"
-    PORT = 5555
 
     sock = None
 
     for _ in range(5):
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(.5)  # Set the response timeout to 2 seconds
-            sock.connect((HOST, PORT))
+            sock.settimeout(2)  # Set the response timeout to 2 seconds
+            sock.connect((HOST, MODHOST_PORT))
             print("Connected via socket")
             return sock
-        except ConnectionRefusedError:
-            print("Socket couldn't connect...")
+        except ConnectionRefusedError as e:
+            print(f"Socket couldn't connect: {e}")
             time.sleep(1)
 
     print("Socket couldn't make a connection")
@@ -83,11 +108,14 @@ def connectToModHost():
 
 
 def sendCommand(sock, command):
+    if PRINT_CMDS:
+        print(command)
     try:
         sock.sendall(command.encode()+b"\n")
         response = sock.recv(1024)
         return response.decode().replace('\x00', '')
     except socket.timeout:
+        print(f"Socket timeout for command: {command}")
         return ""
     except Exception as e:
         print(f"Failed to send command: {e}")
@@ -285,20 +313,20 @@ def setUpPlugins(sock, manager: plugin_manager.PluginManager):
         if (response != instanceNum):
             print(instanceNum)
             print(response)
-            print(f"Invalid Plugin found {plugin.name}")
-            print("invalid JSON")
+            print(f"Error adding plugins starting at: {plugin.name}.")
+            if response == -101:
+                print("mod-host responded -101: ERR_LV2_INVALID_URI. Is plugin installed?")
             return -5
         else:
             print(f"added {plugin.name}")
-            # NOTE: This was changed from =+ 1 to += 1 because I assumed it
-            # was a mistake. -Jay
             added += 1
     return added
 
 
 def setUpPatch(sock, manager: plugin_manager.PluginManager):
+    prev = None
     for instanceNum, plugin in enumerate(manager.plugins):
-        if instanceNum == 0:
+        if instanceNum == 0:  # CONNECT INPUT TO FIRST PLUGIN
             if (plugin.channels == "mono"):
                 connectSystemCapturMono(
                         sock,
@@ -313,47 +341,33 @@ def setUpPatch(sock, manager: plugin_manager.PluginManager):
             else:
                 print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
                 return -5
-        else:
-            # TODO: Figure out what's going on here. "previous" is undefined.
-            # I commented out because it would crash otherwise
-            """
-            if (previous.channels == "mono"):
-                if (plugin.channels == "mono"):
-                    connectMonoToMono(sock, f"effect_{instanceNum-1}:{previous.outputs[0]}",
-                                      f"effect_{instanceNum}:{plugin.inputs[0]}")
-                elif(plugin.channels == "stereo"):
-                    connectMonoToStereo(sock, f"effect_{instanceNum-1}:{previous.outputs[0]}",
-                                        f"effect_{instanceNum}:{plugin.inputs[0]}",
-                                        f"effect_{instanceNum}:{plugin.inputs[1]}")
-                else:
-                    print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
-                    return -5
-            elif(previous.channels == "stereo"):
-                if(plugin.channels == "mono"):
-                    connectStereoToMono(sock, f"effect_{instanceNum-1}:{previous.outputs[0]}",
-                                        f"effect_{instanceNum-1}:{previous.outputs[1]}",
-                                        f"effect_{instanceNum}:{plugin.inputs[0]}" )
-                elif(plugin.channels == "stereo"):
-                    connectStereoToStereo(sock, f"effect_{instanceNum-1}:{previous.outputs[0]}",
-                                        f"effect_{instanceNum-1}:{previous.outputs[1]}",
-                                        f"effect_{instanceNum}:{plugin.inputs[0]}",
-                                        f"effect_{instanceNum}:{plugin.inputs[1]}" )
-                else:
-                    print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
-                    return -5
+        elif instanceNum == len(manager.plugins) - 1:  # CONNECT LAST PLUGIN TO OUT
+            if (plugin.channels == "mono"):
+                connectSystemPlaybackMono(sock, f"effect_{instanceNum}:{plugin.outputs[0]}")
+            elif (plugin.channels == "stereo"):
+                connectSystemPlaybackStereo(sock, f"effect_{instanceNum}:{plugin.outputs[0]}", f"effect_{instanceNum}:{plugin.outputs[1]}")
             else:
-                print(f"Error in plugin JSON {previous.name}. Invalid channel type: {previous.channels}")
+                print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
                 return -5
-            """
-            if instanceNum == len(manager.plugins) - 1:
-                if (plugin.channels == "mono"):
-                    connectSystemPlaybackMono(sock, f"effect_{instanceNum}:{plugin.outputs[0]}")
-                elif (plugin.channels == "stereo"):
-                    connectSystemPlaybackStereo(sock, f"effect_{instanceNum}:{plugin.outputs[0]}", f"effect_{instanceNum}:{plugin.outputs[1]}")
-                else:
-                    print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
-                    return -5
-        #previous = plugin
+        elif prev is not None:  # CONNECT ALL OTHER PLUGINS
+            if (plugin.channels == "mono"):
+                connectMonoToMono(
+                    sock,
+                    f"effect_{instanceNum-1}:{prev.outputs[0]}",
+                    f"effect_{instanceNum}:{plugin.inputs[0]}"
+                )
+            elif (plugin.channels == "stereo"):
+                connectStereoToStereo(
+                    sock,
+                    f"effect_{instanceNum-1}:{prev.outputs[0]}",
+                    f"effect_{instanceNum-1}:{prev.outputs[1]}",
+                    f"effect_{instanceNum}:{plugin.inputs[0]}",
+                    f"effect_{instanceNum}:{plugin.inputs[1]}"
+                )
+            else:
+                print(f"Error in plugin JSON {plugin.name}. Invalid channel type: {plugin.channels}")
+                return -5
+        prev = plugin
 
 
 def verifyParameters(sock, manager: plugin_manager.PluginManager):

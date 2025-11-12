@@ -3,6 +3,7 @@ import fs
 import fs.base
 import os
 from utils import config_dir, root_dir
+import time
 
 SCAN_FOR_DIR: str = "multifx"
 
@@ -59,6 +60,7 @@ def try_save() -> bool:
     """
     extcfg_fs = scan_devices()
     if not extcfg_fs:
+        time.sleep(1)  # simulate saving
         return False
     # Copy from config to off-board drive
     incfg_fs = fs.open_fs(config_dir)

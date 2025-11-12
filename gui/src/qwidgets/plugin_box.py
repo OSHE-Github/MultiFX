@@ -1,15 +1,13 @@
 """Displays plugin overview for board. Replaces old BoxWidget"""
-import os
-from PyQt5.QtWidgets import QWidget, QLabel
+from PyQt5.QtWidgets import QLabel
 from PyQt5.QtCore import Qt, QRect, QPoint
-from PyQt5.QtGui import QPixmap, QPainter, QPen
+from PyQt5.QtGui import QPainter, QPen
 from qwidgets.graphics_utils import SCREEN_H, SCREEN_W, Caret
-from styles import (styles_label, styles_indicator, color_foreground,
+from styles import (styles_label, color_foreground,
                     ScrollBarStyle, ControlDisplayStyle, color_background,
                     styles_sublabel, styles_proflabel)
-from utils import assets_dir
 from qwidgets.navigation import ScrollItem
-from qwidgets.controls import RotaryEncoder, ControlDisplay, RotaryEncoderData
+from qwidgets.controls import RotaryEncoder, ControlDisplay
 from plugin_manager import Plugin
 
 
@@ -17,6 +15,9 @@ class PluginBox(ScrollItem):
     def __init__(self, index: int, plugin: Plugin, bypass: int = 0):
         super().__init__(plugin.name)
         self.index = index
+        # corresponds to instanceNum in plugin-manager. Should NOT change
+        # when re-ordered
+        self.instanceNum = index
         self.plugin = plugin
         self.plugin_name = plugin.name
         self.bypass = bypass

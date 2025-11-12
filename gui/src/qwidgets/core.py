@@ -2,19 +2,19 @@
 
 import os
 from PyQt5.QtWidgets import QWidget, QStackedWidget, QVBoxLayout, QLabel
-from PyQt5.QtGui import QColor, QPainter, QPen, QPolygon, QPixmap
-from PyQt5.QtCore import Qt, QPoint, QRect, QLine
-from plugin_manager import PluginManager, Parameter, Plugin
+from PyQt5.QtGui import QPainter, QPen
+from PyQt5.QtCore import Qt, QRect, QLine
+from plugin_manager import PluginManager, Plugin
 from modhostmanager import (
-    startModHost, connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
-    updateBypass, quitModHost
+    connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
+    updateBypass
 )
 from styles import (
-    styles_indicator, styles_label, styles_window, color_foreground,
-    styles_error, ScrollBarStyle, color_background, ControlDisplayStyle,
+    styles_window, color_foreground,
+    ScrollBarStyle, color_background, ControlDisplayStyle,
     BreadcrumbsBarStyle, styles_tabletitle, styles_tableitem
 )
-from utils import config_dir, assets_dir
+from utils import config_dir
 from qwidgets.parameter_widgets import ParameterPanel
 from qwidgets.controls import ControlDisplay, RotaryEncoder
 from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
@@ -23,6 +23,7 @@ from qwidgets.navigation import (
 )
 from qwidgets.floating_window import FloatingWindow, DialogItem
 from qwidgets.plugin_box import PluginBox, AddPluginBox
+from offboard import try_save
 
 
 class MainWindow(QWidget):
@@ -74,10 +75,10 @@ class MainWindow(QWidget):
         selected_json = selected_profile + ".json"
         json_path = os.path.join(config_dir, selected_json)
         board.initFromJSON(json_path)
-        startModHost()
         modhost = connectToModHost()
         if modhost is None:
             print("Failed Closing...")
+            exit(1)
             return
         setUpPlugins(modhost, board)
         setUpPatch(modhost, board)
@@ -176,7 +177,14 @@ class BoardWindow(QWidget):
                 if self.swap_plugins(1):
                     self.pluginbox.scroll_group.goNext()
             case RotaryEncoder.BOTTOM.keyPress:
-                self.remove_current_plugin()
+                cur = self.curItem()
+                if type(cur) is PluginBox:
+                    self.remove_current_plugin()
+                if type(cur) is AddPluginBox:
+                    BreadcrumbsBar.navForward("SAVING...")
+                    BreadcrumbsBar.instance.repaint()
+                    try_save()
+                    BreadcrumbsBar.navBackward()
 
     def swap_plugins(self, dist: int) -> bool:
         index = self.curIndex()
