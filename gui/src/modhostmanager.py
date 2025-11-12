@@ -23,8 +23,8 @@ def startModHost():
         if sys.platform.startswith("linux"):
             process = subprocess.Popen(
                     mod_host_cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    #stdout=subprocess.PIPE,
+                    #stderr=subprocess.PIPE,
                     preexec_fn=os.setpgrp
             )
         else:
