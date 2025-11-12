@@ -50,7 +50,7 @@ def startJackdServer():
                     preexec_fn=os.setpgrp,
                 )
                 # check to make sure that process doesn't error out
-                time.sleep(0.25)
+                time.sleep(5)  # give more time to become stable
                 if process.poll() is not None:
                     # process ended
                     print("JACK server failed to start. Falling back to dummy.")
