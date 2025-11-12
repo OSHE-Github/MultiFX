@@ -65,8 +65,7 @@ class MainWindow(QWidget):
 
         self.board_window = None  # Placeholder for later
 
-        global modhost
-        modhost = connectToModHost()
+        self.reset_modhost()
         patchThrough(modhost)  # Bypass all before we load plugins
 
         self.show()
@@ -84,14 +83,7 @@ class MainWindow(QWidget):
 
         # Restart mod-host so we can change profiles.
         # This is inefficient and can be improved, but it's easy.
-        startModHost()
-
-        global modhost
-        modhost = connectToModHost()
-        if modhost is None:
-            print("Failed Closing...")
-            exit(1)
-            return
+        self.reset_modhost()
         setUpPlugins(modhost, board)
         setUpPatch(modhost, board)
         verifyParameters(modhost, board)
@@ -117,9 +109,7 @@ class MainWindow(QWidget):
 
     def show_start_screen(self):
         """Switch back to the start screen."""
-        startModHost()
-        global modhost
-        modhost = connectToModHost()
+        self.reset_modhost()
         patchThrough(modhost)  # Bypass all before we load plugins
         self.stack.setCurrentWidget(self.start_screen)  # Switch back
         self.stack.removeWidget(self.board_window)
@@ -128,6 +118,17 @@ class MainWindow(QWidget):
         ControlDisplay.setBind(RotaryEncoder.TOP, "select")
         ControlDisplay.setBind(RotaryEncoder.MIDDLE, "")
         ControlDisplay.setBind(RotaryEncoder.BOTTOM, "delete")
+
+    def reset_modhost():
+        """Starts or restarts modhost"""
+        startModHost()
+
+        global modhost
+        modhost = connectToModHost()
+        if modhost is None:
+            print("Failed Closing...")
+            exit(1)
+            return
 
 
 class BoardWindow(QWidget):
