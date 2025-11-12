@@ -19,8 +19,8 @@ def startModHost():
         if sys.platform.startswith("linux"):
             process = subprocess.Popen(
                     mod_host_cmd,
-                    #stdout=subprocess.PIPE,
-                    #stderr=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                     preexec_fn=os.setpgrp
             )
         else:
@@ -44,14 +44,19 @@ def startJackdServer():
             try:
                 process = subprocess.Popen(
                     jackd_cmd,
-                    #stdout=subprocess.PIPE,
-                    #stderr=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                     # Makes it independent of the parent process
                     preexec_fn=os.setpgrp,
                 )
                 # check to make sure that process doesn't error out
-                time.sleep(5)  # give more time to become stable
-                if process.poll() is not None:
+                time.sleep(2)  # give time to become stable
+
+                # check for failure by seeing if process has ended or open failed
+                jackd_failed: bool = process.poll() is not None
+                if not jackd_failed and "Failed to open" in subprocess.Popen.communicate(timeout=2):
+                    jackd_failed = True
+                if jackd_failed:
                     # process ended
                     print("JACK server failed to start. Falling back to dummy.")
                     jackd_cmd = [
@@ -60,8 +65,8 @@ def startJackdServer():
                     ]
                     process = subprocess.Popen(
                         jackd_cmd,
-                        #stdout=subprocess.PIPE,
-                        #stderr=subprocess.PIPE,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
                         # Makes it independent of the parent process
                         preexec_fn=os.setpgrp,
                     )
