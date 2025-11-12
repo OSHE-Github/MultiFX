@@ -409,7 +409,7 @@ def verifyParameters(sock, manager: plugin_manager.PluginManager):
 def tryCommand(sock, command, errMsg: str = ""):
     cmdout = ""
     try:
-        sendCommand(sock, command)
+        cmdout = sendCommand(sock, command)
         return cmdout.split()[1]
     except Exception as e:
         print(f"MODHOST-COMMAND ERROR:\n\tEXCEPTION: {e}\n\tCOMMAND: {command} \n\tOUTPUT: {cmdout}\n\t{errMsg}")
