@@ -8,15 +8,11 @@ import plugin_manager
 PRINT_CMDS = False
 MODHOST_PORT = 55555
 
-modHostRunning = False
-
 
 def startModHost():
     # Starting mod-host -n(no ui) -p 5555(w/ port 5555)
     mod_host_cmd = ["mod-host", "-n", "-p", str(MODHOST_PORT)]
-    global modHostRunning
     try:
-
         subprocess.run(["killall", "mod-host"], check=False)
 
         if sys.platform.startswith("linux"):
@@ -29,12 +25,10 @@ def startModHost():
         else:
             print("Unsupported OS")
             return None
-        modHostRunning = True
         return process
 
     except Exception as e:
         print(f"Failed to start: {e}")
-        modHostRunning = False
         return None
 
 
