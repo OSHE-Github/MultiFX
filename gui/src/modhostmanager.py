@@ -59,6 +59,7 @@ def startJackdServer():
                 if jackd_failed:
                     # process ended
                     print("JACK server failed to start. Falling back to dummy.")
+                    subprocess.run(["killall", "mod-host"], check=False)
                     jackd_cmd = [
                             "/usr/bin/jackd", "-d", "dummy", "-r", "96000",
                             "-p", "128"
