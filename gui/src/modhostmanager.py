@@ -8,11 +8,14 @@ import plugin_manager
 PRINT_CMDS = False
 MODHOST_PORT = 55555
 
+modHostRunning = False
+
 
 def startModHost():
+    # Starting mod-host -n(no ui) -p 5555(w/ port 5555)
+    mod_host_cmd = ["mod-host", "-n", "-p", str(MODHOST_PORT)]
+    global modHostRunning
     try:
-        # Starting mod-host -n(no ui) -p 5555(w/ port 5555)
-        mod_host_cmd = ["mod-host", "-n", "-p", str(MODHOST_PORT)]
 
         subprocess.run(["killall", "mod-host"], check=False)
 
@@ -26,10 +29,12 @@ def startModHost():
         else:
             print("Unsupported OS")
             return None
+        modHostRunning = True
         return process
 
     except Exception as e:
         print(f"Failed to start: {e}")
+        modHostRunning = False
         return None
 
 
@@ -169,31 +174,36 @@ def connectStereoToStereo(
         sock, source_out_1, source_out_2, dest_in_1, dest_in_2,
         flipped: bool = False
 ):
+    res = ""
     if flipped:
         command = f"connect {source_out_1} {dest_in_2}"
         try:
-            response = sendCommand(sock, command).split()[1]
+            res = sendCommand(sock, command)
+            response = res.split()[1]
         except Exception as e:
-            print(f"Error connectingEffects {e}")
+            print(f"Error connectingEffects {e}. Result: {res}")
             return -5
         command = f"connect {source_out_2} {dest_in_1}"
         try:
-            return [response, sendCommand(sock, command).split()[1]]
+            res = sendCommand(sock, command)
+            return [response, res.split()[1]]
         except Exception as e:
-            print(f"Error connectingEffects {e}")
+            print(f"Error connectingEffects {e}: Result: {res}")
             return -5
     else:
         command = f"connect {source_out_1} {dest_in_1}"
         try:
-            response = sendCommand(sock, command).split()[1]
+            res = sendCommand(sock, command)
+            response = res.split()[1]
         except Exception as e:
-            print(f"Error connectingEffects {e}")
+            print(f"Error connectingEffects {e}. Result: {res}")
             return -5
         command = f"connect {source_out_2} {dest_in_2}"
         try:
-            return [response, sendCommand(sock, command).split()[1]]
+            res = sendCommand(sock, command)
+            return [response, res.split()[1]]
         except Exception as e:
-            print(f"Error connectingEffects {e}")
+            print(f"Error connectingEffects {e}: Result: {res}")
             return -5
 
 
@@ -215,65 +225,77 @@ def connectStereoToMono(sock, source_out_1, source_out_2, dest):
 
 def connectSystemCapturMono(sock, dest):
     command = f"connect system:capture_1 {dest}"
+    res = ""
     try:
-        response = sendCommand(sock, command).split()[1]
+        res = sendCommand(sock, command)
+        response = res.split()[1]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result: {res}")
         return -5
 
     command = f"connect system:capture_2 {dest}"
     try:
-        return [response, sendCommand(sock, command).split()[1]]
+        res = sendCommand(sock, command)
+        return [response, res.split()[1]]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result: {res}")
         return -5
 
 
 def connectSystemCapturStereo(sock, dest_in_1, dest_in_2):
     command = f"connect system:capture_1 {dest_in_1}"
+    res = ""
     try:
-        response = sendCommand(sock, command).split()[1]
+        res = sendCommand(sock, command)
+        response = res.split()[1]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result: {res}")
         return -5
 
     command = f"connect system:capture_2 {dest_in_2}"
     try:
-        return [response, sendCommand(sock, command).split()[1]]
+        res = sendCommand(sock, command)
+        return [response, res.split()[1]]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result: {res}")
         return -5
 
 
 def connectSystemPlaybackStereo(sock, source_out_1, source_out_2):
     command = f"connect {source_out_1} system:playback_1"
+    res = ""
     try:
-        response = sendCommand(sock, command).split()[1]
+        res = sendCommand(sock, command)
+        response = res.split()[1]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result {res}")
         return -5
 
     command = f"connect {source_out_2} system:playback_2"
     try:
-        return [response, sendCommand(sock, command).split()[1]]
+        res = sendCommand(sock, command)
+        return [response, res.split()[1]]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result {res}")
         return -5
 
 
 def connectSystemPlaybackMono(sock, source):
     command = f"connnect {source} system:playback_1"
+    res = ""
     try:
-        response = sendCommand(sock, command).split()[1]
+        res = sendCommand(sock, command)
+        response = res.split()[1]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result: {res}")
         return -5
 
     command = f"connect {source} system:playback_2"
+    res = sendCommand(sock, command)
     try:
-        return [response, sendCommand(sock, command).split()[1]]
+        return [response, res.split()[1]]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result: {res}")
         return -5
 
 

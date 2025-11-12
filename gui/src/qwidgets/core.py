@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QRect, QLine
 from plugin_manager import PluginManager, Plugin
 from modhostmanager import (
     connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
-    updateBypass
+    updateBypass, modHostRunning, startModHost
 )
 from styles import (
     styles_window, color_foreground,
@@ -76,6 +76,12 @@ class MainWindow(QWidget):
         json_path = os.path.join(config_dir, selected_json)
         board.initFromJSON(json_path)
         modhost = connectToModHost()
+
+        # Restart mod-host if it's running so we can change profiles.
+        # This is inefficient and can be improved, but it's easy.
+        if modHostRunning:
+            startModHost()
+
         if modhost is None:
             print("Failed Closing...")
             exit(1)
