@@ -19,8 +19,8 @@ def startModHost():
         if sys.platform.startswith("linux"):
             process = subprocess.Popen(
                     mod_host_cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    #stdout=subprocess.PIPE,
+                    #stderr=subprocess.PIPE,
                     preexec_fn=os.setpgrp
             )
         else:
@@ -44,8 +44,8 @@ def startJackdServer():
             try:
                 process = subprocess.Popen(
                     jackd_cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    #stdout=subprocess.PIPE,
+                    #stderr=subprocess.PIPE,
                     # Makes it independent of the parent process
                     preexec_fn=os.setpgrp,
                 )
@@ -60,8 +60,8 @@ def startJackdServer():
                     ]
                     process = subprocess.Popen(
                         jackd_cmd,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
+                        #stdout=subprocess.PIPE,
+                        #stderr=subprocess.PIPE,
                         # Makes it independent of the parent process
                         preexec_fn=os.setpgrp,
                     )
