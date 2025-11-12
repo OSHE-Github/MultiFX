@@ -119,7 +119,7 @@ class MainWindow(QWidget):
         ControlDisplay.setBind(RotaryEncoder.MIDDLE, "")
         ControlDisplay.setBind(RotaryEncoder.BOTTOM, "delete")
 
-    def reset_modhost():
+    def reset_modhost(self):
         """Starts or restarts modhost"""
         startModHost()
 
