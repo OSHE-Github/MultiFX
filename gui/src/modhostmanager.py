@@ -8,6 +8,11 @@ import plugin_manager
 PRINT_CMDS = False
 MODHOST_PORT = 55555
 
+SYSIN1 = "system:capture_1"
+SYSIN2 = "system:capture_2"
+SYSOUT1 = "system:playback_1"
+SYSOUT2 = "system:playback_2"
+
 
 def startModHost():
     # Starting mod-host -n(no ui) -p 5555(w/ port 5555)
@@ -396,3 +401,52 @@ def verifyParameters(sock, manager: plugin_manager.PluginManager):
             time.sleep(.1)
 
     return badParameters
+
+
+def tryCommand(sock, command, errMsg: str = ""):
+    cmdout = ""
+    try:
+        sendCommand(sock, command)
+        return cmdout.split()[1]
+    except Exception as e:
+        print(f"MODHOST-COMMAND ERROR:\n\tEXCEPTION: {e}\n\tCOMMAND: {command} \n\tOUTPUT: {cmdout}\n\t{errMsg}")
+        return -5
+
+
+def patchThrough(sock):
+    """Connects system in to system out"""
+    tryCommand(sock, f"connect {SYSIN1} {SYSOUT1}")
+    tryCommand(sock, f"connect {SYSIN2} {SYSOUT2}")
+
+
+def unpatchThrough(sock):
+    """Disconnects system in and system out"""
+    tryCommand(sock, f"disconnect {SYSIN1} {SYSOUT1}")
+    tryCommand(sock, f"disconnect {SYSIN2} {SYSOUT2}")
+
+
+def remove(sock, instanceNum: int):
+    """Helper function to remove plugins"""
+    command = f"remove {instanceNum}"
+    tryCommand(sock, command)
+
+
+def removeFirst(sock, instanceNum: int):
+    """Removes the first plugin. Note that the first instanceNum isn't always
+    0 due to re-ordering and adding"""
+    remove(sock, instanceNum)
+
+
+def removeMiddle(sock, instanceNum: int):
+    """General use case for removing plugin. Not first or last plugin"""
+    remove(sock, instanceNum)
+
+
+def removeLast(sock, instanceNum: int):
+    """Removes the final plugin. Patches previous to system out."""
+    remove(sock, instanceNum)
+
+
+def removeFinal(sock, instanceNum: int):
+    """Removes final plugin. Patches system in to system out"""
+    remove(sock, instanceNum)

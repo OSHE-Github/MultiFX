@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QRect, QLine
 from plugin_manager import PluginManager, Plugin
 from modhostmanager import (
     connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
-    updateBypass, startModHost
+    updateBypass, startModHost, patchThrough
 )
 from styles import (
     styles_window, color_foreground,
@@ -24,6 +24,8 @@ from qwidgets.navigation import (
 from qwidgets.floating_window import FloatingWindow, DialogItem
 from qwidgets.plugin_box import PluginBox, AddPluginBox
 from offboard import try_save
+
+modhost = None
 
 
 class MainWindow(QWidget):
@@ -80,6 +82,7 @@ class MainWindow(QWidget):
         # This is inefficient and can be improved, but it's easy.
         startModHost()
 
+        global modhost
         modhost = connectToModHost()
         if modhost is None:
             print("Failed Closing...")
@@ -110,6 +113,8 @@ class MainWindow(QWidget):
 
     def show_start_screen(self):
         """Switch back to the start screen."""
+        startModHost()
+        patchThrough(modhost)  # Bypass all before we load plugins
         self.stack.setCurrentWidget(self.start_screen)  # Switch back
         self.stack.removeWidget(self.board_window)
         self.start_screen.setFocus()
