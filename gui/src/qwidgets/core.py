@@ -211,7 +211,7 @@ class BoardWindow(QWidget):
         if index is None:
             return False
         n = len(self.pluginbox.scroll_group.items)
-        if index + dist < 0 or index + dist >= n:
+        if index + dist < 0 or index + dist >= n-1:
             return
         items = self.pluginbox.boxes
 
