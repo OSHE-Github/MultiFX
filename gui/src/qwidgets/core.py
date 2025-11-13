@@ -8,7 +8,8 @@ from plugin_manager import PluginManager, Plugin
 from modhostmanager import (
     connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
     updateBypass, startModHost, patchThrough, removeFirst, removeMiddle,
-    removeLast, removeFinal, add_plugin_end
+    removeLast, removeFinal, add_plugin_end, swap_plugins_end,
+    swap_plugins_final, swap_plugins_middle, swap_plugins_start
 )
 from styles import (
     styles_window, color_foreground,
@@ -213,6 +214,81 @@ class BoardWindow(QWidget):
         if index + dist < 0 or index + dist >= n:
             return
         items = self.pluginbox.boxes
+
+        # swap in mod-host
+        # default, swap forward
+        instanceNumA = None
+        pluginA = None
+        instanceNumB = None
+        pluginB = None
+        beforePlugin = None
+        beforeInstanceNum = None
+        afterPlugin = None
+        afterInstanceNum = None
+        # when negative, swap backward
+        if dist < 0:
+            instanceNumB = items[index].instanceNum
+            pluginB = items[index].plugin
+            instanceNumA = items[index+dist].instanceNum
+            pluginA = items[index+dist].plugin
+            if index - 2 >= 0:
+                beforeInstanceNum = self.pluginbox.scroll_group.items[index-2].instanceNum
+                beforePlugin = self.pluginbox.scroll_group.items[index-2].plugin
+            if index + 1 < n-1:  # adjust n for AppPluginBox
+                afterInstanceNum = self.pluginbox.scroll_group.items[index+1].instanceNum
+                afterPlugin = self.pluginbox.scroll_group.items[index+1].plugin
+        else:  # swap forward
+            instanceNumA = items[index].instanceNum
+            pluginA = items[index].plugin
+            instanceNumB = items[index+dist].instanceNum
+            pluginB = items[index+dist].plugin
+            if index - 1 >= 0:
+                beforeInstanceNum = self.pluginbox.scroll_group.items[index-1].instanceNum
+                beforePlugin = self.pluginbox.scroll_group.items[index-1].plugin
+            if index + 2 < n-1:
+                afterInstanceNum = self.pluginbox.scroll_group.items[index+2].instanceNum
+                afterPlugin = self.pluginbox.scroll_group.items[index+2].plugin
+        # call mod-host manager based on what we determined
+        if beforeInstanceNum is None:
+            if afterInstanceNum is None:
+                swap_plugins_final(
+                        modhost,
+                        instanceNumA,
+                        pluginA,
+                        instanceNumB,
+                        pluginB)
+            else:
+                swap_plugins_start(
+                        modhost,
+                        instanceNumA,
+                        pluginA,
+                        instanceNumB,
+                        pluginB,
+                        afterInstanceNum,
+                        afterPlugin)
+        else:
+            if afterInstanceNum is None:
+                swap_plugins_end(
+                        modhost,
+                        instanceNumA,
+                        pluginA,
+                        instanceNumB,
+                        pluginB,
+                        beforeInstanceNum,
+                        beforePlugin)
+            else:
+                swap_plugins_middle(
+                        modhost,
+                        instanceNumA,
+                        pluginA,
+                        instanceNumB,
+                        pluginB,
+                        beforeInstanceNum,
+                        beforePlugin,
+                        afterInstanceNum,
+                        afterPlugin)
+
+        # swap visually
         temp = items[index]
         other = items[index + dist]
         if other.id == AddPluginBox.ID:
@@ -226,7 +302,6 @@ class BoardWindow(QWidget):
         other.isLast = other.index == n - 2
 
         self.pluginbox.scroll_group.drawItems()
-        # TODO: swap in mod-host
 
         return True
 
