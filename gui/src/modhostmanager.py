@@ -8,12 +8,16 @@ import plugin_manager
 PRINT_CMDS = False
 MODHOST_PORT = 55555
 
+SYSIN1 = "system:capture_1"
+SYSIN2 = "system:capture_2"
+SYSOUT1 = "system:playback_1"
+SYSOUT2 = "system:playback_2"
+
 
 def startModHost():
+    # Starting mod-host -n(no ui) -p 5555(w/ port 5555)
+    mod_host_cmd = ["mod-host", "-n", "-p", str(MODHOST_PORT)]
     try:
-        # Starting mod-host -n(no ui) -p 5555(w/ port 5555)
-        mod_host_cmd = ["mod-host", "-n", "-p", str(MODHOST_PORT)]
-
         subprocess.run(["killall", "mod-host"], check=False)
 
         if sys.platform.startswith("linux"):
@@ -91,6 +95,7 @@ def connectToModHost():
     HOST = "localhost"
 
     sock = None
+    error_list: list[str] = []
 
     for _ in range(5):
         try:
@@ -100,10 +105,12 @@ def connectToModHost():
             print("Connected via socket")
             return sock
         except ConnectionRefusedError as e:
-            print(f"Socket couldn't connect: {e}")
+            error_list.append(f"Socket couldn't connect: {e}")
             time.sleep(1)
 
     print("Socket couldn't make a connection")
+    for err in error_list:
+        print(err)
     return None
 
 
@@ -169,31 +176,73 @@ def connectStereoToStereo(
         sock, source_out_1, source_out_2, dest_in_1, dest_in_2,
         flipped: bool = False
 ):
+    res = ""
     if flipped:
         command = f"connect {source_out_1} {dest_in_2}"
         try:
-            response = sendCommand(sock, command).split()[1]
+            res = sendCommand(sock, command)
+            response = res.split()[1]
         except Exception as e:
-            print(f"Error connectingEffects {e}")
+            print(f"Error connectingEffects {e}. Result: {res}")
             return -5
         command = f"connect {source_out_2} {dest_in_1}"
         try:
-            return [response, sendCommand(sock, command).split()[1]]
+            res = sendCommand(sock, command)
+            return [response, res.split()[1]]
         except Exception as e:
-            print(f"Error connectingEffects {e}")
+            print(f"Error connectingEffects {e}: Result: {res}")
             return -5
     else:
         command = f"connect {source_out_1} {dest_in_1}"
         try:
-            response = sendCommand(sock, command).split()[1]
+            res = sendCommand(sock, command)
+            response = res.split()[1]
         except Exception as e:
-            print(f"Error connectingEffects {e}")
+            print(f"Error connectingEffects {e}. Result: {res}")
             return -5
         command = f"connect {source_out_2} {dest_in_2}"
         try:
-            return [response, sendCommand(sock, command).split()[1]]
+            res = sendCommand(sock, command)
+            return [response, res.split()[1]]
         except Exception as e:
-            print(f"Error connectingEffects {e}")
+            print(f"Error connectingEffects {e}: Result: {res}")
+            return -5
+
+
+def disconnectStereoToStereo(
+        sock, source_out_1, source_out_2, dest_in_1, dest_in_2,
+        flipped: bool = False
+):
+    res = ""
+    if flipped:
+        command = f"disconnect {source_out_1} {dest_in_2}"
+        try:
+            res = sendCommand(sock, command)
+            response = res.split()[1]
+        except Exception as e:
+            print(f"Error disconnectingEffects {e}. Result: {res}")
+            return -5
+        command = f"disconnect {source_out_2} {dest_in_1}"
+        try:
+            res = sendCommand(sock, command)
+            return [response, res.split()[1]]
+        except Exception as e:
+            print(f"Error connectingEffects {e}: Result: {res}")
+            return -5
+    else:
+        command = f"disconnect {source_out_1} {dest_in_1}"
+        try:
+            res = sendCommand(sock, command)
+            response = res.split()[1]
+        except Exception as e:
+            print(f"Error disconnectingEffects {e}. Result: {res}")
+            return -5
+        command = f"disconnect {source_out_2} {dest_in_2}"
+        try:
+            res = sendCommand(sock, command)
+            return [response, res.split()[1]]
+        except Exception as e:
+            print(f"Error disconnectingEffects {e}: Result: {res}")
             return -5
 
 
@@ -215,65 +264,115 @@ def connectStereoToMono(sock, source_out_1, source_out_2, dest):
 
 def connectSystemCapturMono(sock, dest):
     command = f"connect system:capture_1 {dest}"
+    res = ""
     try:
-        response = sendCommand(sock, command).split()[1]
+        res = sendCommand(sock, command)
+        response = res.split()[1]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result: {res}")
         return -5
 
     command = f"connect system:capture_2 {dest}"
     try:
-        return [response, sendCommand(sock, command).split()[1]]
+        res = sendCommand(sock, command)
+        return [response, res.split()[1]]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result: {res}")
         return -5
 
 
 def connectSystemCapturStereo(sock, dest_in_1, dest_in_2):
     command = f"connect system:capture_1 {dest_in_1}"
+    res = ""
     try:
-        response = sendCommand(sock, command).split()[1]
+        res = sendCommand(sock, command)
+        response = res.split()[1]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result: {res}")
         return -5
 
     command = f"connect system:capture_2 {dest_in_2}"
     try:
-        return [response, sendCommand(sock, command).split()[1]]
+        res = sendCommand(sock, command)
+        return [response, res.split()[1]]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result: {res}")
+        return -5
+
+
+def disconnectSystemCapturStereo(sock, dest_in_1, dest_in_2):
+    command = f"disconnect system:capture_1 {dest_in_1}"
+    res = ""
+    try:
+        res = sendCommand(sock, command)
+        response = res.split()[1]
+    except Exception as e:
+        print(f"Error disconnectingEffects {e}. Result: {res}")
+        return -5
+
+    command = f"disconnect system:capture_2 {dest_in_2}"
+    try:
+        res = sendCommand(sock, command)
+        return [response, res.split()[1]]
+    except Exception as e:
+        print(f"Error disconnectingEffects {e}. Result: {res}")
         return -5
 
 
 def connectSystemPlaybackStereo(sock, source_out_1, source_out_2):
     command = f"connect {source_out_1} system:playback_1"
+    res = ""
     try:
-        response = sendCommand(sock, command).split()[1]
+        res = sendCommand(sock, command)
+        response = res.split()[1]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result {res}")
         return -5
 
     command = f"connect {source_out_2} system:playback_2"
     try:
-        return [response, sendCommand(sock, command).split()[1]]
+        res = sendCommand(sock, command)
+        return [response, res.split()[1]]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result {res}")
+        return -5
+
+
+def disconnectSystemPlaybackStereo(sock, source_out_1, source_out_2):
+    command = f"disconnect {source_out_1} system:playback_1"
+    res = ""
+    try:
+        res = sendCommand(sock, command)
+        response = res.split()[1]
+    except Exception as e:
+        print(f"Error connectingEffects {e}. Result {res}")
+        return -5
+
+    command = f"disconnect {source_out_2} system:playback_2"
+    try:
+        res = sendCommand(sock, command)
+        return [response, res.split()[1]]
+    except Exception as e:
+        print(f"Error connectingEffects {e}. Result {res}")
         return -5
 
 
 def connectSystemPlaybackMono(sock, source):
     command = f"connnect {source} system:playback_1"
+    res = ""
     try:
-        response = sendCommand(sock, command).split()[1]
+        res = sendCommand(sock, command)
+        response = res.split()[1]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result: {res}")
         return -5
 
     command = f"connect {source} system:playback_2"
+    res = sendCommand(sock, command)
     try:
-        return [response, sendCommand(sock, command).split()[1]]
+        return [response, res.split()[1]]
     except Exception as e:
-        print(f"Error connectingEffects {e}")
+        print(f"Error connectingEffects {e}. Result: {res}")
         return -5
 
 
@@ -380,3 +479,293 @@ def verifyParameters(sock, manager: plugin_manager.PluginManager):
             time.sleep(.1)
 
     return badParameters
+
+
+def tryCommand(sock, command, errMsg: str = ""):
+    cmdout = ""
+    try:
+        cmdout = sendCommand(sock, command)
+        return cmdout.split()[1]
+    except Exception as e:
+        print(f"MODHOST-COMMAND ERROR:\n\tEXCEPTION: {e}\n\tCOMMAND: {command} \n\tOUTPUT: {cmdout}\n\t{errMsg}")
+        return -5
+
+
+def patchThrough(sock):
+    """Connects system in to system out"""
+    tryCommand(sock, f"connect {SYSIN1} {SYSOUT1}")
+    tryCommand(sock, f"connect {SYSIN2} {SYSOUT2}")
+
+
+def unpatchThrough(sock):
+    """Disconnects system in and system out"""
+    tryCommand(sock, f"disconnect {SYSIN1} {SYSOUT1}")
+    tryCommand(sock, f"disconnect {SYSIN2} {SYSOUT2}")
+
+
+def remove(sock, instanceNum: int):
+    """Helper function to remove plugins"""
+    command = f"remove {instanceNum}"
+    tryCommand(sock, command)
+
+
+def removeFirst(sock, rmInstanceNum: int, rmPlugin: plugin_manager.Plugin,
+                nextInstanceNum: int, nextPlugin: plugin_manager.Plugin):
+    """Removes the first plugin. Note that the first instanceNum isn't always
+    0 due to re-ordering and adding"""
+    remove(sock, rmInstanceNum)
+    connectSystemCapturStereo(
+            sock,
+            f"effect_{nextInstanceNum}:{nextPlugin.outputs[0]}",
+            f"effect_{nextInstanceNum}:{nextPlugin.outputs[1]}"
+    )
+
+
+def removeMiddle(sock, rmInstanceNum: int, rmPlugin: plugin_manager.Plugin,
+                 prevInstanceNum: int, prevPlugin: plugin_manager.Plugin,
+                 nextInstanceNum: int, nextPlugin: plugin_manager.Plugin):
+    """General use case for removing plugin. Not first or last plugin"""
+    remove(sock, rmInstanceNum)
+    connectStereoToStereo(
+            sock,
+            f"effect_{prevInstanceNum}:{prevPlugin.outputs[0]}",
+            f"effect_{prevInstanceNum}:{prevPlugin.outputs[1]}",
+            f"effect_{nextInstanceNum}:{nextPlugin.outputs[0]}",
+            f"effect_{nextInstanceNum}:{nextPlugin.outputs[1]}"
+    )
+
+
+def removeLast(sock, rmInstanceNum: int, rmPlugin: plugin_manager.Plugin,
+               prevInstanceNum: int, prevPlugin: plugin_manager.Plugin):
+    """Removes the final plugin. Patches previous to system out."""
+    remove(sock, rmInstanceNum)
+    connectSystemPlaybackStereo(
+            sock,
+            f"effect_{prevInstanceNum}:{prevPlugin.outputs[0]}",
+            f"effect_{prevInstanceNum}:{prevPlugin.outputs[1]}"
+    )
+
+
+def removeFinal(sock, instanceNum: int):
+    """Removes final plugin. Patches system in to system out"""
+    remove(sock, instanceNum)
+    patchThrough(sock)
+
+
+def add_plugin_end(sock, newInstanceNum: int, newPlugin: plugin_manager.Plugin,
+                   lastInstanceNum: int, lastPlugin: plugin_manager.Plugin):
+    """Adds a plugin at the end of the chain."""
+    addEffect(sock, newPlugin, newInstanceNum)
+    disconnectSystemPlaybackStereo(
+            sock,
+            f"effect_{lastInstanceNum}:{lastPlugin.outputs[0]}",
+            f"effect_{lastInstanceNum}:{lastPlugin.outputs[1]}"
+    )
+    connectStereoToStereo(
+            sock,
+            f"effect_{lastInstanceNum}:{lastPlugin.outputs[0]}",
+            f"effect_{lastInstanceNum}:{lastPlugin.outputs[1]}",
+            f"effect_{newInstanceNum}:{newPlugin.inputs[0]}",
+            f"effect_{newInstanceNum}:{newPlugin.inputs[1]}"
+    )
+    connectSystemPlaybackStereo(
+            sock,
+            f"effect_{newInstanceNum}:{newPlugin.outputs[0]}",
+            f"effect_{newInstanceNum}:{newPlugin.outputs[1]}"
+    )
+
+
+def swap_plugins_start(sock, instanceNumA: int, pluginA: plugin_manager.Plugin,
+                       instanceNumB: int, pluginB: plugin_manager.Plugin,
+                       afterInstanceNum: int, afterPlugin: plugin_manager.Plugin):
+    """Swaps the two plugins at the start of the chain.
+    Start state: SYSIN -> pluginA -> pluginB -> afterPlugin
+    End state: SYSIN -> pluginB -> pluginA -> afterPlugin
+    """
+    # disconnect all
+    disconnectSystemCapturStereo(
+            sock,
+            f"effect_{instanceNumA}:{pluginA.inputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[1]}",
+    )
+    disconnectStereoToStereo(
+            sock,
+            f"effect_{instanceNumA}:{pluginA.outputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.outputs[1]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[1]}",
+    )
+    disconnectStereoToStereo(
+            sock,
+            f"effect_{instanceNumB}:{pluginB.outputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.outputs[1]}",
+            f"effect_{afterInstanceNum}:{afterPlugin.inputs[0]}",
+            f"effect_{afterInstanceNum}:{afterPlugin.inputs[1]}",
+    )
+    # reconnect
+    connectSystemCapturStereo(
+            sock,
+            f"effect_{instanceNumB}:{pluginB.inputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[1]}",
+    )
+    connectStereoToStereo(
+            sock,
+            f"effect_{instanceNumB}:{pluginB.outputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.outputs[1]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[1]}",
+    )
+    connectStereoToStereo(
+            sock,
+            f"effect_{instanceNumA}:{pluginA.outputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.outputs[1]}",
+            f"effect_{afterInstanceNum}:{afterPlugin.inputs[0]}",
+            f"effect_{afterInstanceNum}:{afterPlugin.inputs[1]}",
+    )
+
+
+def swap_plugins_end(sock, instanceNumA: int, pluginA: plugin_manager.Plugin,
+                     instanceNumB: int, pluginB: plugin_manager.Plugin,
+                     beforeInstanceNum: int, beforePlugin: plugin_manager.Plugin):
+    """Swaps the two plugins at the end of the chain
+    Start state: beforePlugin -> pluginA -> pluginB -> SYSOUT
+    End state: beforePlugin -> pluginB -> pluginA -> SYSOUT
+    """
+    # disconnect all
+    disconnectStereoToStereo(
+            sock,
+            f"effect_{beforeInstanceNum}:{beforePlugin.outputs[0]}",
+            f"effect_{beforeInstanceNum}:{beforePlugin.outputs[1]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[1]}"
+    )
+    disconnectStereoToStereo(
+            sock,
+            f"effect_{instanceNumA}:{pluginA.outputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.outputs[1]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[1]}",
+    )
+    disconnectSystemPlaybackStereo(
+            sock,
+            f"effect_{instanceNumB}:{pluginB.outputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.outputs[1]}",
+    )
+    # reconnect
+    connectStereoToStereo(
+            sock,
+            f"effect_{beforeInstanceNum}:{beforePlugin.outputs[0]}",
+            f"effect_{beforeInstanceNum}:{beforePlugin.outputs[1]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[1]}",
+    )
+    connectStereoToStereo(
+            sock,
+            f"effect_{instanceNumB}:{pluginB.outputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.outputs[1]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[1]}",
+    )
+    connectSystemPlaybackStereo(
+            sock,
+            f"effect_{instanceNumA}:{pluginA.outputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.outputs[1]}",
+    )
+
+
+def swap_plugins_middle(sock, instanceNumA: int, pluginA: plugin_manager.Plugin,
+                        instanceNumB: int, pluginB: plugin_manager.Plugin,
+                        beforeInstanceNum: int, beforePlugin: plugin_manager.Plugin,
+                        afterInstanceNum: int, afterPlugin: plugin_manager.Plugin):
+    """Swaps any two plugins not at the start or the end of the chain
+    Start state: beforePlugin -> pluginA -> pluginB -> afterPlugin
+    End state: beforePlugin -> pluginB -> pluginA -> afterPlugin
+    """
+    # disconnect all
+    disconnectStereoToStereo(
+            sock,
+            f"effect_{beforeInstanceNum}:{beforePlugin.outputs[0]}",
+            f"effect_{beforeInstanceNum}:{beforePlugin.outputs[1]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[1]}"
+    )
+    disconnectStereoToStereo(
+            sock,
+            f"effect_{instanceNumA}:{pluginA.outputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.outputs[1]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[1]}",
+    )
+    disconnectStereoToStereo(
+            sock,
+            f"effect_{instanceNumB}:{pluginB.outputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.outputs[1]}",
+            f"effect_{afterInstanceNum}:{afterPlugin.inputs[0]}",
+            f"effect_{afterInstanceNum}:{afterPlugin.inputs[1]}",
+    )
+    # reconnect
+    connectStereoToStereo(
+            sock,
+            f"effect_{beforeInstanceNum}:{beforePlugin.outputs[0]}",
+            f"effect_{beforeInstanceNum}:{beforePlugin.outputs[1]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[1]}"
+    )
+    connectStereoToStereo(
+            sock,
+            f"effect_{instanceNumB}:{pluginB.outputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.outputs[1]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[1]}",
+    )
+    connectStereoToStereo(
+            sock,
+            f"effect_{instanceNumA}:{pluginA.outputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.outputs[1]}",
+            f"effect_{afterInstanceNum}:{afterPlugin.inputs[0]}",
+            f"effect_{afterInstanceNum}:{afterPlugin.inputs[1]}",
+    )
+
+
+def swap_plugins_final(sock, instanceNumA: int, pluginA: plugin_manager.Plugin,
+                       instanceNumB: int, pluginB: plugin_manager.Plugin):
+    """Swaps the remaining two plugins in a chain
+    Start state: SYSIN -> pluginA -> pluginB -> SYSOUT
+    End state: SYSIN -> pluginB -> pluginA -> SYSOUT
+    """
+    # disconnect all
+    disconnectSystemCapturStereo(
+            sock,
+            f"effect_{instanceNumA}:{pluginA.inputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[1]}"
+    )
+    disconnectStereoToStereo(
+            sock,
+            f"effect_{instanceNumA}:{pluginA.outputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.outputs[1]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[1]}",
+    )
+    disconnectSystemPlaybackStereo(
+            sock,
+            f"effect_{instanceNumB}:{pluginB.outputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.outputs[1]}",
+    )
+    # reconnect
+    connectSystemPlaybackStereo(
+            sock,
+            f"effect_{instanceNumB}:{pluginB.inputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.inputs[1]}"
+    )
+    connectStereoToStereo(
+            sock,
+            f"effect_{instanceNumB}:{pluginB.outputs[0]}",
+            f"effect_{instanceNumB}:{pluginB.outputs[1]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.inputs[1]}",
+    )
+    connectSystemPlaybackStereo(
+            sock,
+            f"effect_{instanceNumA}:{pluginA.outputs[0]}",
+            f"effect_{instanceNumA}:{pluginA.outputs[1]}",
+    )

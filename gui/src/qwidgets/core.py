@@ -7,7 +7,9 @@ from PyQt5.QtCore import Qt, QRect, QLine
 from plugin_manager import PluginManager, Plugin
 from modhostmanager import (
     connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
-    updateBypass
+    updateBypass, startModHost, patchThrough, removeFirst, removeMiddle,
+    removeLast, removeFinal, add_plugin_end, swap_plugins_end,
+    swap_plugins_final, swap_plugins_middle, swap_plugins_start
 )
 from styles import (
     styles_window, color_foreground,
@@ -24,6 +26,8 @@ from qwidgets.navigation import (
 from qwidgets.floating_window import FloatingWindow, DialogItem
 from qwidgets.plugin_box import PluginBox, AddPluginBox
 from offboard import try_save
+
+modhost = None
 
 
 class MainWindow(QWidget):
@@ -63,6 +67,9 @@ class MainWindow(QWidget):
 
         self.board_window = None  # Placeholder for later
 
+        self.reset_modhost()
+        patchThrough(modhost)  # Bypass all before we load plugins
+
         self.show()
 
     def launch_board(self, selected_profile):
@@ -75,11 +82,10 @@ class MainWindow(QWidget):
         selected_json = selected_profile + ".json"
         json_path = os.path.join(config_dir, selected_json)
         board.initFromJSON(json_path)
-        modhost = connectToModHost()
-        if modhost is None:
-            print("Failed Closing...")
-            exit(1)
-            return
+
+        # Restart mod-host so we can change profiles.
+        # This is inefficient and can be improved, but it's easy.
+        self.reset_modhost()
         setUpPlugins(modhost, board)
         setUpPatch(modhost, board)
         verifyParameters(modhost, board)
@@ -105,6 +111,8 @@ class MainWindow(QWidget):
 
     def show_start_screen(self):
         """Switch back to the start screen."""
+        self.reset_modhost()
+        patchThrough(modhost)  # Bypass all before we load plugins
         self.stack.setCurrentWidget(self.start_screen)  # Switch back
         self.stack.removeWidget(self.board_window)
         self.start_screen.setFocus()
@@ -112,6 +120,17 @@ class MainWindow(QWidget):
         ControlDisplay.setBind(RotaryEncoder.TOP, "select")
         ControlDisplay.setBind(RotaryEncoder.MIDDLE, "")
         ControlDisplay.setBind(RotaryEncoder.BOTTOM, "delete")
+
+    def reset_modhost(self):
+        """Starts or restarts modhost"""
+        startModHost()
+
+        global modhost
+        modhost = connectToModHost()
+        if modhost is None:
+            print("Failed Closing...")
+            exit(1)
+            return
 
 
 class BoardWindow(QWidget):
@@ -192,9 +211,84 @@ class BoardWindow(QWidget):
         if index is None:
             return False
         n = len(self.pluginbox.scroll_group.items)
-        if index + dist < 0 or index + dist >= n:
+        if index + dist < 0 or index + dist >= n-1:
             return
         items = self.pluginbox.boxes
+
+        # swap in mod-host
+        # default, swap forward
+        instanceNumA = None
+        pluginA = None
+        instanceNumB = None
+        pluginB = None
+        beforePlugin = None
+        beforeInstanceNum = None
+        afterPlugin = None
+        afterInstanceNum = None
+        # when negative, swap backward
+        if dist < 0:
+            instanceNumB = items[index].instanceNum
+            pluginB = items[index].plugin
+            instanceNumA = items[index+dist].instanceNum
+            pluginA = items[index+dist].plugin
+            if index - 2 >= 0:
+                beforeInstanceNum = self.pluginbox.scroll_group.items[index-2].instanceNum
+                beforePlugin = self.pluginbox.scroll_group.items[index-2].plugin
+            if index + 1 < n-1:  # adjust n for AppPluginBox
+                afterInstanceNum = self.pluginbox.scroll_group.items[index+1].instanceNum
+                afterPlugin = self.pluginbox.scroll_group.items[index+1].plugin
+        else:  # swap forward
+            instanceNumA = items[index].instanceNum
+            pluginA = items[index].plugin
+            instanceNumB = items[index+dist].instanceNum
+            pluginB = items[index+dist].plugin
+            if index - 1 >= 0:
+                beforeInstanceNum = self.pluginbox.scroll_group.items[index-1].instanceNum
+                beforePlugin = self.pluginbox.scroll_group.items[index-1].plugin
+            if index + 2 < n-1:
+                afterInstanceNum = self.pluginbox.scroll_group.items[index+2].instanceNum
+                afterPlugin = self.pluginbox.scroll_group.items[index+2].plugin
+        # call mod-host manager based on what we determined
+        if beforeInstanceNum is None:
+            if afterInstanceNum is None:
+                swap_plugins_final(
+                        modhost,
+                        instanceNumA,
+                        pluginA,
+                        instanceNumB,
+                        pluginB)
+            else:
+                swap_plugins_start(
+                        modhost,
+                        instanceNumA,
+                        pluginA,
+                        instanceNumB,
+                        pluginB,
+                        afterInstanceNum,
+                        afterPlugin)
+        else:
+            if afterInstanceNum is None:
+                swap_plugins_end(
+                        modhost,
+                        instanceNumA,
+                        pluginA,
+                        instanceNumB,
+                        pluginB,
+                        beforeInstanceNum,
+                        beforePlugin)
+            else:
+                swap_plugins_middle(
+                        modhost,
+                        instanceNumA,
+                        pluginA,
+                        instanceNumB,
+                        pluginB,
+                        beforeInstanceNum,
+                        beforePlugin,
+                        afterInstanceNum,
+                        afterPlugin)
+
+        # swap visually
         temp = items[index]
         other = items[index + dist]
         if other.id == AddPluginBox.ID:
@@ -208,18 +302,33 @@ class BoardWindow(QWidget):
         other.isLast = other.index == n - 2
 
         self.pluginbox.scroll_group.drawItems()
-        # TODO: swap in mod-host
 
         return True
 
     def remove_current_plugin(self):
         index = self.curIndex()
-        if index is None:
+        if index is None:  # don't remove AddPluginBox
             return
         n = len(self.pluginbox.scroll_group.items)
         if index >= n:
             return
         items = self.pluginbox.boxes
+
+        # remove in mod-host
+        if n == 2:  # use 2 because AddPluginBox will always stay
+            removeFinal(modhost, items[index].instanceNum)
+        elif index == n - 2:
+            removeLast(modhost, items[index].instanceNum, items[index].plugin,
+                       items[index-1].instanceNum, items[index-1].plugin)
+        elif index == 0:
+            removeFirst(modhost, items[index].instanceNum, items[index].plugin,
+                        items[index+1].instanceNum, items[index+1].plugin)
+        else:
+            removeMiddle(modhost, items[index].instanceNum, items[index].plugin,
+                         items[index-1].instanceNum, items[index-1].plugin,
+                         items[index+1].instanceNum, items[index+1].plugin)
+
+        # remove and adjust visuals
         # Prevent last item from sticking around
         items[index].hide()
         self.plugins.plugins.remove(items[index].plugin)
@@ -227,7 +336,7 @@ class BoardWindow(QWidget):
         # reassign plugin-box indices
         for i in range(index, n - 2):
             items[i].index -= 1
-        # cleared group
+        # skip scrollgroup logic when last item is removed
         if n == 1:
             return
         # adjust to new position
@@ -238,7 +347,6 @@ class BoardWindow(QWidget):
         self.pluginbox.scroll_group.repaint()
         self.pluginbox.scroll_group.drawItems()
         self.pluginbox.scroll_group.update_bar()
-        # TODO: remove plugins in mod-host
 
     def add_plugin(self, plugin: Plugin):
         self.curItem().unhover()
@@ -254,6 +362,20 @@ class BoardWindow(QWidget):
         # hover new item
         newbox.hover()
         self.pluginbox.scroll_group.pos = n
+        # add to mod-host
+        maxInstanceNum = n
+        for item in self.pluginbox.scroll_group.items:
+            if type(item) is AddPluginBox:
+                continue
+            if item.instanceNum > maxInstanceNum:
+                maxInstanceNum = item.instanceNum
+        add_plugin_end(
+                modhost,
+                maxInstanceNum,
+                plugin,
+                n-1,
+                self.plugins.plugins[n-1]
+        )
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -425,7 +547,7 @@ class ProfileSelectWindow(FloatingWindow):
         self.group.repaint()
         self.group.drawItems()
         super().update_continues()
-        # TODO: actually delete plugin
+        # TODO: actually delete profile
 
     def get_json_files(self, directory):
         """Returns a list of all JSON files in the specified directory."""

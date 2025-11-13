@@ -12,7 +12,6 @@ def main():
     app = QApplication(sys.argv)
     modhostmanager.startJackdServer()
     time.sleep(.5)
-    modhostmanager.startModHost()
     main_window = MainWindow()
     main_window.showFullScreen()
     sys.exit(app.exec_())
