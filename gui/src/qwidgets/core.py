@@ -8,7 +8,7 @@ from plugin_manager import PluginManager, Plugin
 from modhostmanager import (
     connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
     updateBypass, startModHost, patchThrough, removeFirst, removeMiddle,
-    removeLast, removeFinal
+    removeLast, removeFinal, add_plugin_end
 )
 from styles import (
     styles_window, color_foreground,
@@ -287,6 +287,20 @@ class BoardWindow(QWidget):
         # hover new item
         newbox.hover()
         self.pluginbox.scroll_group.pos = n
+        # add to mod-host
+        maxInstanceNum = n
+        for item in self.pluginbox.scroll_group.items:
+            if type(item) is AddPluginBox:
+                continue
+            if item.instanceNum > maxInstanceNum:
+                maxInstanceNum = item.instanceNum
+        add_plugin_end(
+                modhost,
+                maxInstanceNum,
+                plugin,
+                n-1,
+                self.plugins.plugins[n-1]
+        )
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -458,7 +472,7 @@ class ProfileSelectWindow(FloatingWindow):
         self.group.repaint()
         self.group.drawItems()
         super().update_continues()
-        # TODO: actually delete plugin
+        # TODO: actually delete profile
 
     def get_json_files(self, directory):
         """Returns a list of all JSON files in the specified directory."""
