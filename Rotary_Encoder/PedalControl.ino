@@ -50,7 +50,6 @@ RotaryEncoder enc3(A3_PIN, B3_PIN, RotaryEncoder::LatchMode::FOUR0);
 Bounce btn1 = Bounce();
 Bounce btn2 = Bounce();
 Bounce btn3 = Bounce();
-Bounce fs_btn = Bounce();
 
 #define DEBOUNCE_MS 10
 
@@ -59,13 +58,31 @@ long enc1_oldPos = 0;
 long enc2_oldPos = 0;
 long enc3_oldPos = 0;
 
+// --- Footswitch Interrupt State ---
+volatile bool sendFootswitchKey = false; // Flag to tell main loop to send key
+volatile unsigned long last_fs_int_time = 0;
+
 //------------------------------------------------------------
 // Interrupt Service Routines
 //------------------------------------------------------------
 void checkEncoder1() { enc1.tick(); }
 void checkEncoder2() { enc2.tick(); }
 void checkEncoder3() { enc3.tick(); }
-
+void footswitchISR() {
+  unsigned long now = millis();
+  
+  // Debounce: If an interrupt happens within 50ms of the last one, ignore it.
+  if (now - last_fs_int_time < 100) {
+    return; // Ignore bounce
+  }
+  
+  // This is a valid new press, record the time
+  last_fs_int_time = now;
+  
+  // Set the flag for the main loop (this is safe)
+  sendFootswitchKey = true;
+  delay(10);
+}
 //------------------------------------------------------------
 // Setup
 //------------------------------------------------------------
@@ -93,16 +110,18 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(A3_PIN), checkEncoder3, CHANGE);
   attachInterrupt(digitalPinToInterrupt(B3_PIN), checkEncoder3, CHANGE);
 
+  // --- Initialize Footswitch ---
+  pinMode(FS_PIN, OUTPUT);
+  attachInterrupt(digitalPinToInterrupt(FS_PIN), footswitchISR, CHANGE);
+  
   // --- Initialize Buttons ---
   btn1.attach(SW1_PIN, INPUT_PULLUP);
   btn2.attach(SW2_PIN, INPUT_PULLUP);
   btn3.attach(SW3_PIN, INPUT_PULLUP);
-  fs_btn.attach(FS_PIN, INPUT_PULLUP);
 
   btn1.interval(DEBOUNCE_MS);
   btn2.interval(DEBOUNCE_MS);
   btn3.interval(DEBOUNCE_MS);
-  fs_btn.interval(DEBOUNCE_MS);
 
   // --- Start Keyboard HID ---
   Keyboard.begin();
@@ -201,13 +220,6 @@ void handleButtonPresses()
     Keyboard.write('x');
   }
   
-  if (fs_btn.fell())
-  {
-    Serial.println("FOOTSWITCH → 'f'");
-    Keyboard.write('f');
-  }
-}
-
 //------------------------------------------------------------
 // Midi Switch Handler
 //------------------------------------------------------------
@@ -274,7 +286,6 @@ void loop()
   btn1.update();
   btn2.update();
   btn3.update();
-  fs_btn.update();
   
 
   // Handle all inputs
@@ -284,5 +295,11 @@ void loop()
   handleButtonPresses();
   check_midi();
 
+  if(sendFootswitchKey){
+    Keyboard.write('f');
+    delay(200);
+    sendFootswitchKey = false;
+  }
+  
   delay(1);
 }
