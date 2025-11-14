@@ -39,7 +39,7 @@
 const char enc_left_key[] = { 'q', 'a', 'z' };
 const char enc_click_key[] = { 'w', 's', 'x' };
 const char enc_right_key[] = { 'e', 'd', 'c' };
-const char fs_key = 'f';
+const char fs_key = 'r';
 
 // --- Encoder Objects (using FOUR0 latch mode - library default) ---
 RotaryEncoder enc1(A1_PIN, B1_PIN, RotaryEncoder::LatchMode::FOUR0);
@@ -296,7 +296,7 @@ void loop()
   check_midi();
 
   if(sendFootswitchKey){
-    Keyboard.write('f');
+    Keyboard.write('r');
     delay(200);
     sendFootswitchKey = false;
   }
