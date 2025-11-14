@@ -219,7 +219,7 @@ void handleButtonPresses()
     Serial.println("BTN3 CLICK → 'x'");
     Keyboard.write('x');
   }
-  
+}
 //------------------------------------------------------------
 // Midi Switch Handler
 //------------------------------------------------------------
