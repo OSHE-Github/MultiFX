@@ -3,7 +3,7 @@
 // Pins: 1..6
 const int btnPins[6] = { D0, D1, D2, D3, D4, D5 };
 
-// If pressed = HIGH, keep HIGH. If the wiring is inverted, change to LOW.
+// If pressed = HIGH, keep HIGH. If your wiring is inverted, change to LOW.
 const int PRESSED_LEVEL = HIGH;
 
 // Edge-based debounce settings (for D0..D3)
@@ -11,7 +11,7 @@ const unsigned long stableMsEdge = 60;   // input must be stable this long
 const unsigned long minGapEdge   = 120;  // min time between events per button
 
 // Sample-based settings (for D4, D5)
-const unsigned long samplePeriodMs = 150;  // how often we "take a reading"
+const unsigned long samplePeriodMs = 220;  // how often we "take a reading"
 
 
 // ------------ STATE ------------
@@ -49,6 +49,18 @@ void sendMidiOff(uint8_t ch) {
   Serial.println(ch);
 }
 
+int readFilteredPin(int pin) {
+  int ones = 0;
+  const int N = 5;  // number of reads
+
+  for (int k = 0; k < N; k++) {
+    if (digitalRead(pin) == HIGH) ones++;
+    delayMicroseconds(200);  // short spacing, ~1 ms total
+  }
+
+  return (ones >= (N / 2 + 1)) ? HIGH : LOW; // majority vote
+}
+
 
 // ------------ SETUP ------------
 
@@ -60,7 +72,7 @@ void setup() {
 
   // Init D0..D3 (buttons 1..4) for edge-based debounce
   for (int i = 0; i < 4; i++) {
-    pinMode(btnPins[i], INPUT);      // keep existing external wiring
+    pinMode(btnPins[i], INPUT);      // keep your existing external wiring
 
     int v = digitalRead(btnPins[i]);
     lastRawEdge[i]        = v;
@@ -70,16 +82,17 @@ void setup() {
     noteOn[i]             = false;
   }
 
-  // Init D4..D5 (buttons 5..6) for sample-based logic
-  for (int j = 0; j < 2; j++) {
-    int idx = 4 + j;                 // 4 -> D4, 5 -> D5
-    pinMode(btnPins[idx], INPUT);
+// Init D4..D5 (buttons 5..6) for sample-based logic
+for (int j = 0; j < 2; j++) {
+  int idx = 4 + j;                 // 4 -> D4, 5 -> D5
 
-    int v = digitalRead(btnPins[idx]);
-    lastSampleLevel[j] = v;
-    lastSampleTime[j]  = now;
-    noteOn[idx]        = false;
-  }
+  pinMode(btnPins[idx], INPUT_PULLDOWN);  // <--- try this first
+
+  int v = readFilteredPin(btnPins[idx]);
+  lastSampleLevel[j] = v;
+  lastSampleTime[j]  = now;
+  noteOn[idx]        = false;
+}
 
   Serial.println("6-button MIDI footswitch: D0..D3 edge-based, D4..D5 sampled.");
 }
@@ -159,3 +172,4 @@ void loop() {
 
   delay(1);
 }
+
