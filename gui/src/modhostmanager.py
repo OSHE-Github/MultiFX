@@ -58,7 +58,7 @@ def startJackdServer():
 
                 # check for failure by seeing if process has ended or open failed
                 jackd_failed: bool = process.poll() is not None
-                if not jackd_failed and "Failed to open" in subprocess.Popen.communicate(timeout=2):
+                if not jackd_failed and "Failed to open" in subprocess.communicate(timeout=2):
                     jackd_failed = True
                 if jackd_failed:
                     # process ended
