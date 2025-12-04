@@ -3,6 +3,16 @@
         {
             "name": "Muff",
             "uri": "http://guitarix.source.sourceforge.net/plugins/gx_muff_#_muff_",
+            "bypass": 0,
+            "channels": "stereo",
+            "inputs": [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs": [
+                "audio_out_1",
+                "audio_out_2"
+            ],
             "parameters": [
                 {
                     "type": "lv2",
