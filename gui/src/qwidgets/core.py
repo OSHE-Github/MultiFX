@@ -594,10 +594,9 @@ class PluginTable(QWidget):
         # count number of plugins and place them in
         plugincounts = {}
         for plugin in PluginManager.all_plugins():
-            if plugin.uri in map(lambda p: p.uri, plugincounts):
-                plugincounts[plugin] += 1
-            else:
-                plugincounts[plugin] = 1
+            plugincounts[plugin] = 0
+        for plugin in self.plugins.plugins:
+            plugincounts[plugin] += 1
         # TODO: add items not currently on board with value 0
         # TODO: replace iterator with list of total plugins and # in board
         for key, value in sorted(plugincounts.items(), key=lambda x: x[0].name):
