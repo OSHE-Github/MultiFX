@@ -1,0 +1,38 @@
+{
+    "plugins": [
+        {
+            "name": "FUZZ",
+            "uri": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FuzzPlugin",
+            "bypass": 0,
+            "channels": "stereo",
+            "inputs": [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs": [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters": [
+                {
+                    "type": "plug",
+                    "name": "Gain",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FuzzPlugin:gain",
+                    "mode": "dial",
+                    "default": 3,
+                    "min": 0,
+                    "max": 3
+                },
+                {
+                    "type": "plug",
+                    "name": "Clip",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/FuzzPlugin:clip",
+                    "mode": "dial",
+                    "default": 0.5,
+                    "min": 0,
+                    "max": 3
+                }
+            ]
+        }
+    ]
+}

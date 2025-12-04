@@ -1,0 +1,47 @@
+{
+    "plugins": [
+        {
+            "name": "Tremolo",
+            "uri": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/TremoloPlugin",
+            "bypass": 0,
+            "channels": "stereo",
+            "inputs": [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs": [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters": [
+                {
+                    "type": "plug",
+                    "name": "Gain",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/TremoloPlugin:gain",
+                    "mode": "dial",
+                    "default": 1,
+                    "min": 0,
+                    "max": 2
+                },
+                {
+                    "type": "plug",
+                    "name": "Rate",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/TremoloPlugin:rate",
+                    "mode": "dial",
+                    "default": 2,
+                    "min": 0,
+                    "max": 20
+                },
+                {
+                    "type": "plug",
+                    "name": "Depth",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/TremoloPlugin:depth",
+                    "mode": "dial",
+                    "default": 0.2,
+                    "min": 0,
+                    "max": 1
+                }
+            ]
+        }
+    ]
+}

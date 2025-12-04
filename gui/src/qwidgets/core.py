@@ -594,15 +594,15 @@ class PluginTable(QWidget):
         items = []
         # count number of plugins and place them in
         plugincounts = {}
+        all_plugins = PluginManager.all_plugins()
+        for plugin in all_plugins:
+            plugincounts[plugin.name] = 0
         for plugin in self.plugins.plugins:
-            if plugin.uri in map(lambda p: p.uri, plugincounts):
-                plugincounts[plugin] += 1
-            else:
-                plugincounts[plugin] = 1
-        # TODO: add items not currently on board with value 0
-        # TODO: replace iterator with list of total plugins and # in board
-        for key, value in sorted(plugincounts.items(), key=lambda x: x[0].name):
-            items.append(PluginTableEntry(key, value, self))
+            plugincounts[plugin.name] += 1
+        for key, value in sorted(plugincounts.items(), key=lambda x: x):
+            actual_plugin = next((plugin for plugin in all_plugins if key == plugin.name), None)
+            if actual_plugin is not None:
+                items.append(PluginTableEntry(actual_plugin, value, self))
         self.scroll_group = ScrollGroup(
             self.PAGE_SIZE, RotaryEncoder.TOP, items, self.scroll_bar
         )

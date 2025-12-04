@@ -1,0 +1,74 @@
+{
+    "plugins": [
+        {
+            "name": "Compressor",
+            "uri": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin",
+            "bypass": 0,
+            "channels": "stereo",
+            "inputs": [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs": [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters": [
+                {
+                    "type": "plug",
+                    "name": "Attack",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin:attack",
+                    "mode": "dial",
+                    "default": 5,
+                    "min": 0,
+                    "max": 30
+                },
+                {
+                    "type": "plug",
+                    "name": "Release",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin:release",
+                    "mode": "dial",
+                    "default": 100,
+                    "min": 50,
+                    "max": 300
+                },
+                {
+                    "type": "plug",
+                    "name": "Threshold",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin:threshold",
+                    "mode": "dial",
+                    "default": -20,
+                    "min": -50,
+                    "max": 5
+                },
+                {
+                    "type": "plug",
+                    "name": "Ratio",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin:ratio",
+                    "mode": "dial",
+                    "default": 3,
+                    "min": 1,
+                    "max": 20
+                },
+                {
+                    "type": "plug",
+                    "name": "ThresMod",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin:thresMod",
+                    "mode": "button",
+                    "default": 0,
+                    "min": 0,
+                    "max": 1
+                },
+                {
+                    "type": "plug",
+                    "name": "ThresModFreq",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/CompressionPlugin:thresModFreq",
+                    "mode": "dial",
+                    "default": 2,
+                    "min": 1,
+                    "max": 20
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,74 @@
+{
+    "plugins": [
+        {
+            "name": "Distortion",
+            "uri": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin",
+            "bypass": 0,
+            "channels": "stereo",
+            "inputs": [
+                "audio_in_1",
+                "audio_in_2"
+            ],
+            "outputs": [
+                "audio_out_1",
+                "audio_out_2"
+            ],
+            "parameters": [
+                {
+                    "type": "plug",
+                    "name": "Gain",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin:gain",
+                    "mode": "dial",
+                    "default": 1,
+                    "min": 0,
+                    "max": 3
+                },
+                {
+                    "type": "plug",
+                    "name": "Mode",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin:mode",
+                    "mode": "selector",
+                    "default": 0,
+                    "min": 0,
+                    "max": 5
+                },
+                {
+                    "type": "plug",
+                    "name": "LowThres",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin:lowthres2",
+                    "mode": "dial",
+                    "default": 0.5,
+                    "min": 0.5,
+                    "max": 9
+                },
+                {
+                    "type": "plug",
+                    "name": "HighThres",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin:highthres2",
+                    "mode": "dial",
+                    "default": 0.5,
+                    "min": 0.5,
+                    "max": 9
+                },
+                {
+                    "type": "plug",
+                    "name": "Bits",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin:nbit5",
+                    "mode": "selector",
+                    "default": 4,
+                    "min": 1,
+                    "max": 128
+                },
+                {
+                    "type": "plug",
+                    "name": "PercentDrop",
+                    "symbol": "https://github.com/AnnaAndres28/PedalboardPlugins/tree/main/UniqueDistortionPlugin:percentDrop4",
+                    "mode": "dial",
+                    "default": 0.5,
+                    "min": 0,
+                    "max": 10
+                }
+            ]
+        }
+    ]
+}
