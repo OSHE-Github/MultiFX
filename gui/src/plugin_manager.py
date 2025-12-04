@@ -1,4 +1,5 @@
 import json
+from utils import config_dir
 
 
 class Parameter():
@@ -89,6 +90,10 @@ class PluginManager:
         except IndexError:
             print("Plugin index does not exist")
             return None
+
+    def all_plugins(self):
+        json_path = os.path.join(config_dir, "all_plugins.json")
+        return self.initFromJSON(json_path)
 
     def initFromJSON(self, jsonFile: str):
         try:
