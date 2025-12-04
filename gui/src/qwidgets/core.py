@@ -599,7 +599,7 @@ class PluginTable(QWidget):
         for plugin in self.plugins.plugins:
             plugincounts[plugin.name] += 1
         for key, value in sorted(plugincounts.items(), key=lambda x: x):
-            actual_plugin = next((plugin for plugin in all_plugins if key == plugin.uri), None)
+            actual_plugin = next((plugin for plugin in all_plugins if key == plugin.name), None)
             if actual_plugin is not None:
                 items.append(PluginTableEntry(actual_plugin, value, self))
         self.scroll_group = ScrollGroup(
