@@ -94,9 +94,9 @@ class PluginManager:
 
     def all_plugins():
         json_path = os.path.join(config_dir, "all_plugins.json")
-        plugins = PluginManager()
-        plugins.initFromJSON(json_path)
-        return plugins
+        mgr = PluginManager()
+        mgr.initFromJSON(json_path)
+        return mgr.plugins
 
     def initFromJSON(self, jsonFile: str):
         try:
