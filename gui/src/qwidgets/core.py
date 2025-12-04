@@ -595,12 +595,10 @@ class PluginTable(QWidget):
         plugincounts = {}
         all_plugins = PluginManager.all_plugins()
         for plugin in all_plugins:
-            plugincounts[plugin.uri] = 0
+            plugincounts[plugin.name] = 0
         for plugin in self.plugins.plugins:
-            plugincounts[plugin.uri] += 1
-        # TODO: add items not currently on board with value 0
-        # TODO: replace iterator with list of total plugins and # in board
-        for key, value in sorted(plugincounts.items(), key=lambda x: x[0].name):
+            plugincounts[plugin.name] += 1
+        for key, value in sorted(plugincounts.items(), key=lambda x: x):
             actual_plugin = next((plugin for plugin in all_plugins if key == plugin.uri), None)
             if actual_plugin is not None:
                 items.append(PluginTableEntry(actual_plugin, value, self))
