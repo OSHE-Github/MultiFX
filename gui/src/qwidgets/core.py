@@ -593,7 +593,7 @@ class PluginTable(QWidget):
         items = []
         # count number of plugins and place them in
         plugincounts = {}
-        for plugin in self.plugins.all_plugins():
+        for plugin in PluginManager.all_plugins():
             if plugin.uri in map(lambda p: p.uri, plugincounts):
                 plugincounts[plugin] += 1
             else:

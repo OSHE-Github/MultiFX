@@ -92,9 +92,11 @@ class PluginManager:
             print("Plugin index does not exist")
             return None
 
-    def all_plugins(self):
+    def all_plugins():
         json_path = os.path.join(config_dir, "all_plugins.json")
-        return self.initFromJSON(json_path)
+        plugins = PluginManager()
+        plugins.initFromJSON(json_path)
+        return plugins
 
     def initFromJSON(self, jsonFile: str):
         try:
