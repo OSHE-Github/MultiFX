@@ -87,7 +87,7 @@ class FloatingWindow(QWidget):
             case self.encoder.keyRight:
                 self.group.goNext()
                 self.update_continues()
-            case self.encoder.keyPress:
+            case self.encoder.keyPress | Qt.Key_R:
                 self.callback(self.group.curItem().id)
 
 

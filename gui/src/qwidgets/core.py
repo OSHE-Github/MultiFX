@@ -321,6 +321,7 @@ class BoardWindow(QWidget):
             removeLast(modhost, items[index].instanceNum, items[index].plugin,
                        items[index-1].instanceNum, items[index-1].plugin)
         elif index == 0:
+            print(f"CALLING: removeFirst(modhost, {items[index].instanceNum}, {items[index].plugin}, {items[index+1].instanceNum}, {items[index+1].plugin})")
             removeFirst(modhost, items[index].instanceNum, items[index].plugin,
                         items[index+1].instanceNum, items[index+1].plugin)
         else:
