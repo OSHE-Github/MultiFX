@@ -516,8 +516,8 @@ def removeFirst(sock, rmInstanceNum: int, rmPlugin: plugin_manager.Plugin,
     remove(sock, rmInstanceNum)
     connectSystemCapturStereo(
             sock,
-            f"effect_{nextInstanceNum}:{nextPlugin.outputs[0]}",
-            f"effect_{nextInstanceNum}:{nextPlugin.outputs[1]}"
+            f"effect_{nextInstanceNum}:{nextPlugin.inputs[0]}",
+            f"effect_{nextInstanceNum}:{nextPlugin.inputs[1]}"
     )
 
 
@@ -530,8 +530,8 @@ def removeMiddle(sock, rmInstanceNum: int, rmPlugin: plugin_manager.Plugin,
             sock,
             f"effect_{prevInstanceNum}:{prevPlugin.outputs[0]}",
             f"effect_{prevInstanceNum}:{prevPlugin.outputs[1]}",
-            f"effect_{nextInstanceNum}:{nextPlugin.outputs[0]}",
-            f"effect_{nextInstanceNum}:{nextPlugin.outputs[1]}"
+            f"effect_{nextInstanceNum}:{nextPlugin.inputs[0]}",
+            f"effect_{nextInstanceNum}:{nextPlugin.inputs[1]}"
     )
 
 
