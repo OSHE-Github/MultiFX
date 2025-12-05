@@ -1,20 +1,17 @@
 //------------------------------------------------------------
-// Guitar Pedal Keyboard Controller
+// MultiFX Pedal Keyboard Controller
 //
 // Libraries Used:
 // Keyboard.h from https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json pico library
 // RotaryEncoder.H by Matthias Hertel
 // Bounce2 by Thomas O Fredericks
-// 
-// TARGET: Seeed Xiao RP2040
-// Using GPIO numbers from Seeed Xiao pinout
 //------------------------------------------------------------
 
 #include <Keyboard.h>
 #include <RotaryEncoder.h>
 #include <Bounce2.h>
 
-// --- Pin Definitions for Seeed Xiao RP2040 ---
+// If you have more than 3 encoders, you will have to add their functionality
 #define NUM_ENCODERS 3 
 
 // Encoder 1 (Top, Red) - D10, D9, D8
@@ -35,11 +32,11 @@
 // Footswitch - D0
 #define FS_PIN    26  // D0 = GPIO26
 
-// --- Keyboard Mappings ---
-const char enc_left_key[] = { 'q', 'a', 'z' };
-const char enc_click_key[] = { 'w', 's', 'x' };
-const char enc_right_key[] = { 'e', 'd', 'c' };
-const char fs_key = 'r';
+// --- Keyboard Mappings --- (Currently unimplimented, hardcoded values worked)
+// const char enc_left_key[] = { 'q', 'a', 'z' };
+// const char enc_click_key[] = { 'w', 's', 'x' };
+// const char enc_right_key[] = { 'e', 'd', 'c' };
+// const char fs_key = 'r';
 
 // --- Encoder Objects (using FOUR0 latch mode - library default) ---
 RotaryEncoder enc1(A1_PIN, B1_PIN, RotaryEncoder::LatchMode::FOUR0);
@@ -130,7 +127,7 @@ void setup()
   Serial.println("  Encoder 1 (Top):    q(left) w(click) e(right)");
   Serial.println("  Encoder 2 (Middle): a(left) s(click) d(right)");
   Serial.println("  Encoder 3 (Bottom): z(left) x(click) c(right)");
-  Serial.println("  Footswitch:         f");
+  Serial.println("  Footswitch:         r");
   Serial.println("\nReady!\n");
 }
 
