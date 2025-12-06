@@ -584,10 +584,7 @@ class ProfileNameBuilder(QWidget):
         self.name_label.setFixedWidth(self.width())
         self.name_label.adjustSize()
 
-        self.instructions_label = QLabel(
-            "Q/E change letter • W add • S delete • X save",
-            self,
-        )
+        self.instructions_label = QLabel("", self)
         self.instructions_label.setStyleSheet(styles_sublabel)
         self.instructions_label.setAlignment(Qt.AlignCenter)
         self.instructions_label.setFixedWidth(self.width())
