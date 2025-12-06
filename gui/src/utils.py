@@ -6,4 +6,6 @@ import sys
 src_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 root_dir = os.path.normpath(os.path.join(src_dir, ".."))
 config_dir = os.path.join(root_dir, "config")
+profiles_dir = os.path.join(config_dir, "profiles")
+plugins_dir = os.path.join(config_dir, "plugins")
 assets_dir = os.path.join(root_dir, "assets")

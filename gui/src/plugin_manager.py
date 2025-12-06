@@ -1,6 +1,7 @@
 import json
 import os
-from utils import config_dir
+
+from utils import profiles_dir
 
 
 class Parameter():
@@ -76,6 +77,30 @@ class PluginManager:
     def addPlugin(self, plugin: Plugin):
         self.plugins.append(plugin)
 
+    @staticmethod
+    def clone_plugin(plugin: Plugin) -> Plugin:
+        parameters = []
+        for param in plugin.parameters:
+            parameters.append(Parameter(
+                type=param.type,
+                name=param.name,
+                symbol=param.symbol,
+                mode=param.mode,
+                value=param.value,
+                min=param.minimum,
+                max=param.max,
+            ))
+
+        return Plugin(
+            name=plugin.name,
+            uri=plugin.uri,
+            bypass=plugin.bypass,
+            channels=plugin.channels,
+            inputs=list(plugin.inputs),
+            outputs=list(plugin.outputs),
+            paramters=parameters,
+        )
+
     def changeParameter(self, pluginIndex: int, parameterIndex: int,
                         value: float):
         try:
@@ -93,7 +118,7 @@ class PluginManager:
             return None
 
     def all_plugins():
-        json_path = os.path.join(config_dir, "all_plugins.json")
+        json_path = os.path.join(profiles_dir, "all_plugins.json")
         mgr = PluginManager()
         mgr.initFromJSON(json_path)
         return mgr.plugins
@@ -126,7 +151,9 @@ class PluginManager:
                                 mode=param_data.get("mode", "dial"),
                                 min=param_data["min"],
                                 max=param_data["max"],
-                                value=param_data.get("default", 1.0)
+                                value=param_data.get("value",
+                                                    param_data.get("default",
+                                                                   1.0))
                             )
                             parameters.append(parameter)
                         except KeyError as e:
@@ -149,3 +176,50 @@ class PluginManager:
             return -1
         except ValueError as e:
             print(f"JSON Error: {e}")
+
+    def serialize(self):
+        """Return the current plugin configuration as a dict."""
+        plugin_data = []
+        for plugin in self.plugins:
+            params = []
+            for param in plugin.parameters:
+                params.append({
+                    "type": param.type,
+                    "name": param.name,
+                    "symbol": param.symbol,
+                    "mode": param.mode,
+                    "min": param.minimum,
+                    "max": param.max,
+                    "value": param.value,
+                    "default": param.value,
+                })
+
+            plugin_data.append({
+                "name": plugin.name,
+                "uri": plugin.uri,
+                "bypass": plugin.bypass,
+                "channels": plugin.channels,
+                "inputs": plugin.inputs,
+                "outputs": plugin.outputs,
+                "parameters": params,
+            })
+
+        return {"plugins": plugin_data}
+
+    def save_to_profile(self, profile_name: str) -> str:
+        """Save the current plugin state to a profile file.
+
+        Args:
+            profile_name: Name of the profile without the extension.
+
+        Returns:
+            Path to the saved profile file.
+        """
+        if not profile_name:
+            raise ValueError("Profile name is required to save the board")
+
+        profile_path = os.path.join(profiles_dir, f"{profile_name}.json")
+        with open(profile_path, "w") as file:
+            json.dump(self.serialize(), file, indent=4)
+
+        return profile_path

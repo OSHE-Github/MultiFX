@@ -1,0 +1,18 @@
+This is another method of distortion but it doesn't sound nearly as nice as the one being used in the distortion plugin
+
+// two-stage quadratic soft clipping
+        for (int channel = 0; channel < buffer.getNumChannels(); ++channel) {
+            auto* channelData = buffer.getWritePointer(channel);
+            for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+                float processedSample = channelData[sample] * gainValue; // applying gain
+                if (abs(processedSample) > 0.1) {
+                    channelData[sample] = processedSample;
+                    continue;
+                } else if ((0.05 <= abs(processedSample)) && (abs(processedSample) <= 0.1)) {
+                    processedSample = copysign((a4Value-pow(2-abs(a4Value*processedSample),2))/a4Value, processedSample); 
+                } else {
+                    processedSample = 2*processedSample; // ramp up
+                }
+                channelData[sample] = processedSample;
+             }
+        }
