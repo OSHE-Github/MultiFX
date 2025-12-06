@@ -12,8 +12,8 @@ from modhostmanager import (
     swap_plugins_final, swap_plugins_middle, swap_plugins_start
 )
 from styles import (
-    styles_window, color_foreground,
-    ScrollBarStyle, color_background, ControlDisplayStyle,
+    styles_window, color_foreground, styles_error, styles_label,
+    styles_sublabel, ScrollBarStyle, color_background, ControlDisplayStyle,
     BreadcrumbsBarStyle, styles_tabletitle, styles_tableitem
 )
 from utils import config_dir, profiles_dir
@@ -62,8 +62,8 @@ class MainWindow(QWidget):
         self.breadcrumbs.setParent(self)
 
         # Create selection screen
-        self.start_screen = ProfileSelectWindow(self.launch_board)
-        self.stack.addWidget(self.start_screen)
+        self.start_screen = None
+        self.build_start_screen()
 
         self.board_window = None  # Placeholder for later
 
@@ -110,12 +110,23 @@ class MainWindow(QWidget):
         BreadcrumbsBar.navBackward()
         BreadcrumbsBar.navForward("view plugins")
 
+    def build_start_screen(self):
+        if self.start_screen is not None:
+            self.stack.removeWidget(self.start_screen)
+            self.start_screen.deleteLater()
+        self.start_screen = ProfileSelectWindow(self.launch_board)
+        self.stack.addWidget(self.start_screen)
+
     def show_start_screen(self):
         """Switch back to the start screen."""
         self.reset_modhost()
         patchThrough(modhost)  # Bypass all before we load plugins
+        if self.board_window is not None:
+            self.stack.removeWidget(self.board_window)
+            self.board_window.deleteLater()
+            self.board_window = None
+        self.build_start_screen()
         self.stack.setCurrentWidget(self.start_screen)  # Switch back
-        self.stack.removeWidget(self.board_window)
         self.start_screen.setFocus()
         BreadcrumbsBar.navBackward()
         ControlDisplay.setBind(RotaryEncoder.TOP, "select")
@@ -144,6 +155,7 @@ class BoardWindow(QWidget):
         self.restart_callback = restart_callback
         self.profile_name = profile_name
         self.backgroundColor = color_background
+        self.available_plugins = PluginManager.all_plugins()
 
         self.param_page = 0
         self.current = "plugins"
@@ -355,7 +367,17 @@ class BoardWindow(QWidget):
         self.pluginbox.scroll_group.drawItems()
         self.pluginbox.scroll_group.update_bar()
 
-    def add_plugin(self, plugin: Plugin):
+    def add_plugin(self, plugin_name: str):
+        template = next(
+            (plugin for plugin in self.available_plugins
+             if plugin.name == plugin_name),
+            None,
+        )
+        if template is None:
+            print(f"Plugin {plugin_name} not found in all_plugins.json")
+            return
+
+        plugin = PluginManager.clone_plugin(template)
         self.curItem().unhover()
         # add plugin to board visual
         n = len(self.plugins.plugins)
@@ -525,16 +547,145 @@ class BoxOfPlugins(QWidget):
             pass
 
 
+class ProfileNameBuilder(QWidget):
+    ALPHABET = [chr(i) for i in range(ord('A'), ord('Z') + 1)]
+
+    def __init__(self, on_save):
+        super().__init__()
+        self.on_save = on_save
+        self.setGeometry(0, 0, SCREEN_W, SCREEN_H)
+        self.current_index = 0
+        self.current_name = ""
+        self.initUI()
+        self.setFocusPolicy(Qt.StrongFocus)
+        ControlDisplay.setBind(RotaryEncoder.TOP, "add letter")
+        ControlDisplay.setBind(RotaryEncoder.MIDDLE, "delete")
+        ControlDisplay.setBind(RotaryEncoder.BOTTOM, "save")
+
+    def initUI(self):
+        self.title_label = QLabel("ADD NEW PROFILE", self)
+        self.title_label.setStyleSheet(styles_tabletitle)
+        self.title_label.adjustSize()
+        self.title_label.move(
+            self.width() // 2 - self.title_label.width() // 2,
+            int(self.height() * 0.2),
+        )
+
+        self.letter_label = QLabel(self.current_letter(), self)
+        self.letter_label.setStyleSheet(styles_label)
+        self.letter_label.adjustSize()
+
+        self.name_label = QLabel(self.display_name(), self)
+        self.name_label.setStyleSheet(styles_sublabel)
+        self.name_label.adjustSize()
+
+        self.instructions_label = QLabel(
+            "Q/E change letter • W add • S delete • X save",
+            self,
+        )
+        self.instructions_label.setStyleSheet(styles_sublabel)
+        self.instructions_label.adjustSize()
+
+        self.error_label = QLabel("", self)
+        self.error_label.setStyleSheet(styles_error)
+        self.error_label.adjustSize()
+
+        self.position_labels()
+
+    def position_labels(self):
+        self.letter_label.move(
+            self.width() // 2 - self.letter_label.width() // 2,
+            int(self.height() * 0.4),
+        )
+        self.name_label.move(
+            self.width() // 2 - self.name_label.width() // 2,
+            int(self.height() * 0.6),
+        )
+        self.instructions_label.move(
+            self.width() // 2 - self.instructions_label.width() // 2,
+            int(self.height() * 0.7),
+        )
+        self.error_label.move(
+            self.width() // 2 - self.error_label.width() // 2,
+            int(self.height() * 0.75),
+        )
+
+    def display_name(self):
+        return self.current_name if self.current_name else "_"
+
+    def current_letter(self):
+        return ProfileNameBuilder.ALPHABET[self.current_index]
+
+    def update_display(self):
+        self.letter_label.setText(self.current_letter())
+        self.letter_label.adjustSize()
+        self.name_label.setText(self.display_name())
+        self.name_label.adjustSize()
+        self.position_labels()
+        self.clear_error()
+        self.repaint()
+
+    def rotate_letter(self, direction: int):
+        self.current_index = (self.current_index + direction) % len(ProfileNameBuilder.ALPHABET)
+        self.update_display()
+
+    def append_letter(self):
+        self.current_name += self.current_letter()
+        self.update_display()
+
+    def delete_letter(self):
+        self.current_name = self.current_name[:-1]
+        self.update_display()
+
+    def set_error(self, message: str):
+        self.error_label.setText(message)
+        self.error_label.adjustSize()
+        self.position_labels()
+
+    def clear_error(self):
+        self.set_error("")
+
+    def save_profile(self):
+        if not self.current_name:
+            self.set_error("Add at least one letter")
+            return
+
+        profile_path = os.path.join(profiles_dir, f"{self.current_name}.json")
+        if os.path.exists(profile_path):
+            self.set_error("Profile already exists")
+            return
+
+        self.on_save(self.current_name)
+
+    def keyPressEvent(self, event):
+        key = event.key()
+
+        match key:
+            case RotaryEncoder.TOP.keyLeft:
+                self.rotate_letter(-1)
+            case RotaryEncoder.TOP.keyRight:
+                self.rotate_letter(1)
+            case RotaryEncoder.TOP.keyPress:
+                self.append_letter()
+            case RotaryEncoder.MIDDLE.keyPress:
+                self.delete_letter()
+            case RotaryEncoder.BOTTOM.keyPress:
+                self.save_profile()
+
+
 class ProfileSelectWindow(FloatingWindow):
+    NEW_PROFILE_ID = "add new profile"
+
     def __init__(self, callback):
         self.json_dir = profiles_dir
         self.json_files = self.get_json_files(profiles_dir)
         self.json_files.sort()
 
         self.callback = callback
+        self.builder_window = None
 
         # Floating window
-        dialog_items = []
+        dialog_items = [DialogItem(ProfileSelectWindow.NEW_PROFILE_ID)]
         for p in self.json_files:
             item = DialogItem(p.replace(".json", ""))
             dialog_items.append(item)
@@ -544,12 +695,25 @@ class ProfileSelectWindow(FloatingWindow):
         ControlDisplay.setBind(RotaryEncoder.BOTTOM, "delete")
 
     def keyPressEvent(self, event):
-        super().keyPressEvent(event)
         key = event.key()
+
+        if key in (self.encoder.keyPress, Qt.Key_R):
+            self.handle_selection()
+            return
+
+        super().keyPressEvent(event)
 
         match key:
             case RotaryEncoder.BOTTOM.keyPress:
                 self.remove_profile()
+
+    def handle_selection(self):
+        cur_id = self.group.curItem().id
+        if cur_id == ProfileSelectWindow.NEW_PROFILE_ID:
+            self.start_profile_builder()
+            return
+
+        self.callback(cur_id)
 
     def remove_profile(self):
         # TODO: Prompt to confirm
@@ -557,6 +721,8 @@ class ProfileSelectWindow(FloatingWindow):
         items = self.group.items
         n = len(items)
         if index >= n:
+            return
+        if items[index].id == ProfileSelectWindow.NEW_PROFILE_ID:
             return
         # Prevent last item from sticking around
         items[index].hide()
@@ -573,6 +739,23 @@ class ProfileSelectWindow(FloatingWindow):
         self.group.drawItems()
         super().update_continues()
         # TODO: actually delete profile
+
+    def start_profile_builder(self):
+        BreadcrumbsBar.navForward("new profile")
+        self.builder_window = ProfileNameBuilder(self.finish_new_profile)
+        MainWindow.stack.addWidget(self.builder_window)
+        MainWindow.stack.setCurrentWidget(self.builder_window)
+        self.builder_window.setFocus()
+
+    def finish_new_profile(self, profile_name: str):
+        manager = PluginManager()
+        manager.save_to_profile(profile_name)
+        if self.builder_window is not None:
+            MainWindow.stack.removeWidget(self.builder_window)
+            self.builder_window.deleteLater()
+            self.builder_window = None
+        BreadcrumbsBar.navBackward()
+        self.callback(profile_name)
 
     def get_json_files(self, directory):
         """Returns a list of all JSON files in the specified directory."""
@@ -659,7 +842,7 @@ class PluginTable(QWidget):
             case RotaryEncoder.TOP.keyLeft:
                 self.scroll_group.goPrev()
             case RotaryEncoder.TOP.keyPress:
-                self.add_callback(self.scroll_group.curItem().plugin)
+                self.add_callback(self.scroll_group.curItem().plugin.name)
                 self.back_callback()
             case RotaryEncoder.TOP.keyRight:
                 self.scroll_group.goNext()
