@@ -3,7 +3,7 @@
 import os
 from PyQt5.QtWidgets import QWidget, QStackedWidget, QVBoxLayout, QLabel
 from PyQt5.QtGui import QPainter, QPen
-from PyQt5.QtCore import Qt, QRect, QLine
+from PyQt5.QtCore import Qt, QRect, QLine, QTimer
 from plugin_manager import PluginManager, Plugin
 from modhostmanager import (
     connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
@@ -100,6 +100,7 @@ class MainWindow(QWidget):
             board,
             mod_host_manager=modhost,
             restart_callback=self.show_start_screen,
+            profile_name=selected_profile,
         )
         self.stack.addWidget(self.board_window)
         self.stack.setCurrentWidget(self.board_window)  # Switch view
@@ -135,11 +136,13 @@ class MainWindow(QWidget):
 
 class BoardWindow(QWidget):
     def __init__(
-            self, manager: PluginManager, mod_host_manager, restart_callback):
+            self, manager: PluginManager, mod_host_manager, restart_callback,
+            profile_name: str):
         super().__init__()
         self.plugins = manager
         self.mod_host_manager = mod_host_manager
         self.restart_callback = restart_callback
+        self.profile_name = profile_name
         self.backgroundColor = color_background
 
         self.param_page = 0
@@ -202,8 +205,11 @@ class BoardWindow(QWidget):
                 if type(cur) is AddPluginBox:
                     BreadcrumbsBar.navForward("SAVING...")
                     BreadcrumbsBar.instance.repaint()
-                    try_save()
-                    BreadcrumbsBar.navBackward()
+                    saved_locally = self.save_profile_to_disk()
+                    saved_to_usb = False
+                    if saved_locally:
+                        saved_to_usb = try_save()
+                    self.show_save_feedback(saved_locally and saved_to_usb)
 
     def swap_plugins(self, dist: int) -> bool:
         index = self.curIndex()
@@ -458,6 +464,24 @@ class BoardWindow(QWidget):
             return self.pluginbox.scroll_group.items[self.curIndex()]
         else:
             return self.pluginbox.add_plugin_box
+
+    def save_profile_to_disk(self) -> bool:
+        try:
+            self.plugins.save_to_profile(self.profile_name)
+            return True
+        except Exception as e:
+            print(f"Failed to save profile: {e}")
+            return False
+
+    def show_save_feedback(self, success: bool):
+        message = "WRITE SUCCESSFUL" if success else "WRITE FAIL"
+        BreadcrumbsBar.crumbs[-1] = message
+        BreadcrumbsBar.instance.label.setText(BreadcrumbsBar.labelText())
+        BreadcrumbsBar.instance.label.adjustSize()
+        QTimer.singleShot(1000, self.finish_save_feedback)
+
+    def finish_save_feedback(self):
+        BreadcrumbsBar.navBackward()
 
 
 class BoxOfPlugins(QWidget):
