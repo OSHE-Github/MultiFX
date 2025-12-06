@@ -671,6 +671,7 @@ class ProfileNameBuilder(QWidget):
 
 class ProfileSelectWindow(FloatingWindow):
     NEW_PROFILE_ID = "add new profile"
+    HIDDEN_PROFILES = {"all_plugins.json"}
 
     def __init__(self, callback):
         self.json_dir = profiles_dir
@@ -755,7 +756,10 @@ class ProfileSelectWindow(FloatingWindow):
 
     def get_json_files(self, directory):
         """Returns a list of all JSON files in the specified directory."""
-        return [f for f in os.listdir(directory) if f.endswith('.json')]
+        return [
+            f for f in os.listdir(directory)
+            if f.endswith('.json') and f not in self.HIDDEN_PROFILES
+        ]
 
 
 class PluginTable(QWidget):
