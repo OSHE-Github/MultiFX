@@ -77,6 +77,30 @@ class PluginManager:
     def addPlugin(self, plugin: Plugin):
         self.plugins.append(plugin)
 
+    @staticmethod
+    def clone_plugin(plugin: Plugin) -> Plugin:
+        parameters = []
+        for param in plugin.parameters:
+            parameters.append(Parameter(
+                type=param.type,
+                name=param.name,
+                symbol=param.symbol,
+                mode=param.mode,
+                value=param.value,
+                min=param.minimum,
+                max=param.max,
+            ))
+
+        return Plugin(
+            name=plugin.name,
+            uri=plugin.uri,
+            bypass=plugin.bypass,
+            channels=plugin.channels,
+            inputs=list(plugin.inputs),
+            outputs=list(plugin.outputs),
+            paramters=parameters,
+        )
+
     def changeParameter(self, pluginIndex: int, parameterIndex: int,
                         value: float):
         try:
