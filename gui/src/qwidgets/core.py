@@ -526,7 +526,8 @@ class BoxOfPlugins(QWidget):
             plugin = self.plugins.plugins[i]
             box = PluginBox(i, plugin, plugin.bypass)
             self.boxes.append(box)
-        self.boxes[n-1].isLast = True
+        if n > 0:
+            self.boxes[n-1].isLast = True
         self.add_plugin_box = AddPluginBox()
         self.boxes.append(self.add_plugin_box)
         self.scroll_bar = ScrollBar(RotaryEncoder.TOP)
@@ -573,10 +574,14 @@ class ProfileNameBuilder(QWidget):
 
         self.letter_label = QLabel(self.current_letter(), self)
         self.letter_label.setStyleSheet(styles_label)
+        self.letter_label.setAlignment(Qt.AlignCenter)
+        self.letter_label.setFixedWidth(self.width())
         self.letter_label.adjustSize()
 
         self.name_label = QLabel(self.display_name(), self)
         self.name_label.setStyleSheet(styles_sublabel)
+        self.name_label.setAlignment(Qt.AlignCenter)
+        self.name_label.setFixedWidth(self.width())
         self.name_label.adjustSize()
 
         self.instructions_label = QLabel(
@@ -584,31 +589,25 @@ class ProfileNameBuilder(QWidget):
             self,
         )
         self.instructions_label.setStyleSheet(styles_sublabel)
+        self.instructions_label.setAlignment(Qt.AlignCenter)
+        self.instructions_label.setFixedWidth(self.width())
+        self.instructions_label.setWordWrap(True)
         self.instructions_label.adjustSize()
 
         self.error_label = QLabel("", self)
         self.error_label.setStyleSheet(styles_error)
+        self.error_label.setAlignment(Qt.AlignCenter)
+        self.error_label.setFixedWidth(self.width())
+        self.error_label.setWordWrap(True)
         self.error_label.adjustSize()
 
         self.position_labels()
 
     def position_labels(self):
-        self.letter_label.move(
-            self.width() // 2 - self.letter_label.width() // 2,
-            int(self.height() * 0.4),
-        )
-        self.name_label.move(
-            self.width() // 2 - self.name_label.width() // 2,
-            int(self.height() * 0.6),
-        )
-        self.instructions_label.move(
-            self.width() // 2 - self.instructions_label.width() // 2,
-            int(self.height() * 0.7),
-        )
-        self.error_label.move(
-            self.width() // 2 - self.error_label.width() // 2,
-            int(self.height() * 0.75),
-        )
+        self.letter_label.move(0, int(self.height() * 0.4))
+        self.name_label.move(0, int(self.height() * 0.6))
+        self.instructions_label.move(0, int(self.height() * 0.7))
+        self.error_label.move(0, int(self.height() * 0.75))
 
     def display_name(self):
         return self.current_name if self.current_name else "_"
