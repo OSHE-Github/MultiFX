@@ -1,7 +1,7 @@
 import json
 import os
 
-from utils import config_dir
+from utils import profiles_dir
 
 
 class Parameter():
@@ -94,7 +94,7 @@ class PluginManager:
             return None
 
     def all_plugins():
-        json_path = os.path.join(config_dir, "all_plugins.json")
+        json_path = os.path.join(profiles_dir, "all_plugins.json")
         mgr = PluginManager()
         mgr.initFromJSON(json_path)
         return mgr.plugins
@@ -194,7 +194,7 @@ class PluginManager:
         if not profile_name:
             raise ValueError("Profile name is required to save the board")
 
-        profile_path = os.path.join(config_dir, f"{profile_name}.json")
+        profile_path = os.path.join(profiles_dir, f"{profile_name}.json")
         with open(profile_path, "w") as file:
             json.dump(self.serialize(), file, indent=4)
 

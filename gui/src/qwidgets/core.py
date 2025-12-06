@@ -16,7 +16,7 @@ from styles import (
     ScrollBarStyle, color_background, ControlDisplayStyle,
     BreadcrumbsBarStyle, styles_tabletitle, styles_tableitem
 )
-from utils import config_dir
+from utils import config_dir, profiles_dir
 from qwidgets.parameter_widgets import ParameterPanel
 from qwidgets.controls import ControlDisplay, RotaryEncoder
 from qwidgets.graphics_utils import SCREEN_H, SCREEN_W
@@ -80,7 +80,7 @@ class MainWindow(QWidget):
 
         board = PluginManager()
         selected_json = selected_profile + ".json"
-        json_path = os.path.join(config_dir, selected_json)
+        json_path = os.path.join(profiles_dir, selected_json)
         board.initFromJSON(json_path)
 
         # Restart mod-host so we can change profiles.
@@ -527,8 +527,8 @@ class BoxOfPlugins(QWidget):
 
 class ProfileSelectWindow(FloatingWindow):
     def __init__(self, callback):
-        self.json_dir = os.path.dirname(config_dir)
-        self.json_files = self.get_json_files(config_dir)
+        self.json_dir = profiles_dir
+        self.json_files = self.get_json_files(profiles_dir)
         self.json_files.sort()
 
         self.callback = callback
