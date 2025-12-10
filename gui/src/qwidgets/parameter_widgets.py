@@ -130,6 +130,23 @@ class ParameterPanel(QWidget):
                 self.back_callback()
             case RotaryEncoder.BOTTOM.keyRight:
                 self.increaseParameter(self.top_param+2)
+            # handle footswitches/bypass
+            case Qt.Key_R | RotaryEncoder.MIDDLE.keyPress:
+                self.pluginbox.changeBypass(self.curIndex())
+                if self.curIndex() is None:
+                    self.restart_callback()
+            case Qt.Key_F:
+                self.pluginbox.changeBypass(0)
+            case Qt.Key_G:
+                self.pluginbox.changeBypass(1)
+            case Qt.Key_H:
+                self.pluginbox.changeBypass(2)
+            case Qt.Key_J:
+                self.pluginbox.changeBypass(3)
+            case Qt.Key_K:
+                self.pluginbox.changeBypass(4)
+            case Qt.Key_L:
+                self.pluginbox.changeBypass(5)
 
 
 class ParameterReadingButton(ScrollItem):
