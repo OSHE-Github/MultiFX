@@ -554,7 +554,7 @@ class ProfileSelectWindow(FloatingWindow):
 
     def get_json_files(self, directory):
         """Returns a list of all JSON files in the specified directory."""
-        return [f for f in os.listdir(directory) if f.endswith('.json')]
+        return [f for f in os.listdir(directory) if f.endswith('.json') and "all_plugins" not in f]
 
 
 class PluginTable(QWidget):
