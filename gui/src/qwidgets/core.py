@@ -152,8 +152,7 @@ class BoardWindow(QWidget):
         self.setPalette(palette)
         self.setAutoFillBackground(True)
 
-        self.pluginbox = BoxOfPlugins(self.plugins)
-        self.pluginbox.setParent(self)
+        self.pluginbox = BoxOfPlugins(self.plugins, self)
 
         self.setFocusPolicy(Qt.StrongFocus)
 
@@ -463,14 +462,16 @@ class BoardWindow(QWidget):
 class BoxOfPlugins(QWidget):
     pluginsPerPage: int = 3
 
-    def __init__(self, plugins: PluginManager):
+    def __init__(self, plugins: PluginManager, parent):
         super().__init__()
         self.setGeometry(
             0, 0, SCREEN_W,
             int((1 - ControlDisplayStyle.REL_H) * SCREEN_H)
         )
         self.plugins = plugins
+        self.board_window = parent
         self.initGroup()
+        self.setParent(parent)
 
     def initGroup(self):
         # Create scroll group
@@ -479,6 +480,7 @@ class BoxOfPlugins(QWidget):
         for i in range(0, n):
             plugin = self.plugins.plugins[i]
             box = PluginBox(i, plugin, plugin.bypass)
+            box.board_window = self.board_window
             self.boxes.append(box)
         self.boxes[n-1].isLast = True
         self.add_plugin_box = AddPluginBox()
