@@ -9,7 +9,7 @@ from modhostmanager import (
     connectToModHost, setUpPlugins, setUpPatch, verifyParameters,
     updateBypass, startModHost, patchThrough, removeFirst, removeMiddle,
     removeLast, removeFinal, add_plugin_end, swap_plugins_end,
-    swap_plugins_final, swap_plugins_middle, swap_plugins_start
+    swap_plugins_final, swap_plugins_middle, swap_plugins_start, unpatchThrough
 )
 from styles import (
     styles_window, color_foreground,
@@ -320,7 +320,6 @@ class BoardWindow(QWidget):
             removeLast(modhost, items[index].instanceNum, items[index].plugin,
                        items[index-1].instanceNum, items[index-1].plugin)
         elif index == 0:
-            print(f"CALLING: removeFirst(modhost, {items[index].instanceNum}, {items[index].plugin}, {items[index+1].instanceNum}, {items[index+1].plugin})")
             removeFirst(modhost, items[index].instanceNum, items[index].plugin,
                         items[index+1].instanceNum, items[index+1].plugin)
         else:

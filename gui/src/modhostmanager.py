@@ -556,11 +556,19 @@ def add_plugin_end(sock, newInstanceNum: int, newPlugin: plugin_manager.Plugin,
                    lastInstanceNum: int, lastPlugin: plugin_manager.Plugin):
     """Adds a plugin at the end of the chain."""
     addEffect(sock, newPlugin, newInstanceNum)
-    disconnectSystemPlaybackStereo(
-            sock,
-            f"effect_{lastInstanceNum}:{lastPlugin.outputs[0]}",
-            f"effect_{lastInstanceNum}:{lastPlugin.outputs[1]}"
-    )
+    if lastInstanceNum < 0:  # Handle adding first plugin
+        unpatchThrough(sock)
+        connectSystemCapturStereo(
+                sock,
+                f"effect_{newInstanceNum}:{newPlugin.inputs[0]}",
+                f"effect_{newInstanceNum}:{newPlugin.inputs[1]}"
+        )
+    else:
+        disconnectSystemPlaybackStereo(
+                sock,
+                f"effect_{lastInstanceNum}:{lastPlugin.outputs[0]}",
+                f"effect_{lastInstanceNum}:{lastPlugin.outputs[1]}"
+        )
     connectStereoToStereo(
             sock,
             f"effect_{lastInstanceNum}:{lastPlugin.outputs[0]}",
