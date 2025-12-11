@@ -3,6 +3,13 @@
 Code and documentation for the open-source Raspberry Pi-based audio-effects 
 pedal.
 
+**IMPORTANT!**
+
+If audio ever stops coming through from your profile, go back to the profile
+selection page and re-enter the profile until it works. We were unfortunately
+unable to find the root cause of this before the deadline due to its random
+nature.
+
 ## Outline 
 
 ```
