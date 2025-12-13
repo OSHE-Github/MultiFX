@@ -56,6 +56,8 @@ class PluginBox(ScrollItem):
         )
         self.preset_label = QLabel(self.preset_name, self)
         self.setLabel(self.preset_name)
+        # TODO: Remove the below line once presets are working
+        self.preset_label.hide()
 
     def setLabel(self, text: str):
         self.preset_label.setText(text)
