@@ -25,6 +25,7 @@ class Parameter():
 
 class Plugin():
     def __init__(self, name: str, uri: str, channels: str, inputs: list,
+                 # WHY IS BYPASS A FLOAT >:(
                  outputs: list, bypass: float = 0, paramters: list = None):
         self.name = name
         self.uri = uri

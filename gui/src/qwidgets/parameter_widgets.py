@@ -57,6 +57,23 @@ class ParameterPanel(QWidget):
         self.scroll_group.setParent(self)
         self.scroll_group.update_bar()
 
+        self.button_on_path = os.path.join(assets_dir, "IndicatorOn.png")
+        self.button_off_path = os.path.join(assets_dir, "IndicatorOff.png")
+
+        self.button = QLabel(self)
+
+        self.updateBypassVisual()
+
+    def updateBypassVisual(self):
+        # Create Dial on screen
+        if self.plugin.bypass == 1:
+            button = QPixmap(self.button_off_path).scaledToWidth(86)
+        else:
+            button = QPixmap(self.button_on_path).scaledToWidth(86)
+
+        self.button.setPixmap(button)
+        self.button.adjustSize()
+
     def updateParameter(self, position: int = 0):
         try:
             self.parameters[position].updateValue(
@@ -135,18 +152,25 @@ class ParameterPanel(QWidget):
                 self.pluginbox.board_window.changeBypass(self.pluginbox.board_window.curIndex())
                 if self.pluginbox.board_window.curIndex() is None:
                     self.restart_callback()
+                self.updateBypassVisual()
             case Qt.Key_F:
                 self.pluginbox.board_window.changeBypass(0)
+                self.updateBypassVisual()
             case Qt.Key_G:
                 self.pluginbox.board_window.changeBypass(1)
+                self.updateBypassVisual()
             case Qt.Key_H:
                 self.pluginbox.board_window.changeBypass(2)
+                self.updateBypassVisual()
             case Qt.Key_J:
                 self.pluginbox.board_window.changeBypass(3)
+                self.updateBypassVisual()
             case Qt.Key_K:
                 self.pluginbox.board_window.changeBypass(4)
+                self.updateBypassVisual()
             case Qt.Key_L:
                 self.pluginbox.board_window.changeBypass(5)
+                self.updateBypassVisual()
 
 
 class ParameterReadingButton(ScrollItem):
