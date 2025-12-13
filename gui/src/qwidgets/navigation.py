@@ -145,11 +145,12 @@ class ScrollGroup(QWidget):
         self.page_mode = page_mode
         self.scroll_bar = scroll_bar
         self.encoder = encoder
-        self.setFixedSize(items[0].width(), page_size * items[0].height())
+        if len(items) > 0:
+            self.setFixedSize(items[0].width(), page_size * items[0].height())
+            items[0].hover()
         for item in items:
             item.setParent(self)
             item.hide()
-        items[0].hover()
         self.drawItems()
         self.setFocusPolicy(Qt.StrongFocus)  # needed for input
 
