@@ -596,6 +596,8 @@ class PluginTable(QWidget):
         # count number of plugins and place them in
         plugincounts = {}
         all_plugins = PluginManager.all_plugins()
+        # NOTE: Things will get screwy if there are multiple plugins by the
+        # same name. Must be unique
         for plugin in all_plugins:
             plugincounts[plugin.name] = 0
         for plugin in self.plugins.plugins:
