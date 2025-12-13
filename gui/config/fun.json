@@ -1,0 +1,19 @@
+{
+    "plugins" : [
+        {
+            "name" : "Muff",
+            "uri" : "http://guitarix.sourceforge.net/plugins/gx_muff_#_muff_",
+            "parameters" : []
+        },
+        {
+            "name" : "Screamer",
+            "uri" : "http://guitarix.sourceforge.net/plugins/gx_scream_#_scream_",
+            "parameters" : []
+        },
+        {
+            "name" : "Phaser",
+            "uri" : "http://guitarix.sourceforge.net/plugins/gx_phaser#_phaser",
+            "parameters" : []
+        }
+    ]
+}
